@@ -1,1 +1,1 @@
-# EPSF-Alex_Magazine
+# EPSF-Alex Magazine
