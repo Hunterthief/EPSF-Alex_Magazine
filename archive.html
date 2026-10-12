@@ -6,15 +6,20 @@ permalink: /archive/
 
 <section class="archive-section">
   <h2>Issue Archive</h2>
-  {% assign issues = site.static_files 
-    | where_exp: "file", "file.extname == '.pdf' and file.path contains '/magazines/'" 
-    | sort: "name" 
-    | reverse 
-  %}
+  
+  {% assign pdfs = site.static_files | where: "extname", ".pdf" | sort: "name" | reverse %}
+  {% assign has_issues = false %}
   
   <div class="issue-grid">
-    {% for file in issues %}
-      {% include issue-card.html file=file %}
+    {% for file in pdfs %}
+      {% if file.path contains '/magazines/' %}
+        {% include issue-card.html file=file %}
+        {% assign has_issues = true %}
+      {% endif %}
     {% endfor %}
   </div>
+
+  {% if has_issues == false %}
+    <p>No magazines uploaded yet.</p>
+  {% endif %}
 </section>
