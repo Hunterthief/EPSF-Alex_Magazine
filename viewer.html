@@ -1,0 +1,17 @@
+---
+layout: default
+title: Read Issue
+permalink: /viewer/
+---
+
+<section class="viewer-shell">
+  <header class="viewer-header">
+    <a href="{{ '/' | relative_url }}" class="viewer-back">← Back to magazines</a>
+    <h1 id="viewer-title" class="viewer-title">Loading issue…</h1>
+    <a id="viewer-download" class="viewer-download" href="#" target="_blank" rel="noopener">Download PDF</a>
+  </header>
+
+  <div id="magazine-viewer" data-baseurl="{{ site.baseurl | default: '' }}">
+    <div class="viewer-loading">Loading magazine…</div>
+  </div>
+</section>
