@@ -1,0 +1,20 @@
+---
+layout: default
+title: Archive
+permalink: /archive/
+---
+
+<section class="archive-section">
+  <h2>Issue Archive</h2>
+  {% assign issues = site.static_files 
+    | where_exp: "file", "file.extname == '.pdf' and file.path contains '/magazines/'" 
+    | sort: "name" 
+    | reverse 
+  %}
+  
+  <div class="issue-grid">
+    {% for file in issues %}
+      {% include issue-card.html file=file %}
+    {% endfor %}
+  </div>
+</section>
