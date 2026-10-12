@@ -51,7 +51,7 @@ header .nav {
   display: flex;
   align-items: center;
   gap: 15px;
-  text-decoration: none;
+  /* Removed link styling */
 }
 .logo-svg { flex-shrink: 0; }
 .logo-text-group { display: flex; flex-direction: column; }
