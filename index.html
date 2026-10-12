@@ -1,0 +1,37 @@
+---
+layout: default
+title: Home
+---
+
+<section class="masthead">
+  <h1>EPSF Alex PE Magazine</h1>
+  <p>Monthly digital edition</p>
+</section>
+
+<section class="latest-section">
+  <h2>Latest Issue</h2>
+
+  {% assign issues = site.static_files 
+    | where_exp: "file", "file.extname == '.pdf' and file.path contains '/magazines/'" 
+    | sort: "name" 
+    | reverse 
+  %}
+
+  {% if issues.size > 0 %}
+    {% assign latest = issues | first %}
+    {% include issue-card.html file=latest featured=true %}
+  {% else %}
+    <p>No magazines uploaded yet. Upload your first PDF to the <code>magazines/</code> folder.</p>
+  {% endif %}
+</section>
+
+<section class="archive-section">
+  <h2>All Issues</h2>
+  {% if issues.size > 0 %}
+    <div class="issue-grid">
+      {% for file in issues %}
+        {% include issue-card.html file=file %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
