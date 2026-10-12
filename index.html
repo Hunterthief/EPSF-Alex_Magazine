@@ -8,29 +8,34 @@ title: Home
   <p>Monthly digital edition</p>
 </section>
 
+{% assign pdfs = site.static_files | where: "extname", ".pdf" | sort: "name" | reverse %}
+{% assign has_issues = false %}
+
 <section class="latest-section">
   <h2>Latest Issue</h2>
+  
+  {% for file in pdfs %}
+    {% if file.path contains '/magazines/' %}
+      {% unless has_issues %}
+        {% include issue-card.html file=file featured=true %}
+        {% assign has_issues = true %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
 
-  {% assign issues = site.static_files 
-    | where_exp: "file", "file.extname == '.pdf' and file.path contains '/magazines/'" 
-    | sort: "name" 
-    | reverse 
-  %}
-
-  {% if issues.size > 0 %}
-    {% assign latest = issues | first %}
-    {% include issue-card.html file=latest featured=true %}
-  {% else %}
-    <p>No magazines uploaded yet. Upload your first PDF to the <code>magazines/</code> folder.</p>
+  {% if has_issues == false %}
+    <p>No magazines uploaded yet.</p>
   {% endif %}
 </section>
 
 <section class="archive-section">
   <h2>All Issues</h2>
-  {% if issues.size > 0 %}
+  {% if has_issues %}
     <div class="issue-grid">
-      {% for file in issues %}
-        {% include issue-card.html file=file %}
+      {% for file in pdfs %}
+        {% if file.path contains '/magazines/' %}
+          {% include issue-card.html file=file %}
+        {% endif %}
       {% endfor %}
     </div>
   {% endif %}
