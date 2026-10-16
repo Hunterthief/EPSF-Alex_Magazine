@@ -59,11 +59,7 @@ title: Home
     .issue-cover { aspect-ratio: 3/4; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--color-ink), var(--color-primary)); }
     .issue-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
     .issue-card:hover .issue-cover img { transform: scale(1.05); }
-    .issue-cover .cover-fallback {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; padding: 30px; text-align: center;
-      color: var(--color-white); z-index: 1;
-    }
+    .issue-cover .cover-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; color: var(--color-white); z-index: 1; }
     .issue-cover::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--color-accent); z-index: 2; }
     .fallback-brand { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 15px; color: var(--color-accent); letter-spacing: 0.1em; text-transform: uppercase; }
     .fallback-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1.2; }
@@ -75,68 +71,113 @@ title: Home
     .read-btn::after { content: "→"; transition: transform 0.2s; }
     .issue-card:hover .read-btn::after { transform: translateX(4px); }
 
-    .viewer-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-    .viewer-modal[hidden] { display: none; }
-    .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.96); backdrop-filter: blur(8px); }
-    .viewer-content {
-      position: relative; width: 95vw; height: 95vh; max-width: 1200px;
-      background: #121212; border-radius: 12px; overflow: hidden;
-      display: flex; flex-direction: column;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.8);
-      animation: modalIn 0.3s ease;
+    /* ===== IMMERSIVE 3D MAGAZINE VIEWER ===== */
+    .viewer-stage {
+      position: fixed; inset: 0; z-index: 9999;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
+      perspective: 2500px;
     }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .viewer-stage.active { opacity: 1; pointer-events: all; }
 
-    .viewer-top {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 24px; background: #0A0A0A;
-      border-bottom: 2px solid var(--color-accent); flex-shrink: 0; gap: 12px;
+    .viewer-topbar {
+      position: absolute; top: 0; left: 0; right: 0; padding: 24px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; color: #fff;
     }
-    .viewer-top-title { font-family: var(--font-display); font-size: 1.2rem; color: var(--color-white); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .viewer-btn { background: none; border: none; color: var(--color-white); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 8px; transition: color 0.2s; }
-    .viewer-btn:hover { color: var(--color-accent); }
-    .viewer-dl { background: var(--color-primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: background 0.2s; border: none; cursor: pointer;}
-    .viewer-dl:hover { background: var(--color-accent); color: var(--color-ink); }
+    .viewer-title { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.05em; opacity: 0.9; }
+    .viewer-controls { display: flex; gap: 16px; }
+    .viewer-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; padding: 8px 20px; border-radius: 24px; cursor: pointer;
+      font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;
+      transition: all 0.3s ease; backdrop-filter: blur(8px); text-decoration: none;
+    }
+    .viewer-btn:hover { background: var(--color-accent); color: #000; border-color: var(--color-accent); }
 
-    .viewer-body { 
-      flex: 1; display: flex; align-items: center; justify-content: center; 
-      position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; 
-      touch-action: pan-y;
+    .book-wrapper {
+      width: 90vw; max-width: 1400px; height: 80vh;
+      display: flex; align-items: center; justify-content: center;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform: scale(0.85) rotateX(5deg);
     }
-    
-    .viewer-img {
-      max-width: 100%; max-height: 100%; object-fit: contain;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; background: #fff;
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      user-select: none; -webkit-user-drag: none;
-    }
-    .viewer-loading { position: absolute; color: var(--color-accent); font-size: 1.2rem; display: none; text-align: center; }
+    .viewer-stage.active .book-wrapper { transform: scale(1) rotateX(0deg); }
 
-    .viewer-nav {
-      display: flex; align-items: center; justify-content: center; gap: 20px;
-      padding: 14px 24px; background: #0A0A0A;
-      border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+    .book {
+      position: relative; width: 100%; height: 100%; max-height: 900px;
+      display: flex; transform-style: preserve-3d;
     }
-    .viewer-btn-nav {
-      background: var(--color-primary); color: #fff; border: none;
-      padding: 10px 24px; border-radius: 6px; cursor: pointer;
-      font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
-    }
-    .viewer-btn-nav:hover { background: var(--color-accent); color: var(--color-ink); }
-    .viewer-btn-nav:disabled { opacity: 0.3; cursor: default; background: #333; }
-    .viewer-page-info { color: var(--color-white); font-size: 0.9rem; min-width: 100px; text-align: center; }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-      .issue-card { opacity: 1; transform: none; }
+    .page {
+      flex: 1; height: 100%; background-color: #fff;
+      background-size: cover; background-position: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      position: relative; overflow: hidden;
     }
+    .page-left { border-radius: 12px 0 0 12px; }
+    .page-right { border-radius: 0 12px 12px 0; }
+
+    .book::after {
+      content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 60px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0) 100%);
+      pointer-events: none; z-index: 50;
+    }
+
+    .flip-container {
+      position: absolute; top: 0; width: 50%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+      z-index: 100; pointer-events: none;
+    }
+    .flip-forward { right: 0; transform-origin: left center; }
+    .flip-backward { left: 0; transform-origin: right center; transform: rotateY(-180deg); }
+    .flip-forward.flipping { transform: rotateY(-180deg); }
+    .flip-backward.flipping { transform: rotateY(0deg); }
+
+    .flip-face {
+      position: absolute; inset: 0; backface-visibility: hidden;
+      background-size: cover; background-position: center; background-color: #fff;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+    .flip-front { border-radius: 0 12px 12px 0; }
+    .flip-back { transform: rotateY(180deg); border-radius: 12px 0 0 12px; }
+
+    .book-shadow {
+      position: absolute; bottom: -40px; left: 5%; right: 5%; height: 40px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 70%);
+      filter: blur(15px); z-index: -1;
+    }
+
+    .viewer-bottom {
+      position: absolute; bottom: 30px; left: 0; right: 0;
+      display: flex; justify-content: center; align-items: center; gap: 40px; z-index: 100;
+    }
+    .nav-arrow {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(8px);
+    }
+    .nav-arrow:hover { background: var(--color-accent); color: #000; transform: scale(1.1); border-color: var(--color-accent); }
+    .nav-arrow:disabled { opacity: 0.2; cursor: default; transform: none; background: transparent; }
+    .page-indicator { color: rgba(255,255,255,0.6); font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; min-width: 120px; text-align: center; }
+
+    .click-zone { position: absolute; top: 10vh; bottom: 10vh; width: 40%; z-index: 90; cursor: pointer; }
+    .zone-left { left: 5%; }
+    .zone-right { right: 5%; }
+
     @media (max-width: 768px) {
       .masthead h1 { font-size: 2.5rem; }
       .issue-card.featured { grid-template-columns: 1fr; }
       .issue-cover { aspect-ratio: 16/9; }
-      .viewer-top { flex-wrap: wrap; padding: 10px 15px; }
-      .viewer-top-title { order: 3; width: 100%; text-align: left; font-size: 1rem; margin-top: 5px;}
-      .viewer-btn-nav { padding: 10px 16px; }
+      .viewer-topbar { padding: 15px 20px; }
+      .viewer-title { font-size: 1rem; }
+      .viewer-btn { padding: 6px 12px; font-size: 0.7rem; }
+      .book-wrapper { width: 95vw; height: 75vh; }
+      .nav-arrow { width: 40px; height: 40px; }
     }
   </style>
 </head>
@@ -235,24 +276,47 @@ title: Home
 
   <footer><p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p></footer>
 
-  <div id="viewer-modal" class="viewer-modal" hidden>
-    <div class="viewer-backdrop"></div>
-    <div class="viewer-content">
-      <div class="viewer-top">
-        <button class="viewer-btn" id="v-close" aria-label="Close">&times;</button>
-        <span class="viewer-top-title" id="v-title">Loading…</span>
-        <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener" download>Download PDF</a>
-      </div>
-      <div class="viewer-body" id="v-body">
-        <img id="v-img" class="viewer-img" src="" alt="Magazine Page" draggable="false">
-        <div class="viewer-loading" id="v-loading">Loading…</div>
-      </div>
-      <div class="viewer-nav">
-        <button id="v-prev" class="viewer-btn-nav">← Prev</button>
-        <span class="viewer-page-info" id="v-page-info">Page 1 / 1</span>
-        <button id="v-next" class="viewer-btn-nav">Next →</button>
+  <!-- IMMERSIVE 3D VIEWER STAGE -->
+  <div id="viewer-stage" class="viewer-stage">
+    <div class="viewer-topbar">
+      <span class="viewer-title" id="v-title">EPSF Alex PE Magazine</span>
+      <div class="viewer-controls">
+        <a class="viewer-btn" id="v-download" href="#" target="_blank" rel="noopener" download>Download</a>
+        <button class="viewer-btn" id="v-close">Close</button>
       </div>
     </div>
+
+    <div class="book-wrapper">
+      <div class="book" id="book">
+        <div class="page page-left" id="page-left"></div>
+        <div class="page page-right" id="page-right"></div>
+        
+        <div class="flip-container flip-forward" id="flip-forward">
+          <div class="flip-face flip-front" id="ff-front"></div>
+          <div class="flip-face flip-back" id="ff-back"></div>
+        </div>
+        
+        <div class="flip-container flip-backward" id="flip-backward">
+          <div class="flip-face flip-front" id="fb-front"></div>
+          <div class="flip-face flip-back" id="fb-back"></div>
+        </div>
+        
+        <div class="book-shadow"></div>
+      </div>
+    </div>
+
+    <div class="viewer-bottom">
+      <button class="nav-arrow" id="v-prev" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="page-indicator" id="v-page-info">Cover</span>
+      <button class="nav-arrow" id="v-next">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    
+    <div class="click-zone zone-left" id="zone-left"></div>
+    <div class="click-zone zone-right" id="zone-right"></div>
   </div>
 
   <script>
@@ -287,73 +351,122 @@ title: Home
       }, { threshold: 0.1 });
       document.querySelectorAll(".issue-card").forEach(c => obs.observe(c));
 
-      const modal = document.getElementById("viewer-modal");
-      const vBody = document.getElementById("v-body");
-      const vImg = document.getElementById("v-img");
-      const vTitle = document.getElementById("v-title");
-      const vDownload = document.getElementById("v-download");
-      const vLoading = document.getElementById("v-loading");
-      const vPrev = document.getElementById("v-prev");
-      const vNext = document.getElementById("v-next");
-      const vPageInfo = document.getElementById("v-page-info");
+      /* ==== 3D BOOK ENGINE ==== */
+      const stage = document.getElementById('viewer-stage');
+      const vTitle = document.getElementById('v-title');
+      const vDownload = document.getElementById('v-download');
+      const vPageInfo = document.getElementById('v-page-info');
+      const vPrev = document.getElementById('v-prev');
+      const vNext = document.getElementById('v-next');
 
-      let currentPagesUrl = "";
-      let currentPage = 1;
-      let totalPages = 1;
+      let pages = [];
+      let currentSpread = 0;
+      let isAnimating = false;
 
       async function openViewer(pdfUrl, fileName, pagesUrl) {
         const parsed = parseIssueName(fileName);
         vTitle.textContent = parsed.title;
         vDownload.href = pdfUrl;
         
-        currentPagesUrl = pagesUrl; 
-        currentPage = 1;
-        
-        modal.hidden = false;
-        document.body.style.overflow = "hidden";
-        vLoading.style.display = "block";
-        vImg.style.opacity = "0";
-
         try {
-          const manifestUrl = `${currentPagesUrl}/manifest.json`;
+          const manifestUrl = `${pagesUrl}/manifest.json`;
           const response = await fetch(manifestUrl);
-          if (!response.ok) throw new Error("Manifest not found");
           const manifest = await response.json();
-          totalPages = manifest.pages;
-          renderPage(currentPage);
+          
+          pages = [];
+          for(let i=1; i<=manifest.pages; i++) {
+            pages.push(`${pagesUrl}/${i}.jpg`);
+          }
+          
+          currentSpread = 0;
+          renderSpread(currentSpread);
+          
+          stage.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          
+          // Cinematic Opening: Auto-flip the cover after 1.2s
+          setTimeout(() => { turnPage(1); }, 1200);
+          
         } catch (e) {
-          console.error("Manifest error:", e);
-          totalPages = 1; 
-          renderPage(currentPage);
+          console.error("Failed to load manifest:", e);
         }
       }
 
-      function renderPage(num) {
-        vLoading.style.display = "block";
-        vImg.style.opacity = "0";
+      function renderSpread(spreadIdx) {
+        const leftEl = document.getElementById('page-left');
+        const rightEl = document.getElementById('page-right');
         
-        const imgUrl = `${currentPagesUrl}/${num}.jpg`;
+        if (spreadIdx === 0) {
+          leftEl.style.backgroundImage = 'none';
+          leftEl.style.backgroundColor = '#111';
+          rightEl.style.backgroundImage = `url(${pages[0]})`;
+          vPageInfo.textContent = 'Cover';
+        } else {
+          let leftPageIdx = (spreadIdx * 2) - 1;
+          let rightPageIdx = spreadIdx * 2;
+          
+          leftEl.style.backgroundImage = pages[leftPageIdx] ? `url(${pages[leftPageIdx]})` : 'none';
+          leftEl.style.backgroundColor = '#fff';
+          
+          rightEl.style.backgroundImage = pages[rightPageIdx] ? `url(${pages[rightPageIdx]})` : 'none';
+          
+          if(pages[leftPageIdx] && pages[rightPageIdx]) vPageInfo.textContent = `Pages ${leftPageIdx + 1} - ${rightPageIdx + 1}`;
+          else if(pages[leftPageIdx]) vPageInfo.textContent = `Page ${leftPageIdx + 1}`;
+          else vPageInfo.textContent = 'End';
+        }
+        updateNav();
+      }
+
+      function updateNav() {
+        let maxSpread = Math.ceil((pages.length - 1) / 2);
+        vPrev.disabled = currentSpread <= 0;
+        vNext.disabled = currentSpread >= maxSpread;
+      }
+
+      function turnPage(direction) {
+        if (isAnimating) return;
         
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          vImg.src = imgUrl;
-          vImg.style.opacity = "1";
-          vLoading.style.display = "none";
-          vPageInfo.textContent = `Page ${num} / ${totalPages}`;
-          vPrev.disabled = num <= 1;
-          vNext.disabled = num >= totalPages;
-        };
-        tempImg.onerror = () => {
-          // DEBUG MODE: Shows the exact URL it tried to load
-          vLoading.innerHTML = `Failed to load page.<br><small style="font-size:0.8rem;opacity:0.7;word-break:break-all;">Tried: ${imgUrl}</small>`;
-          vLoading.style.display = "block";
-        };
-        tempImg.src = imgUrl;
+        let nextSpread = currentSpread + direction;
+        let maxSpread = Math.ceil((pages.length - 1) / 2);
+        
+        if (nextSpread < 0 || nextSpread > maxSpread) return;
+        isAnimating = true;
+        
+        if (direction === 1) {
+          let currentRightIdx = currentSpread === 0 ? 0 : (currentSpread * 2);
+          let nextLeftIdx = (nextSpread * 2) - 1;
+          let nextRightIdx = nextSpread * 2;
+          
+          document.getElementById('ff-front').style.backgroundImage = `url(${pages[currentRightIdx]})`;
+          document.getElementById('ff-back').style.backgroundImage = `url(${pages[nextLeftIdx]})`;
+          document.getElementById('page-right').style.backgroundImage = pages[nextRightIdx] ? `url(${pages[nextRightIdx]})` : 'none';
+          
+          document.getElementById('flip-forward').classList.add('flipping');
+        } else {
+          let currentLeftIdx = (currentSpread * 2) - 1;
+          let prevRightIdx = currentSpread === 1 ? 0 : ((currentSpread - 1) * 2);
+          let prevLeftIdx = ((currentSpread - 1) * 2) - 1;
+          
+          document.getElementById('fb-front').style.backgroundImage = `url(${pages[prevRightIdx]})`;
+          document.getElementById('fb-back').style.backgroundImage = `url(${pages[currentLeftIdx]})`;
+          document.getElementById('page-left').style.backgroundImage = pages[prevLeftIdx] ? `url(${pages[prevLeftIdx]})` : 'none';
+          document.getElementById('page-left').style.backgroundColor = '#fff';
+          
+          document.getElementById('flip-backward').classList.add('flipping');
+        }
+        
+        setTimeout(() => {
+          currentSpread = nextSpread;
+          document.getElementById('flip-forward').classList.remove('flipping');
+          document.getElementById('flip-backward').classList.remove('flipping');
+          renderSpread(currentSpread);
+          isAnimating = false;
+        }, 1200);
       }
 
       function closeViewer() {
-        modal.hidden = true;
-        document.body.style.overflow = "";
+        stage.classList.remove('active');
+        document.body.style.overflow = '';
       }
 
       document.querySelectorAll(".issue-card").forEach(card => {
@@ -363,37 +476,27 @@ title: Home
         });
       });
 
-      vPrev.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } });
-      vNext.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
-      document.getElementById("v-close").addEventListener("click", closeViewer);
-      modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
+      vPrev.addEventListener("click", () => turnPage(-1));
+      vNext.addEventListener("click", () => turnPage(1));
+      document.getElementById('v-close').addEventListener("click", closeViewer);
+      document.getElementById('zone-left').addEventListener("click", () => turnPage(-1));
+      document.getElementById('zone-right').addEventListener("click", () => turnPage(1));
       
       document.addEventListener("keydown", e => {
-        if (!modal.hidden) {
+        if (stage.classList.contains('active')) {
           if (e.key === "Escape") closeViewer();
-          if (e.key === "ArrowLeft" && currentPage > 1) { currentPage--; renderPage(currentPage); }
-          if (e.key === "ArrowRight" && currentPage < totalPages) { currentPage++; renderPage(currentPage); }
+          if (e.key === "ArrowLeft") turnPage(-1);
+          if (e.key === "ArrowRight") turnPage(1);
         }
       });
 
       let touchStartX = 0;
-      let touchEndX = 0;
-      
-      vBody.addEventListener("touchstart", e => { touchStartX = e.changedTouches[0].screenX; }, false);
-      vBody.addEventListener("touchend", e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
+      stage.addEventListener("touchstart", e => { touchStartX = e.changedTouches[0].screenX; }, false);
+      stage.addEventListener("touchend", e => {
+        let diff = e.changedTouches[0].screenX - touchStartX;
+        if (diff > 50) turnPage(-1);
+        if (diff < -50) turnPage(1);
       }, false);
-
-      function handleSwipe() {
-        const swipeThreshold = 50;
-        if (touchEndX < touchStartX - swipeThreshold) {
-          if (currentPage < totalPages) { currentPage++; renderPage(currentPage); }
-        }
-        if (touchEndX > touchStartX + swipeThreshold) {
-          if (currentPage > 1) { currentPage--; renderPage(currentPage); }
-        }
-      }
     });
   </script>
 </body>
