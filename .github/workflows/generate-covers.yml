@@ -1,0 +1,39 @@
+name: Generate Magazine Covers
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'magazines/**' # Only run when a PDF is uploaded
+
+permissions:
+  contents: write # Allow the action to save the generated images back to your repo
+
+jobs:
+  generate-covers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyMuPDF
+        run: pip install pymupdf
+
+      - name: Generate Covers
+        run: python scripts/generate_covers.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add covers/
+          # Only commit if there are new covers
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-generate magazine covers [skip ci]"
+            git push
+          fi
