@@ -1,7 +1,6 @@
 title: EPSF Alex PE Magazine
-description: Digital monthly magazine for EPSF Alex PE
-baseurl: "" # Use "/pe-magazine" if this is a project site, or "" if it's a user/org site
-url: ""
+baseurl: ""
+url: "https://hunterthief.github.io"
 
 permalink: pretty
 
