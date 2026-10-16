@@ -10,7 +10,8 @@ title: Home
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Stable PDF.js Version with Worker -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <style>
     :root {
       --color-ink: #0A192F;
@@ -62,11 +63,11 @@ title: Home
     .issue-card.featured { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.2fr; max-width: 900px; margin: 0 auto; border: 2px solid var(--color-accent); }
 
     .issue-cover { aspect-ratio: 3/4; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--color-ink), var(--color-primary)); }
-    .issue-cover canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .issue-cover canvas { width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0; }
     .issue-cover .cover-fallback {
       position: absolute; inset: 0; display: flex; flex-direction: column;
       justify-content: center; align-items: center; padding: 30px; text-align: center;
-      color: var(--color-white); transition: opacity 0.4s ease;
+      color: var(--color-white); transition: opacity 0.4s ease; z-index: 1;
     }
     .issue-cover .cover-fallback.hidden { opacity: 0; pointer-events: none; }
     .issue-cover::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--color-accent); z-index: 2; }
@@ -83,38 +84,42 @@ title: Home
     /* ===== MAGAZINE VIEWER MODAL ===== */
     .viewer-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .viewer-modal[hidden] { display: none; }
-    .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.92); backdrop-filter: blur(6px); }
+    .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.96); backdrop-filter: blur(8px); }
     .viewer-content {
-      position: relative; width: 95vw; height: 95vh; max-width: 1000px;
-      background: var(--color-ink); border-radius: 12px; overflow: hidden;
+      position: relative; width: 95vw; height: 95vh; max-width: 1200px;
+      background: #121212; border-radius: 12px; overflow: hidden;
       display: flex; flex-direction: column;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.8);
       animation: modalIn 0.3s ease;
     }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
     .viewer-top {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 24px; background: var(--color-ink);
+      padding: 12px 24px; background: #0A0A0A;
       border-bottom: 2px solid var(--color-accent); flex-shrink: 0; gap: 12px;
     }
     .viewer-top-title { font-family: var(--font-display); font-size: 1.2rem; color: var(--color-white); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .viewer-close { background: none; border: none; color: var(--color-white); font-size: 2rem; cursor: pointer; line-height: 1; padding: 0 8px; }
-    .viewer-close:hover { color: var(--color-accent); }
-    .viewer-dl { background: var(--color-primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .viewer-btn { background: none; border: none; color: var(--color-white); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 8px; transition: color 0.2s; }
+    .viewer-btn:hover { color: var(--color-accent); }
+    .viewer-dl-group { display: flex; gap: 8px; }
+    .viewer-dl { background: var(--color-primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: background 0.2s; border: none; cursor: pointer;}
     .viewer-dl:hover { background: var(--color-accent); color: var(--color-ink); }
+    .viewer-dl.native { background: #333; }
 
-    .viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+    .viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; }
     .viewer-body canvas {
       max-width: 100%; max-height: 100%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-      border-radius: 4px; background: #fff;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5);
+      border-radius: 2px; background: #fff;
+      transition: opacity 0.3s ease;
     }
-    .viewer-loading { color: var(--color-accent); font-size: 1.1rem; position: absolute; }
+    .viewer-loading { color: var(--color-accent); font-size: 1.1rem; position: absolute; font-family: var(--font-body); }
+    .viewer-error { color: #ff4444; font-size: 1rem; position: absolute; text-align: center; padding: 20px; font-family: var(--font-body);}
 
     .viewer-nav {
       display: flex; align-items: center; justify-content: center; gap: 20px;
-      padding: 14px 24px; background: var(--color-ink);
+      padding: 14px 24px; background: #0A0A0A;
       border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
     }
     .viewer-nav button {
@@ -123,8 +128,8 @@ title: Home
       font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
     }
     .viewer-nav button:hover { background: var(--color-accent); color: var(--color-ink); }
-    .viewer-nav button:disabled { opacity: 0.3; cursor: default; }
-    .viewer-page-info { color: var(--color-white); font-size: 0.9rem; min-width: 100px; text-align: center; }
+    .viewer-nav button:disabled { opacity: 0.3; cursor: default; background: #333; }
+    .viewer-page-info { color: var(--color-white); font-size: 0.9rem; min-width: 100px; text-align: center; font-family: var(--font-body); }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -134,8 +139,9 @@ title: Home
       .masthead h1 { font-size: 2.5rem; }
       .issue-card.featured { grid-template-columns: 1fr; }
       .issue-cover { aspect-ratio: 16/9; }
-      .viewer-top { flex-wrap: wrap; }
-      .viewer-top-title { order: 3; width: 100%; text-align: left; }
+      .viewer-top { flex-wrap: wrap; padding: 10px 15px; }
+      .viewer-top-title { order: 3; width: 100%; text-align: left; font-size: 1rem; margin-top: 5px;}
+      .viewer-dl { padding: 6px 12px; font-size: 0.7rem; }
     }
   </style>
 </head>
@@ -170,7 +176,8 @@ title: Home
       {% for file in pdfs %}
         {% if file.path contains '/magazines/' %}
           {% unless has_issues %}
-            <div class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ site.baseurl }}{{ file.path }}" role="button" tabindex="0">
+            <!-- relative_url guarantees the path is correct regardless of baseurl -->
+            <div class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" role="button" tabindex="0">
               <div class="issue-cover">
                 <canvas class="thumb-canvas"></canvas>
                 <div class="cover-fallback">
@@ -197,7 +204,7 @@ title: Home
         <div class="issue-grid">
           {% for file in pdfs %}
             {% if file.path contains '/magazines/' %}
-              <div class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ site.baseurl }}{{ file.path }}" role="button" tabindex="0">
+              <div class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" role="button" tabindex="0">
                 <div class="issue-cover">
                   <canvas class="thumb-canvas"></canvas>
                   <div class="cover-fallback">
@@ -225,13 +232,18 @@ title: Home
     <div class="viewer-backdrop"></div>
     <div class="viewer-content">
       <div class="viewer-top">
-        <button class="viewer-close" id="v-close" aria-label="Close">&times;</button>
+        <button class="viewer-btn" id="v-close" aria-label="Close">&times;</button>
         <span class="viewer-top-title" id="v-title">Loading…</span>
-        <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener">Download</a>
+        <div class="viewer-dl-group">
+          <button class="viewer-btn" id="v-fullscreen" aria-label="Fullscreen" style="font-size: 1.2rem;">⛶</button>
+          <a class="viewer-dl native" id="v-open-native" href="#" target="_blank" rel="noopener">Native</a>
+          <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener" download>Download</a>
+        </div>
       </div>
       <div class="viewer-body" id="v-body">
         <span class="viewer-loading" id="v-loading">Loading magazine…</span>
-        <canvas id="v-canvas"></canvas>
+        <span class="viewer-error" id="v-error" style="display:none;"></span>
+        <canvas id="v-canvas" style="opacity: 0;"></canvas>
       </div>
       <div class="viewer-nav">
         <button id="v-prev">← Prev</button>
@@ -242,7 +254,8 @@ title: Home
   </div>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // Set up the worker (required for PDF.js to function)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
     document.addEventListener("DOMContentLoaded", () => {
 
@@ -278,7 +291,7 @@ title: Home
       }, { threshold: 0.1 });
       document.querySelectorAll(".issue-card").forEach(c => obs.observe(c));
 
-      /* ---- Thumbnail Rendering (PDF.js) ---- */
+      /* ---- High-DPI Thumbnail Rendering ---- */
       const thumbObs = new IntersectionObserver(async entries => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
@@ -288,27 +301,44 @@ title: Home
           const fallback = card.querySelector(".cover-fallback");
           const url = card.dataset.pdfUrl;
           if (!canvas || !url) continue;
+          
           try {
-            const pdf = await pdfjsLib.getDocument(url).promise;
+            const loadingTask = pdfjsLib.getDocument({
+              url: url,
+              cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/",
+              cMapPacked: true
+            });
+            const pdf = await loadingTask.promise;
             const page = await pdf.getPage(1);
             const vp = page.getViewport({ scale: 1 });
-            const scale = 400 / vp.width;
-            const scaledVp = page.getViewport({ scale });
+            
+            // Scale for high DPI (Retina displays)
+            const dpr = window.devicePixelRatio || 1;
+            const scale = (canvas.offsetWidth * dpr) / vp.width;
+            const scaledVp = page.getViewport({ scale: scale });
+            
             canvas.width = scaledVp.width;
             canvas.height = scaledVp.height;
-            await page.render({ canvasContext: canvas.getContext("2d"), viewport: scaledVp }).promise;
+            const ctx = canvas.getContext("2d");
+            
+            await page.render({ canvasContext: ctx, viewport: scaledVp }).promise;
             if (fallback) fallback.classList.add("hidden");
-          } catch (e) { /* keep fallback */ }
+          } catch (e) { 
+            console.error("Thumbnail generation failed:", e);
+            // Fallback remains visible
+          }
         }
       }, { threshold: 0.1 });
       document.querySelectorAll(".issue-card").forEach(c => thumbObs.observe(c));
 
-      /* ---- Magazine Viewer ---- */
+      /* ---- Premium Magazine Viewer ---- */
       const modal = document.getElementById("viewer-modal");
       const vCanvas = document.getElementById("v-canvas");
       const vTitle = document.getElementById("v-title");
       const vDownload = document.getElementById("v-download");
+      const vNative = document.getElementById("v-open-native");
       const vLoading = document.getElementById("v-loading");
+      const vError = document.getElementById("v-error");
       const vPrev = document.getElementById("v-prev");
       const vNext = document.getElementById("v-next");
       const vPageInfo = document.getElementById("v-page-info");
@@ -318,24 +348,40 @@ title: Home
       async function renderPage(num) {
         if (!currentPdf) return;
         vLoading.style.display = "block";
-        vCanvas.style.display = "none";
+        vError.style.display = "none";
+        vCanvas.style.opacity = "0"; // Fade out
+        
         try {
           const page = await currentPdf.getPage(num);
           const vp = page.getViewport({ scale: 1 });
-          const maxW = Math.min(window.innerWidth * 0.85, 900);
-          const maxH = window.innerHeight * 0.7;
+          
+          // Calculate scale to fit screen while maintaining aspect ratio
+          const maxW = window.innerWidth * 0.9;
+          const maxH = window.innerHeight * 0.75;
           const scale = Math.min(maxW / vp.width, maxH / vp.height);
           const svp = page.getViewport({ scale });
-          vCanvas.width = svp.width;
-          vCanvas.height = svp.height;
-          await page.render({ canvasContext: vCanvas.getContext("2d"), viewport: svp }).promise;
+          
+          const dpr = window.devicePixelRatio || 1;
+          vCanvas.width = svp.width * dpr;
+          vCanvas.height = svp.height * dpr;
+          vCanvas.style.width = svp.width + "px";
+          vCanvas.style.height = svp.height + "px";
+          
+          const ctx = vCanvas.getContext("2d");
+          ctx.scale(dpr, dpr);
+          
+          await page.render({ canvasContext: ctx, viewport: svp }).promise;
+          
           vLoading.style.display = "none";
-          vCanvas.style.display = "block";
-          vPageInfo.textContent = "Page " + num + " / " + totalPages;
+          vCanvas.style.opacity = "1"; // Fade in
+          vPageInfo.textContent = `Page ${num} / ${totalPages}`;
           vPrev.disabled = num <= 1;
           vNext.disabled = num >= totalPages;
         } catch (e) {
-          vLoading.textContent = "Error loading page.";
+          console.error("Render Error:", e);
+          vLoading.style.display = "none";
+          vError.textContent = "Error rendering page. Try 'Native' viewer.";
+          vError.style.display = "block";
         }
       }
 
@@ -343,18 +389,31 @@ title: Home
         const parsed = parseIssueName(fileName);
         vTitle.textContent = parsed.title;
         vDownload.href = pdfUrl;
+        vNative.href = pdfUrl; // Fallback to native browser viewer
+        
         currentPage = 1;
         vLoading.textContent = "Loading magazine…";
         vLoading.style.display = "block";
-        vCanvas.style.display = "none";
+        vError.style.display = "none";
+        vCanvas.style.opacity = "0";
+        
         modal.hidden = false;
         document.body.style.overflow = "hidden";
+        
         try {
-          currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+          currentPdf = await pdfjsLib.getDocument({
+            url: pdfUrl,
+            cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/",
+            cMapPacked: true
+          }).promise;
           totalPages = currentPdf.numPages;
           await renderPage(currentPage);
         } catch (e) {
-          vLoading.textContent = "Failed to load PDF.";
+          console.error("PDF Load Error:", e);
+          vLoading.style.display = "none";
+          // Show exact error so we know if it's a 404 or CORS issue
+          vError.textContent = `Failed to load PDF: ${e.message || e}`;
+          vError.style.display = "block";
         }
       }
 
@@ -362,8 +421,10 @@ title: Home
         modal.hidden = true;
         currentPdf = null;
         document.body.style.overflow = "";
+        if (document.fullscreenElement) document.exitFullscreen();
       }
 
+      // Event Listeners
       document.querySelectorAll(".issue-card").forEach(card => {
         card.addEventListener("click", () => openViewer(card.dataset.pdfUrl, card.dataset.fileName));
         card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openViewer(card.dataset.pdfUrl, card.dataset.fileName); } });
@@ -373,6 +434,15 @@ title: Home
       vNext.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
       document.getElementById("v-close").addEventListener("click", closeViewer);
       modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
+      
+      document.getElementById("v-fullscreen").addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      });
+
       document.addEventListener("keydown", e => {
         if (modal.hidden) return;
         if (e.key === "Escape") closeViewer();
