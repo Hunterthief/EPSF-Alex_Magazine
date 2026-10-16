@@ -10,6 +10,7 @@ title: Home
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
       --color-ink: #0A192F;
@@ -22,327 +23,130 @@ title: Home
       --font-display: "Playfair Display", "Georgia", serif;
       --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --radius-card: 12px;
-      --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -1px rgb(0 0 0 / 0.03);
-      --shadow-card-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+      --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      --shadow-card-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-body);
-      background-color: var(--color-paper);
-      color: var(--color-ink);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
+    body { font-family: var(--font-body); background: var(--color-paper); color: var(--color-ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
     main { min-height: 60vh; padding-bottom: 60px; }
 
-    /* Header */
-    header {
-      background: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.95);
-    }
-    header .nav {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .logo-svg { flex-shrink: 0; }
+    header { background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--color-border); padding: 15px 0; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+    header .nav { display: flex; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .logo-container { display: flex; align-items: center; gap: 15px; }
     .logo-text-group { display: flex; flex-direction: column; }
-    .logo-text {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 900;
-      line-height: 1;
-      color: var(--color-ink);
-    }
-    .logo-sub {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--color-primary);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
+    .logo-text { font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; line-height: 1; }
+    .logo-sub { font-size: 0.7rem; font-weight: 600; color: var(--color-primary); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 
-    /* Footer */
-    footer {
-      background: var(--color-ink);
-      color: var(--color-white);
-      padding: 40px 20px;
-      margin-top: 80px;
-      text-align: center;
-    }
+    footer { background: var(--color-ink); color: var(--color-white); padding: 40px 20px; margin-top: 80px; text-align: center; }
     footer p { font-size: 0.9rem; opacity: 0.8; }
 
-    /* Masthead */
-    .masthead {
-      text-align: center;
-      padding: 80px 20px 60px;
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: 60px;
-    }
-    .masthead h1 {
-      font-family: var(--font-display);
-      font-size: 3.5rem;
-      margin-bottom: 15px;
-      color: var(--color-ink);
-      letter-spacing: -0.02em;
-    }
-    .masthead p {
-      color: var(--color-primary);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
+    .masthead { text-align: center; padding: 80px 20px 60px; border-bottom: 1px solid var(--color-border); margin-bottom: 60px; }
+    .masthead h1 { font-family: var(--font-display); font-size: 3.5rem; margin-bottom: 15px; letter-spacing: -0.02em; }
+    .masthead p { color: var(--color-primary); font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 
-    /* Sections */
     section { padding: 0 20px; max-width: 1200px; margin: 0 auto 80px; }
-    section h2 {
-      font-family: var(--font-display);
-      font-size: 2.2rem;
-      margin-bottom: 40px;
-      color: var(--color-ink);
-      position: relative;
-      display: inline-block;
-    }
-    section h2::after {
-      content: "";
-      position: absolute;
-      bottom: -8px;
-      left: 0;
-      width: 40px;
-      height: 3px;
-      background: var(--color-accent);
-    }
+    section h2 { font-family: var(--font-display); font-size: 2.2rem; margin-bottom: 40px; position: relative; display: inline-block; }
+    section h2::after { content: ""; position: absolute; bottom: -8px; left: 0; width: 40px; height: 3px; background: var(--color-accent); }
 
-    /* Card Grid */
-    .issue-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 40px;
-    }
+    .issue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px; }
 
-    /* Magazine Card */
     .issue-card {
-      display: flex;
-      flex-direction: column;
-      background: var(--color-white);
-      border-radius: var(--radius-card);
-      overflow: hidden;
-      color: var(--color-ink);
-      box-shadow: var(--shadow-card);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, opacity 0.5s ease;
-      opacity: 0;
-      transform: translateY(24px);
-      border: 1px solid var(--color-border);
-      cursor: pointer;
+      display: flex; flex-direction: column; background: var(--color-white);
+      border-radius: var(--radius-card); overflow: hidden;
+      box-shadow: var(--shadow-card); border: 1px solid var(--color-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+      opacity: 0; transform: translateY(24px); cursor: pointer;
     }
     .issue-card.is-visible { opacity: 1; transform: translateY(0); }
-    .issue-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-card-hover);
-      border-color: var(--color-accent);
-    }
+    .issue-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-card-hover); border-color: var(--color-accent); }
+    .issue-card.featured { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.2fr; max-width: 900px; margin: 0 auto; border: 2px solid var(--color-accent); }
 
-    /* Featured Card */
-    .issue-card.featured {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      max-width: 900px;
-      margin: 0 auto;
-      border: 2px solid var(--color-accent);
+    .issue-cover { aspect-ratio: 3/4; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--color-ink), var(--color-primary)); }
+    .issue-cover canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .issue-cover .cover-fallback {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; padding: 30px; text-align: center;
+      color: var(--color-white); transition: opacity 0.4s ease;
     }
+    .issue-cover .cover-fallback.hidden { opacity: 0; pointer-events: none; }
+    .issue-cover::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--color-accent); z-index: 2; }
+    .fallback-brand { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 15px; color: var(--color-accent); letter-spacing: 0.1em; text-transform: uppercase; }
+    .fallback-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1.2; }
 
-    /* Card Cover */
-    .issue-cover {
-      aspect-ratio: 3/4;
-      background: linear-gradient(135deg, var(--color-ink) 0%, var(--color-primary) 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: var(--color-white);
-      padding: 30px;
-      text-align: center;
-      overflow: hidden;
-      position: relative;
-    }
-    .issue-cover::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 6px;
-      background: var(--color-accent);
-    }
-    .issue-card:hover .issue-cover * { transform: scale(1.03); transition: transform 0.4s ease; }
-    .fallback-brand {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-      color: var(--color-accent);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .fallback-title {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .issue-info {
-      padding: 30px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      flex: 1;
-    }
-    .issue-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      color: var(--color-ink);
-    }
-    .issue-date {
-      color: var(--color-muted);
-      margin-bottom: 25px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .read-btn {
-      color: var(--color-primary);
-      font-weight: 600;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: auto;
-    }
+    .issue-info { padding: 30px; display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    .issue-title { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 10px; }
+    .issue-date { color: var(--color-muted); margin-bottom: 25px; font-size: 0.95rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .read-btn { color: var(--color-primary); font-weight: 600; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; margin-top: auto; }
     .read-btn::after { content: "→"; transition: transform 0.2s; }
     .issue-card:hover .read-btn::after { transform: translateX(4px); }
 
-    /* Fullscreen Modal Viewer */
-    .viewer-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    /* ===== MAGAZINE VIEWER MODAL ===== */
+    .viewer-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .viewer-modal[hidden] { display: none; }
-    .viewer-modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 25, 47, 0.85);
-      backdrop-filter: blur(4px);
+    .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.92); backdrop-filter: blur(6px); }
+    .viewer-content {
+      position: relative; width: 95vw; height: 95vh; max-width: 1000px;
+      background: var(--color-ink); border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      animation: modalIn 0.3s ease;
     }
-    .viewer-modal-content {
-      position: relative;
-      width: 95vw;
-      height: 95vh;
-      max-width: 1200px;
-      background: var(--color-white);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-      animation: modalEnter 0.3s ease;
-    }
-    @keyframes modalEnter {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .viewer-modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 2px solid var(--color-accent);
-      background: var(--color-ink);
-      flex-shrink: 0;
-    }
-    .viewer-modal-title {
-      font-family: var(--font-display);
-      font-size: 1.3rem;
-      color: var(--color-white);
-      margin: 0;
-      flex: 1;
-      text-align: center;
-    }
-    .viewer-close-btn {
-      background: none;
-      border: none;
-      color: var(--color-white);
-      font-size: 2rem;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0 8px;
-      transition: color 0.2s;
-    }
-    .viewer-close-btn:hover { color: var(--color-accent); }
-    .viewer-download {
-      background: var(--color-primary);
-      color: white;
-      padding: 8px 18px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-    .viewer-download:hover { background: var(--color-accent); color: var(--color-ink); }
-    .viewer-modal-body { flex: 1; overflow: hidden; }
-    .pdf-frame { width: 100%; height: 100%; border: none; }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-    /* Reduced Motion */
+    .viewer-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; background: var(--color-ink);
+      border-bottom: 2px solid var(--color-accent); flex-shrink: 0; gap: 12px;
+    }
+    .viewer-top-title { font-family: var(--font-display); font-size: 1.2rem; color: var(--color-white); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .viewer-close { background: none; border: none; color: var(--color-white); font-size: 2rem; cursor: pointer; line-height: 1; padding: 0 8px; }
+    .viewer-close:hover { color: var(--color-accent); }
+    .viewer-dl { background: var(--color-primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .viewer-dl:hover { background: var(--color-accent); color: var(--color-ink); }
+
+    .viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+    .viewer-body canvas {
+      max-width: 100%; max-height: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      border-radius: 4px; background: #fff;
+    }
+    .viewer-loading { color: var(--color-accent); font-size: 1.1rem; position: absolute; }
+
+    .viewer-nav {
+      display: flex; align-items: center; justify-content: center; gap: 20px;
+      padding: 14px 24px; background: var(--color-ink);
+      border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+    }
+    .viewer-nav button {
+      background: var(--color-primary); color: #fff; border: none;
+      padding: 10px 24px; border-radius: 6px; cursor: pointer;
+      font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
+    }
+    .viewer-nav button:hover { background: var(--color-accent); color: var(--color-ink); }
+    .viewer-nav button:disabled { opacity: 0.3; cursor: default; }
+    .viewer-page-info { color: var(--color-white); font-size: 0.9rem; min-width: 100px; text-align: center; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       .issue-card { opacity: 1; transform: none; }
     }
-
-    /* Mobile */
     @media (max-width: 768px) {
       .masthead h1 { font-size: 2.5rem; }
       .issue-card.featured { grid-template-columns: 1fr; }
       .issue-cover { aspect-ratio: 16/9; }
-      .viewer-modal-header { flex-wrap: wrap; gap: 10px; }
-      .viewer-modal-title { order: 3; width: 100%; text-align: left; }
+      .viewer-top { flex-wrap: wrap; }
+      .viewer-top-title { order: 3; width: 100%; text-align: left; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="nav">
       <div class="logo-container">
-        <svg class="logo-svg" viewBox="0 0 50 50" width="45" height="45" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="25" cy="25" r="23" fill="none" stroke="var(--color-accent)" stroke-width="2"/>
-          <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="var(--color-primary)"/>
+        <svg viewBox="0 0 50 50" width="45" height="45" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
+          <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#1E3A8A"/>
         </svg>
         <div class="logo-text-group">
           <span class="logo-text">EPSF Alex</span>
@@ -353,7 +157,6 @@ title: Home
   </header>
 
   <main>
-    <!-- MASTHEAD -->
     <section class="masthead">
       <h1>EPSF Alex PE Magazine</h1>
       <p>Monthly digital edition</p>
@@ -362,15 +165,15 @@ title: Home
     {% assign pdfs = site.static_files | where: "extname", ".pdf" | sort: "name" | reverse %}
     {% assign has_issues = false %}
 
-    <!-- LATEST ISSUE -->
-    <section class="latest-section">
+    <section>
       <h2>Latest Issue</h2>
       {% for file in pdfs %}
         {% if file.path contains '/magazines/' %}
           {% unless has_issues %}
-            <div class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" role="button" tabindex="0">
+            <div class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ site.baseurl }}{{ file.path }}" role="button" tabindex="0">
               <div class="issue-cover">
-                <div class="issue-cover-fallback">
+                <canvas class="thumb-canvas"></canvas>
+                <div class="cover-fallback">
                   <span class="fallback-brand">EPSF Alex</span>
                   <span class="fallback-title js-cover-title">{{ file.name }}</span>
                 </div>
@@ -385,21 +188,19 @@ title: Home
           {% endunless %}
         {% endif %}
       {% endfor %}
-      {% if has_issues == false %}
-        <p>No magazines uploaded yet.</p>
-      {% endif %}
+      {% if has_issues == false %}<p>No magazines uploaded yet.</p>{% endif %}
     </section>
 
-    <!-- ALL ISSUES -->
-    <section class="archive-section">
+    <section>
       <h2>All Issues</h2>
       {% if has_issues %}
         <div class="issue-grid">
           {% for file in pdfs %}
             {% if file.path contains '/magazines/' %}
-              <div class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" role="button" tabindex="0">
+              <div class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ site.baseurl }}{{ file.path }}" role="button" tabindex="0">
                 <div class="issue-cover">
-                  <div class="issue-cover-fallback">
+                  <canvas class="thumb-canvas"></canvas>
+                  <div class="cover-fallback">
                     <span class="fallback-brand">EPSF Alex</span>
                     <span class="fallback-title js-cover-title">{{ file.name }}</span>
                   </div>
@@ -417,117 +218,168 @@ title: Home
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p>
-  </footer>
+  <footer><p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p></footer>
 
-  <!-- FULLSCREEN VIEWER MODAL -->
+  <!-- MAGAZINE VIEWER -->
   <div id="viewer-modal" class="viewer-modal" hidden>
-    <div class="viewer-modal-backdrop"></div>
-    <div class="viewer-modal-content">
-      <header class="viewer-modal-header">
-        <button id="viewer-close" class="viewer-close-btn" aria-label="Close viewer">&times;</button>
-        <h2 id="viewer-title" class="viewer-modal-title">Loading…</h2>
-        <a id="viewer-download" class="viewer-download" href="#" target="_blank" rel="noopener">Download PDF</a>
-      </header>
-      <div class="viewer-modal-body">
-        <iframe id="viewer-frame" class="pdf-frame" title="EPSF Alex PE Magazine issue"></iframe>
+    <div class="viewer-backdrop"></div>
+    <div class="viewer-content">
+      <div class="viewer-top">
+        <button class="viewer-close" id="v-close" aria-label="Close">&times;</button>
+        <span class="viewer-top-title" id="v-title">Loading…</span>
+        <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener">Download</a>
+      </div>
+      <div class="viewer-body" id="v-body">
+        <span class="viewer-loading" id="v-loading">Loading magazine…</span>
+        <canvas id="v-canvas"></canvas>
+      </div>
+      <div class="viewer-nav">
+        <button id="v-prev">← Prev</button>
+        <span class="viewer-page-info" id="v-page-info">Page 1 / 1</span>
+        <button id="v-next">Next →</button>
       </div>
     </div>
   </div>
 
   <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     document.addEventListener("DOMContentLoaded", () => {
 
-      // Title Parsing
+      /* ---- Title Parser ---- */
       function parseIssueName(fileName) {
         const name = fileName.replace(/\.pdf$/i, "");
-        const match = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
-        if (!match) return { title: name.replace(/[-_]/g, " "), date: null };
-        const year = Number(match[1]);
-        const month = Number(match[2]);
-        const slug = match[3] || "";
-        const date = new Date(Date.UTC(year, month - 1, 1));
-        const monthName = date.toLocaleString("en", { month: "long", timeZone: "UTC" });
-        let title = `${monthName} ${year}`;
-        if (slug) {
-          const prettySlug = slug.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-          title += ` — ${prettySlug}`;
-        }
-        return { title, date };
+        const m = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
+        if (!m) return { title: name.replace(/[-_]/g, " "), date: null };
+        const yr = +m[1], mo = +m[2], slug = m[3] || "";
+        const d = new Date(Date.UTC(yr, mo - 1, 1));
+        const mn = d.toLocaleString("en", { month: "long", timeZone: "UTC" });
+        let t = mn + " " + yr;
+        if (slug) t += " — " + slug.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        return { title: t, date: d };
       }
 
-      // Update card titles and dates
+      /* ---- Update Card Text ---- */
       document.querySelectorAll(".issue-card").forEach(card => {
-        const fileName = card.dataset.fileName;
-        if (!fileName) return;
-        const parsed = parseIssueName(fileName);
-        const titleEl = card.querySelector(".js-issue-title");
-        const dateEl = card.querySelector(".js-issue-date");
-        const coverTitle = card.querySelector(".js-cover-title");
-        if (titleEl) titleEl.textContent = parsed.title;
-        if (coverTitle) coverTitle.textContent = parsed.title;
-        if (dateEl && parsed.date) {
-          dateEl.textContent = parsed.date.toLocaleDateString("en", {
-            year: "numeric", month: "long", timeZone: "UTC"
-          });
-        }
+        const fn = card.dataset.fileName;
+        if (!fn) return;
+        const p = parseIssueName(fn);
+        const ti = card.querySelector(".js-issue-title");
+        const da = card.querySelector(".js-issue-date");
+        const ct = card.querySelector(".js-cover-title");
+        if (ti) ti.textContent = p.title;
+        if (ct) ct.textContent = p.title;
+        if (da && p.date) da.textContent = p.date.toLocaleDateString("en", { year: "numeric", month: "long", timeZone: "UTC" });
       });
 
-      // Scroll animations
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
+      /* ---- Scroll Animations ---- */
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("is-visible"); obs.unobserve(e.target); } });
       }, { threshold: 0.1 });
-      document.querySelectorAll(".issue-card").forEach(card => observer.observe(card));
+      document.querySelectorAll(".issue-card").forEach(c => obs.observe(c));
 
-      // Modal Viewer
+      /* ---- Thumbnail Rendering (PDF.js) ---- */
+      const thumbObs = new IntersectionObserver(async entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          thumbObs.unobserve(entry.target);
+          const card = entry.target;
+          const canvas = card.querySelector(".thumb-canvas");
+          const fallback = card.querySelector(".cover-fallback");
+          const url = card.dataset.pdfUrl;
+          if (!canvas || !url) continue;
+          try {
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const page = await pdf.getPage(1);
+            const vp = page.getViewport({ scale: 1 });
+            const scale = 400 / vp.width;
+            const scaledVp = page.getViewport({ scale });
+            canvas.width = scaledVp.width;
+            canvas.height = scaledVp.height;
+            await page.render({ canvasContext: canvas.getContext("2d"), viewport: scaledVp }).promise;
+            if (fallback) fallback.classList.add("hidden");
+          } catch (e) { /* keep fallback */ }
+        }
+      }, { threshold: 0.1 });
+      document.querySelectorAll(".issue-card").forEach(c => thumbObs.observe(c));
+
+      /* ---- Magazine Viewer ---- */
       const modal = document.getElementById("viewer-modal");
-      const backdrop = modal.querySelector(".viewer-modal-backdrop");
-      const closeBtn = document.getElementById("viewer-close");
-      const frame = document.getElementById("viewer-frame");
-      const titleEl = document.getElementById("viewer-title");
-      const downloadEl = document.getElementById("viewer-download");
+      const vCanvas = document.getElementById("v-canvas");
+      const vTitle = document.getElementById("v-title");
+      const vDownload = document.getElementById("v-download");
+      const vLoading = document.getElementById("v-loading");
+      const vPrev = document.getElementById("v-prev");
+      const vNext = document.getElementById("v-next");
+      const vPageInfo = document.getElementById("v-page-info");
 
-      function openViewer(pdfUrl, fileName) {
+      let currentPdf = null, currentPage = 1, totalPages = 0;
+
+      async function renderPage(num) {
+        if (!currentPdf) return;
+        vLoading.style.display = "block";
+        vCanvas.style.display = "none";
+        try {
+          const page = await currentPdf.getPage(num);
+          const vp = page.getViewport({ scale: 1 });
+          const maxW = Math.min(window.innerWidth * 0.85, 900);
+          const maxH = window.innerHeight * 0.7;
+          const scale = Math.min(maxW / vp.width, maxH / vp.height);
+          const svp = page.getViewport({ scale });
+          vCanvas.width = svp.width;
+          vCanvas.height = svp.height;
+          await page.render({ canvasContext: vCanvas.getContext("2d"), viewport: svp }).promise;
+          vLoading.style.display = "none";
+          vCanvas.style.display = "block";
+          vPageInfo.textContent = "Page " + num + " / " + totalPages;
+          vPrev.disabled = num <= 1;
+          vNext.disabled = num >= totalPages;
+        } catch (e) {
+          vLoading.textContent = "Error loading page.";
+        }
+      }
+
+      async function openViewer(pdfUrl, fileName) {
         const parsed = parseIssueName(fileName);
-        titleEl.textContent = parsed.title;
-        downloadEl.href = pdfUrl;
-        frame.src = pdfUrl;
+        vTitle.textContent = parsed.title;
+        vDownload.href = pdfUrl;
+        currentPage = 1;
+        vLoading.textContent = "Loading magazine…";
+        vLoading.style.display = "block";
+        vCanvas.style.display = "none";
         modal.hidden = false;
         document.body.style.overflow = "hidden";
+        try {
+          currentPdf = await pdfjsLib.getDocument(pdfUrl).promise;
+          totalPages = currentPdf.numPages;
+          await renderPage(currentPage);
+        } catch (e) {
+          vLoading.textContent = "Failed to load PDF.";
+        }
       }
 
       function closeViewer() {
         modal.hidden = true;
-        frame.src = "";
+        currentPdf = null;
         document.body.style.overflow = "";
       }
 
       document.querySelectorAll(".issue-card").forEach(card => {
-        card.addEventListener("click", () => {
-          openViewer(card.dataset.pdfUrl, card.dataset.fileName);
-        });
-        card.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openViewer(card.dataset.pdfUrl, card.dataset.fileName);
-          }
-        });
+        card.addEventListener("click", () => openViewer(card.dataset.pdfUrl, card.dataset.fileName));
+        card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openViewer(card.dataset.pdfUrl, card.dataset.fileName); } });
       });
 
-      closeBtn.addEventListener("click", closeViewer);
-      backdrop.addEventListener("click", closeViewer);
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.hidden) closeViewer();
+      vPrev.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } });
+      vNext.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
+      document.getElementById("v-close").addEventListener("click", closeViewer);
+      modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
+      document.addEventListener("keydown", e => {
+        if (modal.hidden) return;
+        if (e.key === "Escape") closeViewer();
+        if (e.key === "ArrowLeft" && currentPage > 1) { currentPage--; renderPage(currentPage); }
+        if (e.key === "ArrowRight" && currentPage < totalPages) { currentPage++; renderPage(currentPage); }
       });
     });
   </script>
-
 </body>
 </html>
