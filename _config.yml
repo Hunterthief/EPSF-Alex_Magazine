@@ -1,6 +1,13 @@
 title: EPSF Alex PE Magazine
-baseurl: ""
+description: Digital monthly magazine
+
+# THIS IS THE FIX: It must match your repository name EXACTLY (case-sensitive)
+baseurl: "/EPSF-Alex_Magazine" 
 url: "https://hunterthief.github.io"
+
+# Force Jekyll to include the generated image folders in the final site
+include:
+  - assets/issues
 
 permalink: pretty
 
