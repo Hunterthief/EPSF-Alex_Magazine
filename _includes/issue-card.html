@@ -2,15 +2,16 @@
 {% assign pdfPath = include.file.path | relative_url %}
 {% assign featured = include.featured | default: false %}
 
-<a
+<div
   class="issue-card {% if featured %}featured{% endif %}"
-  href="{{ '/viewer/' | relative_url }}?issue={{ include.file.path | url_encode }}"
   data-file-name="{{ fileName }}"
   data-pdf-url="{{ pdfPath }}"
+  role="button"
+  tabindex="0"
 >
   <div class="issue-cover">
     <div class="issue-cover-fallback">
-      <span class="fallback-brand">EPSF Alex PE</span>
+      <span class="fallback-brand">EPSF Alex</span>
       <span class="fallback-title js-cover-title">{{ fileName }}</span>
     </div>
   </div>
@@ -19,7 +20,7 @@
     <h3 class="issue-title js-issue-title">{{ fileName }}</h3>
     <p class="issue-date js-issue-date"></p>
     {% if featured %}
-      <span class="read-btn">Read Issue →</span>
+      <span class="read-btn">Read Issue</span>
     {% endif %}
   </div>
-</a>
+</div>
