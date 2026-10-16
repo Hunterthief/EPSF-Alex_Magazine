@@ -74,7 +74,7 @@ title: Home
     .read-btn::after { content: "→"; transition: transform 0.2s; }
     .issue-card:hover .read-btn::after { transform: translateX(4px); }
 
-    /* ===== MAGAZINE VIEWER MODAL ===== */
+    /* ===== IMAGE VIEWER MODAL ===== */
     .viewer-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .viewer-modal[hidden] { display: none; }
     .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.96); backdrop-filter: blur(8px); }
@@ -99,7 +99,27 @@ title: Home
     .viewer-dl:hover { background: var(--color-accent); color: var(--color-ink); }
 
     .viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; }
-    .pdf-frame { width: 100%; height: 100%; border: none; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); background: #fff; }
+    
+    .viewer-img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; background: #fff;
+      transition: opacity 0.3s ease;
+    }
+    .viewer-loading { position: absolute; color: var(--color-accent); font-size: 1.2rem; display: none; }
+
+    .viewer-nav {
+      display: flex; align-items: center; justify-content: center; gap: 20px;
+      padding: 14px 24px; background: #0A0A0A;
+      border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+    }
+    .viewer-btn-nav {
+      background: var(--color-primary); color: #fff; border: none;
+      padding: 10px 24px; border-radius: 6px; cursor: pointer;
+      font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
+    }
+    .viewer-btn-nav:hover { background: var(--color-accent); color: var(--color-ink); }
+    .viewer-btn-nav:disabled { opacity: 0.3; cursor: default; background: #333; }
+    .viewer-page-info { color: var(--color-white); font-size: 0.9rem; min-width: 100px; text-align: center; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -145,10 +165,11 @@ title: Home
       {% for file in pdfs %}
         {% if file.path contains '/magazines/' %}
           {% unless has_issues %}
-            {% assign cover_img = file.name | replace: '.pdf', '.jpg' %}
-            <a href="#" class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-cover-url="{{ '/covers/' | append: cover_img | relative_url }}">
+            {% assign issue_folder = file.name | replace: '.pdf', '' %}
+            {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
+            <a href="#" class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-issue-folder="{{ issue_folder }}">
               <div class="issue-cover">
-                <img src="{{ '/covers/' | append: cover_img | relative_url }}" alt="Cover" onerror="this.style.display='none'">
+                <img src="{{ cover_url }}" alt="Cover" onerror="this.style.display='none'">
                 <div class="cover-fallback">
                   <span class="fallback-brand">EPSF Alex</span>
                   <span class="fallback-title js-cover-title">{{ file.name }}</span>
@@ -173,10 +194,11 @@ title: Home
         <div class="issue-grid">
           {% for file in pdfs %}
             {% if file.path contains '/magazines/' %}
-              {% assign cover_img = file.name | replace: '.pdf', '.jpg' %}
-              <a href="#" class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}">
+              {% assign issue_folder = file.name | replace: '.pdf', '' %}
+              {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
+              <a href="#" class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-issue-folder="{{ issue_folder }}">
                 <div class="issue-cover">
-                  <img src="{{ '/covers/' | append: cover_img | relative_url }}" alt="Cover" onerror="this.style.display='none'">
+                  <img src="{{ cover_url }}" alt="Cover" onerror="this.style.display='none'">
                   <div class="cover-fallback">
                     <span class="fallback-brand">EPSF Alex</span>
                     <span class="fallback-title js-cover-title">{{ file.name }}</span>
@@ -197,8 +219,8 @@ title: Home
 
   <footer><p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p></footer>
 
-  <!-- MAGAZINE VIEWER MODAL -->
-  <div id="viewer-modal" class="viewer-modal" hidden>
+  <!-- IMAGE VIEWER MODAL -->
+  <div id="viewer-modal" class="viewer-modal" hidden data-baseurl="{{ site.baseurl }}">
     <div class="viewer-backdrop"></div>
     <div class="viewer-content">
       <div class="viewer-top">
@@ -206,8 +228,14 @@ title: Home
         <span class="viewer-top-title" id="v-title">Loading…</span>
         <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener" download>Download PDF</a>
       </div>
-      <div class="viewer-body">
-        <iframe id="v-frame" class="pdf-frame" title="Magazine Viewer"></iframe>
+      <div class="viewer-body" id="v-body">
+        <img id="v-img" class="viewer-img" src="" alt="Magazine Page">
+        <div class="viewer-loading" id="v-loading">Loading…</div>
+      </div>
+      <div class="viewer-nav">
+        <button id="v-prev" class="viewer-btn-nav">← Prev</button>
+        <span class="viewer-page-info" id="v-page-info">Page 1 / 1</span>
+        <button id="v-next" class="viewer-btn-nav">Next →</button>
       </div>
     </div>
   </div>
@@ -215,7 +243,6 @@ title: Home
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
-      /* ---- Title Parser ---- */
       function parseIssueName(fileName) {
         const name = fileName.replace(/\.pdf$/i, "");
         const m = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
@@ -228,7 +255,6 @@ title: Home
         return { title: t, date: d };
       }
 
-      /* ---- Update Card Text ---- */
       document.querySelectorAll(".issue-card").forEach(card => {
         const fn = card.dataset.fileName;
         if (!fn) return;
@@ -241,45 +267,96 @@ title: Home
         if (da && p.date) da.textContent = p.date.toLocaleDateString("en", { year: "numeric", month: "long", timeZone: "UTC" });
       });
 
-      /* ---- Scroll Animations ---- */
       const obs = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("is-visible"); obs.unobserve(e.target); } });
       }, { threshold: 0.1 });
       document.querySelectorAll(".issue-card").forEach(c => obs.observe(c));
 
-      /* ---- Magazine Viewer Modal ---- */
+      /* ---- Image Viewer Logic ---- */
       const modal = document.getElementById("viewer-modal");
-      const vFrame = document.getElementById("v-frame");
+      const baseUrl = modal.dataset.baseurl || "";
+      const vImg = document.getElementById("v-img");
       const vTitle = document.getElementById("v-title");
       const vDownload = document.getElementById("v-download");
+      const vLoading = document.getElementById("v-loading");
+      const vPrev = document.getElementById("v-prev");
+      const vNext = document.getElementById("v-next");
+      const vPageInfo = document.getElementById("v-page-info");
 
-      function openViewer(pdfUrl, fileName) {
+      let currentIssue = "";
+      let currentPage = 1;
+      let totalPages = 1;
+
+      async function openViewer(pdfUrl, fileName, issueFolder) {
         const parsed = parseIssueName(fileName);
         vTitle.textContent = parsed.title;
         vDownload.href = pdfUrl;
-        vFrame.src = pdfUrl; // Native browser PDF viewer (bulletproof)
+        
+        currentIssue = issueFolder;
+        currentPage = 1;
+        
         modal.hidden = false;
         document.body.style.overflow = "hidden";
+        vLoading.style.display = "block";
+        vImg.style.opacity = "0";
+
+        try {
+          const manifestUrl = `${baseUrl}/pages/${issueFolder}/manifest.json`;
+          const response = await fetch(manifestUrl);
+          if (!response.ok) throw new Error("Manifest not found");
+          const manifest = await response.json();
+          totalPages = manifest.pages;
+          renderPage(currentPage);
+        } catch (e) {
+          totalPages = 1; // Fallback
+          renderPage(currentPage);
+        }
+      }
+
+      function renderPage(num) {
+        vLoading.style.display = "block";
+        vImg.style.opacity = "0";
+        
+        const imgUrl = `${baseUrl}/pages/${currentIssue}/${num}.jpg`;
+        
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          vImg.src = imgUrl;
+          vImg.style.opacity = "1";
+          vLoading.style.display = "none";
+          vPageInfo.textContent = `Page ${num} / ${totalPages}`;
+          vPrev.disabled = num <= 1;
+          vNext.disabled = num >= totalPages;
+        };
+        tempImg.onerror = () => {
+          vLoading.textContent = "Failed to load page.";
+        };
+        tempImg.src = imgUrl;
       }
 
       function closeViewer() {
         modal.hidden = true;
-        vFrame.src = "about:blank"; // Stop loading
         document.body.style.overflow = "";
       }
 
       document.querySelectorAll(".issue-card").forEach(card => {
         card.addEventListener("click", (e) => {
           e.preventDefault();
-          openViewer(card.dataset.pdfUrl, card.dataset.fileName);
+          openViewer(card.dataset.pdfUrl, card.dataset.fileName, card.dataset.issueFolder);
         });
       });
 
+      vPrev.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } });
+      vNext.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
       document.getElementById("v-close").addEventListener("click", closeViewer);
       modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
       
       document.addEventListener("keydown", e => {
-        if (!modal.hidden && e.key === "Escape") closeViewer();
+        if (!modal.hidden) {
+          if (e.key === "Escape") closeViewer();
+          if (e.key === "ArrowLeft" && currentPage > 1) { currentPage--; renderPage(currentPage); }
+          if (e.key === "ArrowRight" && currentPage < totalPages) { currentPage++; renderPage(currentPage); }
+        }
       });
     });
   </script>
