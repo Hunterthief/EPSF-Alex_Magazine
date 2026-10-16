@@ -1,33 +1,56 @@
-import pymupdf
 import os
+import json
+
+try:
+    import pymupdf
+except ImportError:
+    import fitz as pymupdf
 
 MAGAZINES_DIR = "magazines"
-COVERS_DIR = "covers"
+PAGES_DIR = "pages"
 
-# Create the covers folder if it doesn't exist
-os.makedirs(COVERS_DIR, exist_ok=True)
+os.makedirs(PAGES_DIR, exist_ok=True)
 
 for filename in os.listdir(MAGAZINES_DIR):
     if not filename.lower().endswith(".pdf"):
         continue
     
+    pdf_name = os.path.splitext(filename)[0]
     pdf_path = os.path.join(MAGAZINES_DIR, filename)
-    cover_name = os.path.splitext(filename)[0] + ".jpg"
-    cover_path = os.path.join(COVERS_DIR, cover_name)
+    issue_dir = os.path.join(PAGES_DIR, pdf_name)
+    manifest_path = os.path.join(issue_dir, "manifest.json")
     
-    # Only generate if the cover doesn't already exist
-    if not os.path.exists(cover_path):
+    # Only process if we haven't generated the manifest yet
+    if not os.path.exists(manifest_path):
+        os.makedirs(issue_dir, exist_ok=True)
         try:
             doc = pymupdf.open(pdf_path)
-            page = doc.load_page(0) # Get first page
+            page_count = doc.page_count
+            print(f"Processing {filename} ({page_count} pages)...")
             
-            # 2x zoom for high-DPI (Retina) crispness
-            mat = pymupdf.Matrix(2, 2) 
-            pix = page.get_pixmap(matrix=mat, alpha=False)
-            
-            # Save as JPEG using the correct 'jpg_quality' argument
-            pix.save(cover_path, output="jpeg", jpg_quality=85)
-            print(f"✅ Generated cover for {filename}")
+            for i in range(page_count):
+                page = doc.load_page(i)
+                mat = pymupdf.Matrix(2, 2) # 2x zoom for crisp images
+                pix = page.get_pixmap(matrix=mat, alpha=False)
+                
+                img_path = os.path.join(issue_dir, f"{i+1}.jpg")
+                
+                # Bypass library save() bugs
+                try:
+                    img_bytes = pix.tobytes("jpeg")
+                except TypeError:
+                    img_bytes = pix.tobytes(output="jpeg")
+                    
+                with open(img_path, "wb") as f:
+                    f.write(img_bytes)
+                    
             doc.close()
+            
+            # Create manifest so the website knows the page count
+            manifest = {"title": pdf_name, "pages": page_count}
+            with open(manifest_path, "w") as f:
+                json.dump(manifest, f)
+                
+            print(f"✅ Generated {page_count} pages for {filename}")
         except Exception as e:
-            print(f"❌ Failed to generate cover for {filename}: {e}")
+            print(f"❌ Failed to process {filename}: {e}")
