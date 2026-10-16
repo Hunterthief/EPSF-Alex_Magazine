@@ -31,7 +31,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add pages/
+          git add assets/issues/
           if ! git diff --staged --quiet; then
             git commit -m "Auto-generate magazine pages [skip ci]"
             git push
