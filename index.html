@@ -40,3 +40,18 @@ title: Home
     </div>
   {% endif %}
 </section>
+
+<!-- ===== FULLSCREEN VIEWER MODAL ===== -->
+<div id="viewer-modal" class="viewer-modal" hidden>
+  <div class="viewer-modal-backdrop"></div>
+  <div class="viewer-modal-content">
+    <header class="viewer-modal-header">
+      <button id="viewer-close" class="viewer-close-btn" aria-label="Close viewer">&times;</button>
+      <h2 id="viewer-title" class="viewer-modal-title">Loading…</h2>
+      <a id="viewer-download" class="viewer-download" href="#" target="_blank" rel="noopener">Download PDF</a>
+    </header>
+    <div class="viewer-modal-body">
+      <iframe id="viewer-frame" class="pdf-frame" title="EPSF Alex PE Magazine issue"></iframe>
+    </div>
+  </div>
+</div>
