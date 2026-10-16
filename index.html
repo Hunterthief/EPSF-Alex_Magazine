@@ -75,7 +75,6 @@ title: Home
     .read-btn::after { content: "→"; transition: transform 0.2s; }
     .issue-card:hover .read-btn::after { transform: translateX(4px); }
 
-    /* ===== IMAGE VIEWER MODAL ===== */
     .viewer-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .viewer-modal[hidden] { display: none; }
     .viewer-backdrop { position: absolute; inset: 0; background: rgba(10,25,47,0.96); backdrop-filter: blur(8px); }
@@ -102,7 +101,7 @@ title: Home
     .viewer-body { 
       flex: 1; display: flex; align-items: center; justify-content: center; 
       position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; 
-      touch-action: pan-y; /* Allows vertical scroll but captures horizontal swipes */
+      touch-action: pan-y;
     }
     
     .viewer-img {
@@ -111,7 +110,7 @@ title: Home
       transition: opacity 0.4s ease, transform 0.4s ease;
       user-select: none; -webkit-user-drag: none;
     }
-    .viewer-loading { position: absolute; color: var(--color-accent); font-size: 1.2rem; display: none; }
+    .viewer-loading { position: absolute; color: var(--color-accent); font-size: 1.2rem; display: none; text-align: center; }
 
     .viewer-nav {
       display: flex; align-items: center; justify-content: center; gap: 20px;
@@ -173,8 +172,8 @@ title: Home
         {% if file.path contains '/magazines/' %}
           {% unless has_issues %}
             {% assign issue_folder = file.name | replace: '.pdf', '' %}
-            {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
-            {% assign pages_dir_url = '/pages/' | append: issue_folder | relative_url %}
+            {% assign cover_url = '/assets/issues/' | append: issue_folder | append: '/1.jpg' | relative_url %}
+            {% assign pages_dir_url = '/assets/issues/' | append: issue_folder | relative_url %}
             
             <a href="#" class="issue-card featured" 
                data-file-name="{{ file.name }}" 
@@ -207,8 +206,8 @@ title: Home
           {% for file in pdfs %}
             {% if file.path contains '/magazines/' %}
               {% assign issue_folder = file.name | replace: '.pdf', '' %}
-              {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
-              {% assign pages_dir_url = '/pages/' | append: issue_folder | relative_url %}
+              {% assign cover_url = '/assets/issues/' | append: issue_folder | append: '/1.jpg' | relative_url %}
+              {% assign pages_dir_url = '/assets/issues/' | append: issue_folder | relative_url %}
 
               <a href="#" class="issue-card" 
                  data-file-name="{{ file.name }}" 
@@ -236,7 +235,6 @@ title: Home
 
   <footer><p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p></footer>
 
-  <!-- IMAGE VIEWER MODAL -->
   <div id="viewer-modal" class="viewer-modal" hidden>
     <div class="viewer-backdrop"></div>
     <div class="viewer-content">
@@ -289,7 +287,6 @@ title: Home
       }, { threshold: 0.1 });
       document.querySelectorAll(".issue-card").forEach(c => obs.observe(c));
 
-      /* ---- Image Viewer Logic ---- */
       const modal = document.getElementById("viewer-modal");
       const vBody = document.getElementById("v-body");
       const vImg = document.getElementById("v-img");
@@ -309,7 +306,7 @@ title: Home
         vTitle.textContent = parsed.title;
         vDownload.href = pdfUrl;
         
-        currentPagesUrl = pagesUrl; // e.g., "/pe-magazine/pages/2026-10-my-story"
+        currentPagesUrl = pagesUrl; 
         currentPage = 1;
         
         modal.hidden = false;
@@ -318,7 +315,6 @@ title: Home
         vImg.style.opacity = "0";
 
         try {
-          // Fetch the manifest to get the total page count
           const manifestUrl = `${currentPagesUrl}/manifest.json`;
           const response = await fetch(manifestUrl);
           if (!response.ok) throw new Error("Manifest not found");
@@ -327,7 +323,7 @@ title: Home
           renderPage(currentPage);
         } catch (e) {
           console.error("Manifest error:", e);
-          totalPages = 1; // Fallback if manifest fails
+          totalPages = 1; 
           renderPage(currentPage);
         }
       }
@@ -336,7 +332,6 @@ title: Home
         vLoading.style.display = "block";
         vImg.style.opacity = "0";
         
-        // Direct path to the image
         const imgUrl = `${currentPagesUrl}/${num}.jpg`;
         
         const tempImg = new Image();
@@ -349,7 +344,9 @@ title: Home
           vNext.disabled = num >= totalPages;
         };
         tempImg.onerror = () => {
-          vLoading.textContent = "Failed to load page.";
+          // DEBUG MODE: Shows the exact URL it tried to load
+          vLoading.innerHTML = `Failed to load page.<br><small style="font-size:0.8rem;opacity:0.7;word-break:break-all;">Tried: ${imgUrl}</small>`;
+          vLoading.style.display = "block";
         };
         tempImg.src = imgUrl;
       }
@@ -371,7 +368,6 @@ title: Home
       document.getElementById("v-close").addEventListener("click", closeViewer);
       modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
       
-      // Keyboard Navigation
       document.addEventListener("keydown", e => {
         if (!modal.hidden) {
           if (e.key === "Escape") closeViewer();
@@ -380,7 +376,6 @@ title: Home
         }
       });
 
-      // Mobile Swipe Navigation
       let touchStartX = 0;
       let touchEndX = 0;
       
@@ -393,11 +388,9 @@ title: Home
       function handleSwipe() {
         const swipeThreshold = 50;
         if (touchEndX < touchStartX - swipeThreshold) {
-          // Swipe Left -> Next Page
           if (currentPage < totalPages) { currentPage++; renderPage(currentPage); }
         }
         if (touchEndX > touchStartX + swipeThreshold) {
-          // Swipe Right -> Prev Page
           if (currentPage > 1) { currentPage--; renderPage(currentPage); }
         }
       }
