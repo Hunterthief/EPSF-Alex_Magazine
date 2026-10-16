@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Title Parsing Logic
+
+  // ========================================
+  // 1. TITLE PARSING
+  // ========================================
   function parseIssueName(fileName) {
     const name = fileName.replace(/\.pdf$/i, "");
     const match = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
@@ -20,27 +23,30 @@ document.addEventListener("DOMContentLoaded", () => {
     return { title, date };
   }
 
-  // 2. Update DOM elements with parsed titles
+  // ========================================
+  // 2. UPDATE CARD TITLES & DATES
+  // ========================================
   document.querySelectorAll(".issue-card").forEach(card => {
     const fileName = card.dataset.fileName;
-    if(!fileName) return;
+    if (!fileName) return;
     const parsed = parseIssueName(fileName);
 
-    const titleElement = card.querySelector(".js-issue-title");
-    const dateElement = card.querySelector(".js-issue-date");
+    const titleEl = card.querySelector(".js-issue-title");
+    const dateEl = card.querySelector(".js-issue-date");
     const coverTitle = card.querySelector(".js-cover-title");
 
-    if (titleElement) titleElement.textContent = parsed.title;
+    if (titleEl) titleEl.textContent = parsed.title;
     if (coverTitle) coverTitle.textContent = parsed.title;
-
-    if (dateElement && parsed.date) {
-      dateElement.textContent = parsed.date.toLocaleDateString("en", {
+    if (dateEl && parsed.date) {
+      dateEl.textContent = parsed.date.toLocaleDateString("en", {
         year: "numeric", month: "long", timeZone: "UTC"
       });
     }
   });
 
-  // 3. Scroll Animations (Intersection Observer)
+  // ========================================
+  // 3. SCROLL ANIMATIONS
+  // ========================================
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -52,28 +58,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".issue-card").forEach(card => observer.observe(card));
 
-  // 4. Viewer Page Logic
-  const viewer = document.getElementById("magazine-viewer");
-  if (viewer) {
-    const params = new URLSearchParams(window.location.search);
-    const issuePath = params.get("issue");
-    const baseUrl = viewer.dataset.baseurl || "";
+  // ========================================
+  // 4. FULLSCREEN MODAL VIEWER
+  // ========================================
+  const modal = document.getElementById("viewer-modal");
+  const backdrop = modal.querySelector(".viewer-modal-backdrop");
+  const closeBtn = document.getElementById("viewer-close");
+  const frame = document.getElementById("viewer-frame");
+  const titleEl = document.getElementById("viewer-title");
+  const downloadEl = document.getElementById("viewer-download");
 
-    if (!issuePath || !issuePath.startsWith("/magazines/") || !issuePath.endsWith(".pdf")) {
-      viewer.innerHTML = `<div class="viewer-error" style="padding:40px;text-align:center;"><h2>Magazine not found</h2><p>Please go back and choose an issue from the homepage.</p></div>`;
-    } else {
-      const cleanPath = issuePath.replace(/\/+/g, "/");
-      const pdfUrl = `${baseUrl}${cleanPath}`;
-      const fileName = cleanPath.split("/").pop();
-
-      const viewerTitle = document.getElementById("viewer-title");
-      const viewerDownload = document.getElementById("viewer-download");
-
-      if(viewerTitle) viewerTitle.textContent = parseIssueName(fileName).title;
-      if(viewerDownload) viewerDownload.href = pdfUrl;
-
-      // Level 1 Viewer: Built-in browser iframe
-      viewer.innerHTML = `<iframe class="pdf-frame" src="${pdfUrl}" title="EPSF Alex PE Magazine issue"></iframe>`;
-    }
+  function openViewer(pdfUrl, fileName) {
+    const parsed = parseIssueName(fileName);
+    titleEl.textContent = parsed.title;
+    downloadEl.href = pdfUrl;
+    frame.src = pdfUrl;
+    modal.hidden = false;
+    document.body.style.overflow = "hidden"; // prevent background scroll
   }
+
+  function closeViewer() {
+    modal.hidden = true;
+    frame.src = ""; // stop loading the PDF
+    document.body.style.overflow = "";
+  }
+
+  // Open when clicking a card
+  document.querySelectorAll(".issue-card").forEach(card => {
+    card.addEventListener("click", () => {
+      openViewer(card.dataset.pdfUrl, card.dataset.fileName);
+    });
+    // Keyboard accessibility
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openViewer(card.dataset.pdfUrl, card.dataset.fileName);
+      }
+    });
+  });
+
+  // Close triggers
+  closeBtn.addEventListener("click", closeViewer);
+  backdrop.addEventListener("click", closeViewer);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.hidden) closeViewer();
+  });
 });
