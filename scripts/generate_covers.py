@@ -7,9 +7,10 @@ except ImportError:
     import fitz as pymupdf
 
 MAGAZINES_DIR = "magazines"
-PAGES_DIR = "pages"
+# Changed to assets/issues so Jekyll guarantees it copies the files
+ISSUES_DIR = "assets/issues"
 
-os.makedirs(PAGES_DIR, exist_ok=True)
+os.makedirs(ISSUES_DIR, exist_ok=True)
 
 for filename in os.listdir(MAGAZINES_DIR):
     if not filename.lower().endswith(".pdf"):
@@ -17,10 +18,9 @@ for filename in os.listdir(MAGAZINES_DIR):
     
     pdf_name = os.path.splitext(filename)[0]
     pdf_path = os.path.join(MAGAZINES_DIR, filename)
-    issue_dir = os.path.join(PAGES_DIR, pdf_name)
+    issue_dir = os.path.join(ISSUES_DIR, pdf_name)
     manifest_path = os.path.join(issue_dir, "manifest.json")
     
-    # Only process if we haven't generated the manifest yet
     if not os.path.exists(manifest_path):
         os.makedirs(issue_dir, exist_ok=True)
         try:
@@ -30,12 +30,11 @@ for filename in os.listdir(MAGAZINES_DIR):
             
             for i in range(page_count):
                 page = doc.load_page(i)
-                mat = pymupdf.Matrix(2, 2) # 2x zoom for crisp images
+                mat = pymupdf.Matrix(2, 2) 
                 pix = page.get_pixmap(matrix=mat, alpha=False)
                 
                 img_path = os.path.join(issue_dir, f"{i+1}.jpg")
                 
-                # Bypass library save() bugs
                 try:
                     img_bytes = pix.tobytes("jpeg")
                 except TypeError:
@@ -46,7 +45,6 @@ for filename in os.listdir(MAGAZINES_DIR):
                     
             doc.close()
             
-            # Create manifest so the website knows the page count
             manifest = {"title": pdf_name, "pages": page_count}
             with open(manifest_path, "w") as f:
                 json.dump(manifest, f)
