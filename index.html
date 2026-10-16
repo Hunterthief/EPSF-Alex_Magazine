@@ -57,7 +57,8 @@ title: Home
     .issue-card.featured { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.2fr; max-width: 900px; margin: 0 auto; border: 2px solid var(--color-accent); }
 
     .issue-cover { aspect-ratio: 3/4; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--color-ink), var(--color-primary)); }
-    .issue-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .issue-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+    .issue-card:hover .issue-cover img { transform: scale(1.05); }
     .issue-cover .cover-fallback {
       position: absolute; inset: 0; display: flex; flex-direction: column;
       justify-content: center; align-items: center; padding: 30px; text-align: center;
@@ -98,12 +99,17 @@ title: Home
     .viewer-dl { background: var(--color-primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: background 0.2s; border: none; cursor: pointer;}
     .viewer-dl:hover { background: var(--color-accent); color: var(--color-ink); }
 
-    .viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; }
+    .viewer-body { 
+      flex: 1; display: flex; align-items: center; justify-content: center; 
+      position: relative; overflow: hidden; padding: 20px; background: #1a1a1a; 
+      touch-action: pan-y; /* Allows vertical scroll but captures horizontal swipes */
+    }
     
     .viewer-img {
       max-width: 100%; max-height: 100%; object-fit: contain;
       box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; background: #fff;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      user-select: none; -webkit-user-drag: none;
     }
     .viewer-loading { position: absolute; color: var(--color-accent); font-size: 1.2rem; display: none; }
 
@@ -131,6 +137,7 @@ title: Home
       .issue-cover { aspect-ratio: 16/9; }
       .viewer-top { flex-wrap: wrap; padding: 10px 15px; }
       .viewer-top-title { order: 3; width: 100%; text-align: left; font-size: 1rem; margin-top: 5px;}
+      .viewer-btn-nav { padding: 10px 16px; }
     }
   </style>
 </head>
@@ -167,7 +174,12 @@ title: Home
           {% unless has_issues %}
             {% assign issue_folder = file.name | replace: '.pdf', '' %}
             {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
-            <a href="#" class="issue-card featured" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-issue-folder="{{ issue_folder }}">
+            {% assign pages_dir_url = '/pages/' | append: issue_folder | relative_url %}
+            
+            <a href="#" class="issue-card featured" 
+               data-file-name="{{ file.name }}" 
+               data-pdf-url="{{ file.path | relative_url }}" 
+               data-pages-url="{{ pages_dir_url }}">
               <div class="issue-cover">
                 <img src="{{ cover_url }}" alt="Cover" onerror="this.style.display='none'">
                 <div class="cover-fallback">
@@ -196,7 +208,12 @@ title: Home
             {% if file.path contains '/magazines/' %}
               {% assign issue_folder = file.name | replace: '.pdf', '' %}
               {% assign cover_url = '/pages/' | append: issue_folder | append: '/1.jpg' | relative_url %}
-              <a href="#" class="issue-card" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-issue-folder="{{ issue_folder }}">
+              {% assign pages_dir_url = '/pages/' | append: issue_folder | relative_url %}
+
+              <a href="#" class="issue-card" 
+                 data-file-name="{{ file.name }}" 
+                 data-pdf-url="{{ file.path | relative_url }}" 
+                 data-pages-url="{{ pages_dir_url }}">
                 <div class="issue-cover">
                   <img src="{{ cover_url }}" alt="Cover" onerror="this.style.display='none'">
                   <div class="cover-fallback">
@@ -220,7 +237,7 @@ title: Home
   <footer><p>&copy; {{ site.time | date: '%Y' }} EPSF Alex PE Magazine. All rights reserved.</p></footer>
 
   <!-- IMAGE VIEWER MODAL -->
-  <div id="viewer-modal" class="viewer-modal" hidden data-baseurl="{{ site.baseurl }}">
+  <div id="viewer-modal" class="viewer-modal" hidden>
     <div class="viewer-backdrop"></div>
     <div class="viewer-content">
       <div class="viewer-top">
@@ -229,7 +246,7 @@ title: Home
         <a class="viewer-dl" id="v-download" href="#" target="_blank" rel="noopener" download>Download PDF</a>
       </div>
       <div class="viewer-body" id="v-body">
-        <img id="v-img" class="viewer-img" src="" alt="Magazine Page">
+        <img id="v-img" class="viewer-img" src="" alt="Magazine Page" draggable="false">
         <div class="viewer-loading" id="v-loading">Loading…</div>
       </div>
       <div class="viewer-nav">
@@ -274,7 +291,7 @@ title: Home
 
       /* ---- Image Viewer Logic ---- */
       const modal = document.getElementById("viewer-modal");
-      const baseUrl = modal.dataset.baseurl || "";
+      const vBody = document.getElementById("v-body");
       const vImg = document.getElementById("v-img");
       const vTitle = document.getElementById("v-title");
       const vDownload = document.getElementById("v-download");
@@ -283,16 +300,16 @@ title: Home
       const vNext = document.getElementById("v-next");
       const vPageInfo = document.getElementById("v-page-info");
 
-      let currentIssue = "";
+      let currentPagesUrl = "";
       let currentPage = 1;
       let totalPages = 1;
 
-      async function openViewer(pdfUrl, fileName, issueFolder) {
+      async function openViewer(pdfUrl, fileName, pagesUrl) {
         const parsed = parseIssueName(fileName);
         vTitle.textContent = parsed.title;
         vDownload.href = pdfUrl;
         
-        currentIssue = issueFolder;
+        currentPagesUrl = pagesUrl; // e.g., "/pe-magazine/pages/2026-10-my-story"
         currentPage = 1;
         
         modal.hidden = false;
@@ -301,14 +318,16 @@ title: Home
         vImg.style.opacity = "0";
 
         try {
-          const manifestUrl = `${baseUrl}/pages/${issueFolder}/manifest.json`;
+          // Fetch the manifest to get the total page count
+          const manifestUrl = `${currentPagesUrl}/manifest.json`;
           const response = await fetch(manifestUrl);
           if (!response.ok) throw new Error("Manifest not found");
           const manifest = await response.json();
           totalPages = manifest.pages;
           renderPage(currentPage);
         } catch (e) {
-          totalPages = 1; // Fallback
+          console.error("Manifest error:", e);
+          totalPages = 1; // Fallback if manifest fails
           renderPage(currentPage);
         }
       }
@@ -317,7 +336,8 @@ title: Home
         vLoading.style.display = "block";
         vImg.style.opacity = "0";
         
-        const imgUrl = `${baseUrl}/pages/${currentIssue}/${num}.jpg`;
+        // Direct path to the image
+        const imgUrl = `${currentPagesUrl}/${num}.jpg`;
         
         const tempImg = new Image();
         tempImg.onload = () => {
@@ -342,7 +362,7 @@ title: Home
       document.querySelectorAll(".issue-card").forEach(card => {
         card.addEventListener("click", (e) => {
           e.preventDefault();
-          openViewer(card.dataset.pdfUrl, card.dataset.fileName, card.dataset.issueFolder);
+          openViewer(card.dataset.pdfUrl, card.dataset.fileName, card.dataset.pagesUrl);
         });
       });
 
@@ -351,6 +371,7 @@ title: Home
       document.getElementById("v-close").addEventListener("click", closeViewer);
       modal.querySelector(".viewer-backdrop").addEventListener("click", closeViewer);
       
+      // Keyboard Navigation
       document.addEventListener("keydown", e => {
         if (!modal.hidden) {
           if (e.key === "Escape") closeViewer();
@@ -358,6 +379,28 @@ title: Home
           if (e.key === "ArrowRight" && currentPage < totalPages) { currentPage++; renderPage(currentPage); }
         }
       });
+
+      // Mobile Swipe Navigation
+      let touchStartX = 0;
+      let touchEndX = 0;
+      
+      vBody.addEventListener("touchstart", e => { touchStartX = e.changedTouches[0].screenX; }, false);
+      vBody.addEventListener("touchend", e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, false);
+
+      function handleSwipe() {
+        const swipeThreshold = 50;
+        if (touchEndX < touchStartX - swipeThreshold) {
+          // Swipe Left -> Next Page
+          if (currentPage < totalPages) { currentPage++; renderPage(currentPage); }
+        }
+        if (touchEndX > touchStartX + swipeThreshold) {
+          // Swipe Right -> Prev Page
+          if (currentPage > 1) { currentPage--; renderPage(currentPage); }
+        }
+      }
     });
   </script>
 </body>
