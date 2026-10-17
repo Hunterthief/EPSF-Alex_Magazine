@@ -7,9 +7,14 @@ title: Home
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EPSF Alex PE Magazine</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+
+<!-- StPageFlip / page-flip -->
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/page-flip.browser.js"></script>
+
 <style>
 :root {
   --ink: #0A192F;
@@ -578,20 +583,32 @@ body {
   perspective: 2600px;
   perspective-origin: 50% 46%;
 }
-.book-pos {
+
+.book-wrap {
   position: relative;
-  transform-style: preserve-3d;
-  transition: transform 1s var(--ease-book);
-}
-.book-pos.closed { transform: translateX(-25%); }
-.book-pos.closed-back { transform: translateX(25%); }
-.book {
-  position: relative;
-  transform-style: preserve-3d;
+  width: 0;
+  height: 0;
   opacity: 0;
   transition: opacity 0.5s ease;
+  transform-style: preserve-3d;
 }
-.book.visible { opacity: 1; }
+.book-wrap.visible { opacity: 1; }
+
+#flipbook-mount {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+#flipbook {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#flipbook canvas {
+  display: block;
+}
+
 .book-shadow {
   position: absolute;
   left: 50%;
@@ -603,102 +620,10 @@ body {
   pointer-events: none;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
   filter: blur(14px);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.book.visible ~ .book-shadow { opacity: 1; }
-
-.half {
-  position: absolute;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-  background: #FAFAF7;
-  z-index: 2;
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45);
-}
-.half--l { left: 0; transition: opacity 0.55s ease; }
-.half--r { right: 0; }
-.book-pos.closed .half--l,
-.book-pos.closed .spine { opacity: 0; }
-.book-pos.closed-back .half,
-.book-pos.closed-back .spine { opacity: 0; }
-.half img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.half .inner-cover {
-  position: absolute;
-  inset: 0;
-  display: none;
-  background:
-    radial-gradient(ellipse 130% 90% at 100% 50%, rgba(212,175,55,0.14), transparent 62%),
-    linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%);
-}
-.half.is-empty .inner-cover { display: block; }
-.half.is-empty img { display: none; }
-.half.is-blank { background: #fff; }
-.half.is-blank img { display: none; }
-.half--l::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%);
-}
-.half--r::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to left, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%);
-}
-.half--l::before {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0; left: 0;
-  width: 3px;
-  z-index: 4;
-  background: linear-gradient(to right, rgba(0,0,0,0.16), transparent);
-}
-.half--r::before {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0; right: 0;
-  width: 3px;
-  z-index: 4;
-  background: linear-gradient(to left, rgba(0,0,0,0.16), transparent);
-}
-.page-edge {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 5px;
-  z-index: 5;
-  background: linear-gradient(to bottom, #E8E4DC 0%, #D4D0C8 50%, #E8E4DC 100%);
-  box-shadow: inset 0 0 3px rgba(0,0,0,0.2);
-}
-.half--l .page-edge { right: -2px; }
-.half--r .page-edge { left: -2px; }
-
-.spine {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 74px;
-  transform: translateX(-50%);
-  z-index: 6;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-  background: linear-gradient(to right,
-    transparent 0%,
-    rgba(0,0,0,0.1) 26%,
-    rgba(0,0,0,0.4) 47%,
-    rgba(0,0,0,0.46) 50%,
-    rgba(0,0,0,0.4) 53%,
-    rgba(0,0,0,0.1) 74%,
-    transparent 100%
-  );
+  z-index: 0;
 }
 
-/* Internet Archive style vertical page sheets, same height as pages */
+/* Vertical page sheets, same height as pages */
 .page-stack {
   position: absolute;
   top: 0;
@@ -715,12 +640,10 @@ body {
 }
 .page-stack--r {
   left: 100%;
-  border-radius: 0;
   background: transparent;
 }
 .page-stack--l {
   right: 100%;
-  border-radius: 0;
   background: transparent;
 }
 .sheet {
@@ -769,112 +692,6 @@ body {
   box-shadow: 0 12px 28px rgba(0,0,0,0.45);
 }
 .sheet-tip.show { opacity: 1; transform: translateY(0); }
-
-.leaf {
-  position: absolute;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  transform-style: preserve-3d;
-  display: none;
-  z-index: 20;
-  will-change: transform;
-  --flip-dur: 1000ms;
-  pointer-events: none;
-}
-.leaf.pos-r { left: 50%; transform-origin: left center; }
-.leaf.pos-l { left: 0; transform-origin: right center; }
-.face {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: #FAFAF7;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-  pointer-events: none;
-}
-.face img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.face--b { transform: rotateY(180deg); }
-.face .inner-cover {
-  position: absolute;
-  inset: 0;
-  display: none;
-  background: linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%);
-}
-.face.is-empty .inner-cover { display: block; }
-.face.is-empty img { display: none; }
-.face.is-blank { background: #fff; }
-.face.is-blank img,
-.face.is-blank .inner-cover { display: none; }
-.face.is-backcover img,
-.face.is-backcover .inner-cover { display: none; }
-
-.face::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-}
-.face--f::after { background: linear-gradient(to left, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
-.face--b::after { background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
-.leaf.is-flipping .face--f::after { animation: shadeA var(--flip-dur) cubic-bezier(0.55,0.085,0.68,0.53) forwards; }
-.leaf.is-flipping .face--b::after { animation: shadeB var(--flip-dur) cubic-bezier(0.55,0.085,0.68,0.53) forwards; }
-@keyframes shadeA { 0% { opacity: 0; } 48% { opacity: 0.9; } 100% { opacity: 0; } }
-@keyframes shadeB { 0% { opacity: 0.75; } 52% { opacity: 0.2; } 100% { opacity: 0; } }
-
-.backcover-design {
-  position: absolute;
-  inset: 0;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  padding: 30px;
-  text-align: center;
-  color: #fff;
-  background:
-    radial-gradient(ellipse 130% 90% at 50% 0%, rgba(212,175,55,0.14), transparent 55%),
-    linear-gradient(150deg, #0A192F 0%, #12233F 60%, #1E3A8A 100%);
-}
-.face.is-backcover .backcover-design { display: flex; }
-.bc-logo { width: 58px; height: 58px; opacity: 0.95; }
-.bc-brand { font-family: var(--display); font-size: 1.45rem; font-weight: 700; letter-spacing: 0.04em; }
-.bc-sub { font-size: 0.58rem; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-.bc-rule { width: 44px; height: 2px; background: var(--accent); border-radius: 2px; }
-.bc-thanks { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.78); margin-top: 6px; }
-
-.shine {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  pointer-events: none;
-  overflow: hidden;
-}
-.shine i {
-  position: absolute;
-  top: -30%;
-  bottom: -30%;
-  width: 42%;
-  background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.1) 34%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 66%, transparent 100%);
-  transform: translateX(-260%) skewX(-14deg);
-  filter: blur(3px);
-}
-.shine.go i { animation: sweep 1.5s var(--ease-out) forwards; }
-@keyframes sweep { to { transform: translateX(320%) skewX(-14deg); } }
-
-.zone {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 15;
-  cursor: pointer;
-}
-.zone--l { left: 0; width: 50%; }
-.zone--r { right: 0; width: 50%; }
-.reader.state-closed .zone--l { display: none; }
 
 /* electric sparks on the EDGES + flash */
 .sparks {
@@ -1005,7 +822,7 @@ body {
 }
 .dock-pages:hover { color: var(--accent-soft); }
 .page-input {
-  width: 64px;
+  width: 72px;
   height: 26px;
   border-radius: 6px;
   border: 1px solid rgba(212,175,55,0.65);
@@ -1162,17 +979,6 @@ body {
   max-width: 34ch;
   text-align: center;
   line-height: 1.6;
-}
-
-.fly {
-  position: fixed;
-  z-index: 9500;
-  pointer-events: none;
-  object-fit: cover;
-  transform-origin: top left;
-  will-change: transform;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.6);
-  border-radius: 4px;
 }
 
 @media (max-width: 900px) {
@@ -1356,63 +1162,15 @@ body {
   </div>
 
   <div class="r-stage" id="r-stage">
-    <div class="book-pos closed" id="book-pos">
-      <div class="book" id="book">
-        <div class="page-stack page-stack--l" id="stack-l"></div>
-        <div class="page-stack page-stack--r" id="stack-r"></div>
+    <div class="book-wrap" id="book-wrap">
+      <div class="page-stack page-stack--l" id="stack-l"></div>
+      <div class="page-stack page-stack--r" id="stack-r"></div>
 
-        <div class="half half--l" id="half-l">
-          <img id="img-l" alt="">
-          <div class="inner-cover"></div>
-          <div class="page-edge"></div>
-        </div>
-
-        <div class="half half--r" id="half-r">
-          <img id="img-r" alt="">
-          <div class="inner-cover"></div>
-          <div class="page-edge"></div>
-          <div class="shine" id="shine"><i></i></div>
-        </div>
-
-        <div class="spine"></div>
-
-        <div class="leaf pos-r" id="leaf">
-          <div class="face face--f" id="face-f">
-            <img id="img-f" alt="">
-            <div class="inner-cover"></div>
-            <div class="backcover-design">
-              <svg class="bc-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
-                <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>
-              </svg>
-              <span class="bc-brand">EPSF Alex</span>
-              <span class="bc-sub">PE Magazine</span>
-              <span class="bc-rule"></span>
-              <span class="bc-thanks">Thank you for reading</span>
-            </div>
-          </div>
-          <div class="face face--b" id="face-b">
-            <img id="img-b" alt="">
-            <div class="inner-cover"></div>
-            <div class="backcover-design">
-              <svg class="bc-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
-                <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>
-              </svg>
-              <span class="bc-brand">EPSF Alex</span>
-              <span class="bc-sub">PE Magazine</span>
-              <span class="bc-rule"></span>
-              <span class="bc-thanks">Thank you for reading</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="rapid-flash" id="rapid-flash"></div>
-        <div class="sparks" id="sparks"></div>
-        <div class="zone zone--l" id="zone-l"></div>
-        <div class="zone zone--r" id="zone-r"></div>
-      </div>
+      <div id="flipbook-mount"></div>
       <div class="book-shadow"></div>
+
+      <div class="rapid-flash" id="rapid-flash"></div>
+      <div class="sparks" id="sparks"></div>
     </div>
   </div>
 
@@ -1421,7 +1179,7 @@ body {
 
   <div class="hint" id="hint">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    <span id="hint-txt">Click to open</span>
+    <span id="hint-txt">Drag a corner or click to flip</span>
   </div>
 
   <div class="end-card" id="end-card">
@@ -1455,15 +1213,8 @@ body {
   "use strict";
 
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var NORMAL_DUR = 560;
-  var RAPID_DUR = 110;
-  var JUMP_DUR = 70;
-  var BOOK_DUR = 950;
   var STACK_MAX = 96;
-
-  var SMART_JUMP_BUDGET = 420;
-  var SMART_JUMP_MIN = 16;
-  var SMART_JUMP_MAX = 70;
+  var JUMP_ANIMATE_THRESHOLD = 10;
 
   function parseIssueName(fileName) {
     var name = String(fileName || "").replace(/\.pdf$/i, "");
@@ -1650,239 +1401,150 @@ body {
     synthSpark();
   }
 
-  /* ===================== READER ===================== */
-  var reader    = document.getElementById("reader");
-  var stage     = document.getElementById("r-stage");
-  var bookPos   = document.getElementById("book-pos");
-  var book      = document.getElementById("book");
-  var halfL     = document.getElementById("half-l");
-  var halfR     = document.getElementById("half-r");
-  var imgL      = document.getElementById("img-l");
-  var imgR      = document.getElementById("img-r");
-  var leaf      = document.getElementById("leaf");
-  var faceF     = document.getElementById("face-f");
-  var faceB     = document.getElementById("face-b");
-  var imgF      = document.getElementById("img-f");
-  var imgB      = document.getElementById("img-b");
-  var shine     = document.getElementById("shine");
-  var hint      = document.getElementById("hint");
-  var hintTxt   = document.getElementById("hint-txt");
-  var endCard   = document.getElementById("end-card");
-  var loader    = document.getElementById("loader");
-  var loaderTxt = document.getElementById("loader-txt");
-  var rTitle    = document.getElementById("r-title");
-  var rDl       = document.getElementById("r-dl");
-  var edgeL     = document.getElementById("edge-l");
-  var edgeR     = document.getElementById("edge-r");
-  var zoneL     = document.getElementById("zone-l");
-  var zoneR     = document.getElementById("zone-r");
-  var stackL    = document.getElementById("stack-l");
-  var stackR    = document.getElementById("stack-r");
-  var sparksEl  = document.getElementById("sparks");
-  var flashEl   = document.getElementById("rapid-flash");
-  var sheetTip  = document.getElementById("sheet-tip");
-  var dPrev     = document.getElementById("d-prev");
-  var dNext     = document.getElementById("d-next");
-  var dPages    = document.getElementById("d-pages");
-  var dTrack    = document.getElementById("d-track");
-  var dFill     = document.getElementById("d-fill");
+  /* ===================== READER ELEMENTS ===================== */
+  var reader     = document.getElementById("reader");
+  var stage      = document.getElementById("r-stage");
+  var bookWrap   = document.getElementById("book-wrap");
+  var mount      = document.getElementById("flipbook-mount");
+  var stackL     = document.getElementById("stack-l");
+  var stackR     = document.getElementById("stack-r");
+  var sparksEl   = document.getElementById("sparks");
+  var flashEl    = document.getElementById("rapid-flash");
+  var sheetTip   = document.getElementById("sheet-tip");
+  var hint       = document.getElementById("hint");
+  var hintTxt    = document.getElementById("hint-txt");
+  var endCard    = document.getElementById("end-card");
+  var loader     = document.getElementById("loader");
+  var loaderTxt  = document.getElementById("loader-txt");
+  var rTitle     = document.getElementById("r-title");
+  var rDl        = document.getElementById("r-dl");
+  var edgeL      = document.getElementById("edge-l");
+  var edgeR      = document.getElementById("edge-r");
+  var dPrev      = document.getElementById("d-prev");
+  var dNext      = document.getElementById("d-next");
+  var dPages     = document.getElementById("d-pages");
+  var dTrack     = document.getElementById("d-track");
+  var dFill      = document.getElementById("d-fill");
 
   var pagesUrl = "";
-  var total = 1;
+  var total = 1;             // original page images count
+  var pageCount = 0;         // total StPageFlip pages including synthetic back cover
   var maxSpread = 0;
-  var spread = 1;
   var aspect = 0.72;
-  var busy = false;
-  var bookState = "closed-front";
-  var idleTimer = null;
-  var cache = Object.create(null);
-  var inflight = Object.create(null);
+  var pageW = 0;
+  var pageH = 0;
+
+  var pageFlip = null;
+  var images = [];
+  var currentIdx = 0;
+  var sfState = "read";
+  var isInitializing = false;
+  var suppressLoader = false;
+
   var heldDir = 0;
   var heldLoopRunning = false;
   var holdTimeout = null;
+
   var sparkTimer = null;
   var sparkTick = 0;
-  var bgTimer = null;
-  var bgIndex = 1;
+
   var stackRSheets = [];
   var stackLSheets = [];
   var stackRVisible = [];
   var stackLVisible = [];
   var stackRHover = null;
   var stackLHover = null;
-  var jumping = false;
+
   var jumpToken = 0;
+  var isJumping = false;
+  var idleTimer = null;
 
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
-  function isLoaded(n) {
-    var u = url(n);
-    var im = cache[u];
-    return !!(im && im.complete && im.naturalWidth);
-  }
-
-  function isSpreadLoaded(s) {
-    if (s < 1 || s > maxSpread) return false;
-    var left = s * 2;
-    var right = s * 2 + 1;
-    if (!isLoaded(left)) return false;
-    if (right <= total && !isLoaded(right)) return false;
-    return true;
-  }
-
-  function consecutiveLoadedCount(start, target, dir) {
-    var count = 0;
-    for (var s = start; dir > 0 ? s <= target : s >= target; s += dir) {
-      if (isSpreadLoaded(s)) count++;
-      else break;
-    }
-    return count;
-  }
-
-  function preload(list) {
-    var jobs = (list || []).map(function (n) {
-      if (n === null || n === undefined || n < 1 || n > total) return Promise.resolve(null);
-      var u = url(n);
-      if (inflight[u]) return inflight[u];
-      var im = cache[u] || new Image();
-      cache[u] = im;
-      if (im.complete && im.naturalWidth) {
-        inflight[u] = Promise.resolve(im);
-        return inflight[u];
-      }
-      inflight[u] = new Promise(function (res) {
-        im.onload = function () { res(im); };
-        im.onerror = function () { res(null); };
-        im.src = u;
-      });
-      return inflight[u];
+  function loadImage(src) {
+    return new Promise(function (resolve, reject) {
+      var im = new Image();
+      im.onload = function () { resolve(im); };
+      im.onerror = reject;
+      im.src = src;
     });
-    return Promise.all(jobs);
   }
 
-  function whenLoaded(n, cb) {
-    preload([n]).then(function (arr) { cb(arr[0]); });
-  }
-
-  function preloadAhead(s) {
-    var rightPage = s * 2 + 1;
-    var pages = [];
-    for (var i = 1; i <= 12; i++) pages.push(rightPage + i);
-    pages.push(s * 2 - 1);
-    pages.push(s * 2 - 2);
-    preload(pages);
-  }
-
-  function startBgPreload() {
-    stopBgPreload();
-    bgIndex = 1;
-    bgTimer = setInterval(function () {
-      if (bgIndex > total) { stopBgPreload(); return; }
-      preload([bgIndex, bgIndex + 1, bgIndex + 2, bgIndex + 3]);
-      bgIndex += 4;
-    }, 180);
-  }
-
-  function stopBgPreload() {
-    if (bgTimer) { clearInterval(bgTimer); bgTimer = null; }
-  }
-
-  function setHalf(imgEl, halfEl, n, blankIfMissing) {
-    imgEl.dataset.page = String(n || "");
-    if (n === null || n === undefined || n < 1 || n > total) {
-      halfEl.classList.add("is-empty");
-      halfEl.classList.remove("is-blank");
-      imgEl.removeAttribute("src");
-      return;
-    }
-
-    halfEl.classList.remove("is-empty");
-
-    if (isLoaded(n)) {
-      halfEl.classList.remove("is-blank");
-      imgEl.src = url(n);
-      return;
-    }
-
-    if (blankIfMissing) {
-      halfEl.classList.add("is-blank");
-      imgEl.removeAttribute("src");
-      whenLoaded(n, function (im) {
-        if (imgEl.dataset.page === String(n) && im && im.naturalWidth) {
-          imgEl.src = url(n);
-          halfEl.classList.remove("is-blank");
-        }
+  function probeTotal() {
+    var n = 1;
+    function step(i) {
+      return new Promise(function (resolve) {
+        var im = new Image();
+        im.onload = function () { n = i; resolve(step(i + 1)); };
+        im.onerror = function () { resolve(null); };
+        im.src = url(i);
       });
-    } else {
-      halfEl.classList.remove("is-blank");
-      imgEl.src = url(n);
     }
+    return step(2).then(function () { return n; });
   }
 
-  function setFaceImg(faceEl, imgEl, n, blankIfMissing) {
-    faceEl.classList.remove("is-backcover");
-    imgEl.dataset.page = String(n || "");
+  function makeBackCoverDataUrl(w, h) {
+    var cx = w / 2;
+    var cy = h / 2;
+    var logoSize = Math.round(Math.min(w, h) * 0.12);
 
-    if (n === null || n === undefined || n < 1 || n > total) {
-      faceEl.classList.add("is-empty");
-      faceEl.classList.remove("is-blank");
-      imgEl.removeAttribute("src");
-      return;
-    }
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+        '<defs>' +
+          '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#0A192F"/>' +
+            '<stop offset="0.6" stop-color="#12233F"/>' +
+            '<stop offset="1" stop-color="#1E3A8A"/>' +
+          '</linearGradient>' +
+          '<radialGradient id="glow" cx="0.5" cy="0.15" r="0.8">' +
+            '<stop offset="0" stop-color="#D4AF37" stop-opacity="0.18"/>' +
+            '<stop offset="1" stop-color="#D4AF37" stop-opacity="0"/>' +
+          '</radialGradient>' +
+        '</defs>' +
+        '<rect width="' + w + '" height="' + h + '" fill="url(#bg)"/>' +
+        '<rect width="' + w + '" height="' + h + '" fill="url(#glow)"/>' +
+        '<g transform="translate(' + (cx - logoSize / 2) + ',' + (cy - logoSize * 1.45) + ') scale(' + (logoSize / 50) + ')">' +
+          '<circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>' +
+          '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>' +
+        '</g>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.15) + '" text-anchor="middle" font-family="Georgia, serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="700" fill="#FFFFFF">EPSF Alex</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.55">PE MAGAZINE</text>' +
+        '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 1.05) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#D4AF37"/>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.55) + '" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.78">THANK YOU FOR READING</text>' +
+      '</svg>';
 
-    faceEl.classList.remove("is-empty");
-
-    if (isLoaded(n)) {
-      faceEl.classList.remove("is-blank");
-      imgEl.src = url(n);
-      return;
-    }
-
-    if (blankIfMissing) {
-      faceEl.classList.add("is-blank");
-      imgEl.removeAttribute("src");
-      whenLoaded(n, function (im) {
-        if (imgEl.dataset.page === String(n) && im && im.naturalWidth) {
-          imgEl.src = url(n);
-          faceEl.classList.remove("is-blank");
-        }
-      });
-    } else {
-      faceEl.classList.remove("is-blank");
-      imgEl.src = url(n);
-    }
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
 
-  function setFaceBackcover(faceEl, imgEl) {
-    faceEl.classList.remove("is-empty");
-    faceEl.classList.remove("is-blank");
-    faceEl.classList.add("is-backcover");
-    imgEl.dataset.page = "backcover";
-    imgEl.removeAttribute("src");
-  }
+  function computeLayout() {
+    var narrow = window.innerWidth < 900;
+    var padX = narrow ? 40 : 260;
+    var padY = narrow ? 120 : 160;
 
-  function layout() {
-    var pad = 300;
-    var availW = Math.max(120, stage.clientWidth - pad);
-    var availH = Math.max(160, stage.clientHeight - 150);
-    var a = aspect * 2;
-    var w = availW, h = w / a;
-    if (h > availH) { h = availH; w = h * a; }
-    book.style.width = Math.round(w) + "px";
-    book.style.height = Math.round(h) + "px";
+    var availW = Math.max(180, stage.clientWidth - padX);
+    var availH = Math.max(180, stage.clientHeight - padY);
+    var ratio = (aspect || 0.72) * 2;
+
+    var w = availW;
+    var h = w / ratio;
+    if (h > availH) {
+      h = availH;
+      w = h * ratio;
+    }
+
+    pageW = Math.floor(w / 2);
+    pageH = Math.floor(h);
+
+    bookWrap.style.width = (pageW * 2) + "px";
+    bookWrap.style.height = pageH + "px";
   }
 
   function spreadLabel(s) {
     var left = s * 2;
     var right = s * 2 + 1;
+    if (left > total) return "Page " + total;
     if (right > total) return "Page " + left;
     return "Pages " + left + "–" + right;
-  }
-
-  function paint() {
-    setHalf(imgL, halfL, spread * 2, true);
-    setHalf(imgR, halfR, spread * 2 + 1, true);
-    updateUI();
   }
 
   function buildStacks() {
@@ -1922,10 +1584,25 @@ body {
     updateStacks();
   }
 
+  function spreadFromIndex(idx) {
+    if (idx <= 0) return 0;
+    if (idx >= pageCount - 1) return maxSpread;
+    return Math.ceil(idx / 2);
+  }
+
+  function indexFromSpread(s) {
+    var idx = 2 * s - 1;
+    var maxSoft = pageCount - 2;
+    if (idx > maxSoft) idx = maxSoft;
+    if (idx < 1) idx = 1;
+    return idx;
+  }
+
   function updateStacks() {
-    var unread = Math.max(0, maxSpread - spread);
-    var read = Math.max(0, spread - 1);
-    var open = bookState === "open";
+    var open = currentIdx > 0 && currentIdx < pageCount - 1;
+    var currentSpread = spreadFromIndex(currentIdx);
+    var unread = Math.max(0, maxSpread - currentSpread);
+    var read = Math.max(0, currentSpread - 1);
 
     var wR = (open && unread > 0) ? Math.min(STACK_MAX, Math.max(14, unread * 2)) : 0;
     var wL = (open && read > 0) ? Math.min(STACK_MAX, Math.max(14, read * 2)) : 0;
@@ -1942,7 +1619,7 @@ body {
 
     stackRSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      if (open && s > spread) {
+      if (open && s > currentSpread) {
         sheet.style.display = "";
         stackRVisible.push(sheet);
       } else {
@@ -1952,7 +1629,7 @@ body {
 
     stackLSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      if (open && s < spread) {
+      if (open && s < currentSpread) {
         sheet.style.display = "";
         stackLVisible.push(sheet);
       } else {
@@ -1965,20 +1642,23 @@ body {
     hideTip();
   }
 
-  function updateUI() {
-    updateStacks();
+  function getCurrentIndex() {
+    if (!pageFlip) return currentIdx;
+    try { return pageFlip.getCurrentPageIndex(); } catch (e) { return currentIdx; }
+  }
 
-    if (bookState === "closed-front") {
+  function updateDock() {
+    if (currentIdx <= 0) {
       dPages.textContent = "Cover";
       dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
       dPrev.disabled = true;
-      dNext.disabled = total < 2;
+      dNext.disabled = pageCount < 2;
       edgeL.classList.add("off");
-      edgeR.classList.toggle("off", total < 2);
+      edgeR.classList.toggle("off", pageCount < 2);
       return;
     }
 
-    if (bookState === "closed-back") {
+    if (currentIdx >= pageCount - 1) {
       dPages.textContent = "Back Cover";
       dFill.style.width = "100%";
       dPrev.disabled = false;
@@ -1988,45 +1668,41 @@ body {
       return;
     }
 
-    var f = spread * 2;
-    var l = Math.min(total, spread * 2 + 1);
-    dPages.textContent = (f === l ? f : f + "–" + l) + " / " + total;
-    dFill.style.width = Math.round((l / total) * 100) + "%";
+    var leftImg = currentIdx + 1;
+    var rightImg = currentIdx + 2;
+    if (leftImg > total) leftImg = total;
+    if (rightImg > total) rightImg = 0;
 
-    var atStart = spread <= 1;
-    dPrev.disabled = atStart;
+    dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
+    var lastVisible = rightImg || leftImg;
+    dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
+
+    dPrev.disabled = false;
     dNext.disabled = false;
-    edgeL.classList.toggle("off", atStart);
+    edgeL.classList.remove("off");
     edgeR.classList.remove("off");
   }
 
-  function waitFlip(ms) {
-    return new Promise(function (res) {
-      var done = false;
-      function finish() {
-        if (done) return;
-        done = true;
-        leaf.removeEventListener("transitionend", onEnd);
-        clearTimeout(to);
-        res();
-      }
-      function onEnd(e) {
-        if (e.propertyName === "transform") finish();
-      }
-      leaf.addEventListener("transitionend", onEnd);
-      var to = setTimeout(finish, ms + 240);
-    });
+  function updateHint() {
+    if (currentIdx === 0) {
+      showHint("Drag a corner or click to flip");
+    } else {
+      hideHint();
+    }
   }
 
-  function resetLeaf() {
-    leaf.style.display = "none";
-    leaf.classList.remove("is-flipping");
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(0deg)";
-    faceF.classList.remove("is-backcover");
-    faceB.classList.remove("is-backcover");
-    faceF.classList.remove("is-blank");
-    faceB.classList.remove("is-blank");
+  function updateEnd() {
+    if (currentIdx >= pageCount - 1) showEnd();
+    else hideEnd();
+  }
+
+  function updateFromPageFlip(idx) {
+    if (idx === undefined) idx = getCurrentIndex();
+    currentIdx = Math.max(0, Math.min(pageCount - 1, idx));
+    updateStacks();
+    updateDock();
+    updateHint();
+    updateEnd();
   }
 
   function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
@@ -2052,7 +1728,7 @@ body {
     sheetTip.style.top = y + "px";
   }
 
-  /* ---------- sparks on the page EDGES ---------- */
+  /* ---------- sparks ---------- */
   function showSparks(dir) {
     flashEl.classList.remove("side-l", "side-r", "side-b");
     flashEl.classList.add(dir < 0 ? "side-l" : (dir > 0 ? "side-r" : "side-b"));
@@ -2107,372 +1783,144 @@ body {
     }
   }
 
-  /* ---------- OPEN magazine ---------- */
-  function openMagazine() {
-    if (busy || jumping || bookState !== "closed-front") return;
-    busy = true;
-    hideHint();
-    hideEnd();
-    ensureAudio();
-
-    setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
-    setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
-
-    setFaceImg(faceF, imgF, 1, false);
-    setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
-
-    leaf.className = "leaf pos-r";
-    leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
-    leaf.style.display = "block";
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(0deg)";
-    void leaf.offsetWidth;
-
-    leaf.classList.add("is-flipping");
-    leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(-180deg)";
-
-    bookPos.classList.remove("closed");
-    bookPos.classList.remove("closed-back");
-    reader.classList.remove("state-closed");
-
-    preloadAhead(1);
-
-    waitFlip(BOOK_DUR).then(function () {
-      setHalf(imgL, halfL, 2, true);
-      resetLeaf();
-      spread = 1;
-      bookState = "open";
-      busy = false;
-      paint();
-      startBgPreload();
-    });
+  /* ---------- StPageFlip lifecycle ---------- */
+  function destroyFlipbook() {
+    if (pageFlip) {
+      try { pageFlip.destroy(); } catch (e) {}
+      pageFlip = null;
+    }
+    if (mount) mount.innerHTML = "";
+    isInitializing = false;
   }
 
-  /* ---------- CLOSE magazine ---------- */
-  function closeMagazine() {
-    if (busy || jumping || bookState !== "open") return;
-    busy = true;
-    hideHint();
-    hideEnd();
+  function createFlipbook(startIndex, hideLoader) {
+    destroyFlipbook();
 
-    setHalf(imgL, halfL, 2, false);
-    setHalf(imgR, halfR, 3, false);
-    setFaceImg(faceF, imgF, 1, false);
-    setFaceImg(faceB, imgB, 2, false);
+    if (typeof St === "undefined" || !St.PageFlip) {
+      failLoad("Page flip library failed to load. Check your connection or CDN access.");
+      return;
+    }
 
-    leaf.className = "leaf pos-r";
-    leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
-    leaf.style.display = "block";
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(-180deg)";
-    void leaf.offsetWidth;
+    if (!images.length) {
+      failLoad("No pages to display.");
+      return;
+    }
 
-    leaf.classList.add("is-flipping");
-    leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(0deg)";
+    isInitializing = true;
+    suppressLoader = !!hideLoader;
 
-    bookPos.classList.remove("closed-back");
-    bookPos.classList.add("closed");
+    var flipEl = document.createElement("div");
+    flipEl.id = "flipbook";
+    mount.appendChild(flipEl);
 
-    waitFlip(BOOK_DUR).then(function () {
-      resetLeaf();
-      setHalf(imgR, halfR, 1, false);
-      bookState = "closed-front";
-      busy = false;
-      reader.classList.add("state-closed");
-      updateUI();
-      showHint("Click to open");
+    try {
+      pageFlip = new St.PageFlip(flipEl, {
+        width: pageW,
+        height: pageH,
+        size: "fixed",
+        showCover: true,
+        usePortrait: false,
+        flippingTime: RM ? 1 : 700,
+        maxShadowOpacity: 0.75,
+        mobileScrollSupport: false,
+        startPage: startIndex,
+        startZIndex: 0,
+        autoSize: false,
+        clickEventForward: true,
+        disableFlipByClick: false
+      });
+    } catch (e) {
+      isInitializing = false;
+      failLoad("Could not start page flip: " + (e && e.message ? e.message : e));
+      return;
+    }
+
+    pageFlip.on("init", function () {
+      isInitializing = false;
+      if (!suppressLoader) loader.classList.add("gone");
+      bookWrap.classList.add("visible");
+      reader.classList.add("is-open");
+      updateFromPageFlip(startIndex);
     });
+
+    pageFlip.on("flip", function (e) {
+      var idx = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
+      updateFromPageFlip(idx);
+    });
+
+    pageFlip.on("changeState", function (e) {
+      sfState = (e && e.data) ? e.data : "read";
+      if (sfState === "read" && heldLoopRunning) {
+        setTimeout(heldLoop, 30);
+      }
+    });
+
+    pageFlip.loadFromImages(images);
   }
 
-  /* ---------- FINISH: back cover closes to the LEFT ---------- */
-  function finishMagazine() {
-    if (busy || jumping) return;
-    busy = true;
+  function requestFlip(dir) {
+    if (!pageFlip || isJumping) return;
     hideHint();
-
-    var leftPage = spread * 2;
-    var rightPage = spread * 2 + 1;
-
-    setHalf(imgL, halfL, leftPage, true);
-    setHalf(imgR, halfR, rightPage, true);
-
-    setFaceImg(faceF, imgF, rightPage, true);
-    setFaceBackcover(faceB, imgB);
-
-    leaf.className = "leaf pos-r";
-    leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
-    leaf.style.display = "block";
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(0deg)";
-    void leaf.offsetWidth;
-
-    leaf.classList.add("is-flipping");
-    leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(-180deg)";
-
-    bookPos.classList.remove("closed");
-    bookPos.classList.add("closed-back");
-    reader.classList.remove("state-closed");
-
-    waitFlip(BOOK_DUR).then(function () {
-      leaf.classList.remove("is-flipping");
-      bookState = "closed-back";
-      busy = false;
-      updateUI();
-      showEnd();
-    });
-  }
-
-  /* ---------- GO BACK from back cover ---------- */
-  function reopenFromBack() {
-    if (busy || jumping || bookState !== "closed-back") return;
-    busy = true;
-    hideEnd();
-    hideHint();
-
-    var leftPage = maxSpread * 2;
-    var rightPage = maxSpread * 2 + 1;
-
-    setHalf(imgL, halfL, leftPage, true);
-    setHalf(imgR, halfR, rightPage, true);
-
-    setFaceImg(faceF, imgF, rightPage, true);
-    setFaceBackcover(faceB, imgB);
-
-    leaf.className = "leaf pos-r";
-    leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
-    leaf.style.display = "block";
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(-180deg)";
-    void leaf.offsetWidth;
-
-    leaf.classList.add("is-flipping");
-    leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(0deg)";
-
-    bookPos.classList.remove("closed-back");
-    reader.classList.remove("state-closed");
-
-    waitFlip(BOOK_DUR).then(function () {
-      resetLeaf();
-      spread = maxSpread;
-      bookState = "open";
-      busy = false;
-      paint();
-      preloadAhead(spread);
-    });
-  }
-
-  /* ---------- single spread flip ---------- */
-  function doFlip(dir, duration, instant, allowJumpFlip) {
-    if (busy || (!allowJumpFlip && jumping) || bookState !== "open") return Promise.resolve();
-    if (dir > 0 && spread >= maxSpread) return Promise.resolve();
-    if (dir < 0 && spread <= 1) return Promise.resolve();
-
-    busy = true;
-    hideHint();
-
-    var s = spread;
-    var front, back, staticPage, nextSpread;
 
     if (dir > 0) {
-      front = 2 * s + 1;
-      back = 2 * s + 2;
-      nextSpread = s + 1;
-      staticPage = 2 * nextSpread + 1;
+      if (currentIdx >= pageCount - 1) return;
+      try { pageFlip.flipNext("bottom"); } catch (e) {}
     } else {
-      front = 2 * s;
-      back = 2 * s - 1;
-      nextSpread = s - 1;
-      staticPage = nextSpread * 2;
+      if (currentIdx <= 0) return;
+      try { pageFlip.flipPrev("bottom"); } catch (e) {}
     }
-
-    function runAnim() {
-      if (dir > 0) {
-        setHalf(imgR, halfR, staticPage, true);
-        leaf.className = "leaf pos-r";
-      } else {
-        setHalf(imgL, halfL, staticPage, true);
-        leaf.className = "leaf pos-l";
-      }
-
-      setFaceImg(faceF, imgF, front, true);
-      setFaceImg(faceB, imgB, back, true);
-
-      leaf.style.setProperty("--flip-dur", duration + "ms");
-      leaf.style.display = "block";
-      leaf.style.transition = "none";
-      leaf.style.transform = "rotateY(0deg)";
-      void leaf.offsetWidth;
-
-      leaf.classList.add("is-flipping");
-      leaf.style.transition = "transform " + duration + "ms cubic-bezier(0.55,0.085,0.68,0.53)";
-      leaf.style.transform = dir > 0 ? "rotateY(-180deg)" : "rotateY(180deg)";
-
-      preloadAhead(nextSpread);
-
-      return waitFlip(duration).then(function () {
-        if (dir > 0) setHalf(imgL, halfL, back, true);
-        else setHalf(imgR, halfR, back, true);
-
-        resetLeaf();
-        spread = nextSpread;
-        busy = false;
-        paint();
-      });
-    }
-
-    if (instant) {
-      preload([front, back, staticPage]);
-      return runAnim().catch(function () {
-        resetLeaf();
-        busy = false;
-        paint();
-      });
-    }
-
-    return preload([front, back, staticPage]).then(runAnim).catch(function () {
-      resetLeaf();
-      busy = false;
-      paint();
-    });
   }
 
-  function finishJump(token) {
+  function finishJump(token, idx) {
     if (token !== jumpToken) return;
-    jumping = false;
+    isJumping = false;
     hideSparks();
-    updateUI();
+    if (idx !== undefined) updateFromPageFlip(idx);
+    else updateFromPageFlip();
   }
 
-  /* ---------- smart jump: load target only, riffle loaded pages quickly, skip unloaded ---------- */
-  function jumpToSpread(target, sparks) {
-    if (bookState !== "open" || busy || jumping) return;
-    target = Math.max(1, Math.min(maxSpread, target));
-    if (target === spread) return;
+  function jumpToIndex(target, sparks) {
+    if (!pageFlip) return;
+    target = Math.max(0, Math.min(pageCount - 1, target));
+    var cur = getCurrentIndex();
+    if (target === cur) return;
 
     stopHeld();
     hideHint();
 
-    var dir = target > spread ? 1 : -1;
-    jumping = true;
     var token = ++jumpToken;
+    isJumping = true;
 
-    if (sparks) showSparks(dir);
+    if (sparks) showSparks(target > cur ? 1 : -1);
 
-    var targetLeft = target * 2;
-    var targetRight = target * 2 + 1;
+    var dist = Math.abs(target - cur);
 
-    preload([targetLeft, targetRight]).then(function () {
-      if (token !== jumpToken || reader.hidden || bookState !== "open") {
-        finishJump(token);
-        return;
-      }
-
-      function step() {
-        if (token !== jumpToken || reader.hidden || bookState !== "open") {
-          finishJump(token);
-          return;
-        }
-
-        if (spread === target) {
-          finishJump(token);
-          return;
-        }
-
-        // If current displayed spread is not loaded, don't try to animate from it.
-        if (!isSpreadLoaded(spread)) {
-          spread = target;
-          paint();
-          finishJump(token);
-          return;
-        }
-
-        var next = spread + dir;
-        if (next < 1 || next > maxSpread) {
-          spread = target;
-          paint();
-          finishJump(token);
-          return;
-        }
-
-        // If the next spread is not loaded, skip all remaining middle pages instantly.
-        if (!isSpreadLoaded(next)) {
-          spread = target;
-          paint();
-          finishJump(token);
-          return;
-        }
-
-        var loadedRun = consecutiveLoadedCount(next, target, dir);
-        var dur = loadedRun > 0
-          ? Math.max(SMART_JUMP_MIN, Math.min(SMART_JUMP_MAX, Math.round(SMART_JUMP_BUDGET / loadedRun)))
-          : JUMP_DUR;
-
-        var before = spread;
-        doFlip(dir, dur, true, true).then(function () {
-          if (token !== jumpToken) {
-            finishJump(token);
-            return;
-          }
-
-          // If doFlip could not run, complete instantly.
-          if (spread === before) {
-            spread = target;
-            paint();
-            finishJump(token);
-            return;
-          }
-
-          step();
-        });
-      }
-
-      step();
-    }).catch(function () {
-      finishJump(token);
-    });
-  }
-
-  function flipToSpread(target, sparks) {
-    jumpToSpread(target, sparks);
-  }
-
-  function pageToSpread(pageNum) {
-    pageNum = Math.max(2, Math.min(total, pageNum));
-    return Math.max(1, Math.min(maxSpread, Math.floor(pageNum / 2)));
-  }
-
-  function navigateOnce(dir) {
-    if (busy || jumping) return;
-    ensureAudio();
-
-    if (bookState === "closed-front") {
-      if (dir > 0) openMagazine();
+    if (RM || dist > JUMP_ANIMATE_THRESHOLD) {
+      try { pageFlip.turnToPage(target); } catch (e) {}
+      setTimeout(function () { finishJump(token, target); }, 30);
       return;
     }
 
-    if (bookState === "closed-back") {
-      if (dir < 0) reopenFromBack();
+    try {
+      pageFlip.flip(target, "bottom");
+    } catch (e) {
+      try { pageFlip.turnToPage(target); } catch (_) {}
+      finishJump(token, target);
       return;
     }
 
-    if (bookState === "open") {
-      if (dir > 0) {
-        if (spread >= maxSpread) finishMagazine();
-        else doFlip(1, NORMAL_DUR, false);
-      } else {
-        if (spread <= 1) closeMagazine();
-        else doFlip(-1, NORMAL_DUR, false);
-      }
-    }
+    setTimeout(function () { finishJump(token); }, Math.min(1600, 700 + dist * 120));
+  }
+
+  function jumpToSpread(targetSpread, sparks) {
+    if (maxSpread < 1) return;
+    targetSpread = Math.max(1, Math.min(maxSpread, targetSpread));
+    jumpToIndex(indexFromSpread(targetSpread), sparks);
   }
 
   /* ---------- held-key rapid flipping ---------- */
   function startHeld(dir) {
-    if (jumping) return;
+    if (isJumping || !pageFlip) return;
     if (heldDir === dir && heldLoopRunning) return;
     heldDir = dir;
     if (!heldLoopRunning) {
@@ -2489,67 +1937,35 @@ body {
   }
 
   function heldLoop() {
-    if (!heldLoopRunning || heldDir === 0) return;
-    if (jumping) {
-      stopHeld();
-      return;
-    }
-    if (busy) {
-      setTimeout(heldLoop, 20);
-      return;
-    }
+    if (!heldLoopRunning || heldDir === 0 || !pageFlip || isJumping) return;
 
-    if (bookState === "closed-front") {
-      if (heldDir > 0) {
-        openMagazine();
-        setTimeout(heldLoop, 50);
-      } else {
-        stopHeld();
-      }
-      return;
-    }
-
-    if (bookState === "closed-back") {
-      if (heldDir < 0) {
-        reopenFromBack();
-        setTimeout(heldLoop, 50);
-      } else {
-        stopHeld();
-      }
-      return;
-    }
-
-    if (bookState !== "open") {
-      stopHeld();
+    if (sfState !== "read") {
+      setTimeout(heldLoop, 60);
       return;
     }
 
     if (heldDir > 0) {
-      if (spread >= maxSpread) {
-        finishMagazine();
+      if (currentIdx >= pageCount - 1) {
         stopHeld();
         return;
       }
-      doFlip(1, RAPID_DUR, true).then(function () {
-        if (heldLoopRunning) heldLoop();
-      });
+      requestFlip(1);
     } else {
-      if (spread <= 1) {
-        closeMagazine();
+      if (currentIdx <= 0) {
         stopHeld();
         return;
       }
-      doFlip(-1, RAPID_DUR, true).then(function () {
-        if (heldLoopRunning) heldLoop();
-      });
+      requestFlip(-1);
     }
+
+    setTimeout(heldLoop, 90);
   }
 
   function wake() {
     reader.classList.remove("idle");
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () {
-      if (!busy) reader.classList.add("idle");
+      if (!isJumping) reader.classList.add("idle");
     }, 2800);
   }
 
@@ -2563,197 +1979,108 @@ body {
     loaderTxt.textContent = msg;
   }
 
-  function openReader(card, ev) {
+  function openReader(card) {
     ensureAudio();
+    stopHeld();
+    hideSparks();
+    destroyFlipbook();
+
     pagesUrl = card.dataset.pagesUrl;
     var parsed = parseIssueName(card.dataset.fileName);
     rTitle.textContent = parsed.title;
     rDl.href = card.dataset.pdfUrl;
 
     total = 1;
+    pageCount = 0;
     maxSpread = 0;
-    spread = 1;
-    busy = false;
-    jumping = false;
+    currentIdx = 0;
+    images = [];
     jumpToken++;
-    bookState = "closed-front";
-    cache = Object.create(null);
-    inflight = Object.create(null);
-    stopBgPreload();
+    isJumping = false;
 
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
     reader.hidden = false;
     reader.classList.remove("is-open", "is-closing", "idle");
-    reader.classList.add("state-closed");
     document.body.style.overflow = "hidden";
 
     hideHint();
     hideEnd();
-    resetLeaf();
-    book.classList.remove("visible");
-    bookPos.classList.remove("closed-back");
-    bookPos.classList.add("closed");
+    hideTip();
+    bookWrap.classList.remove("visible");
 
-    preload([1]).then(function (imgs) {
-      var p1 = imgs[0];
-      if (!p1 || !p1.naturalWidth || !p1.naturalHeight) throw new Error("load");
-      aspect = p1.naturalWidth / p1.naturalHeight;
+    loadImage(url(1)).then(function (im) {
+      if (!im.naturalWidth || !im.naturalHeight) throw new Error("bad first page");
+      aspect = im.naturalWidth / im.naturalHeight;
 
       var mUrl = pagesUrl + "/manifest.json";
-      return fetch(mUrl, { cache: "no-store" }).then(function (r) {
-        if (!r.ok) throw new Error("manifest " + r.status);
-        return r.json();
-      }).then(function (m) {
-        total = Math.max(1, parseInt(m.pages, 10) || 1);
-      }).catch(function () {
-        return probe();
-      });
-    }).then(function () {
-      maxSpread = Math.floor(total / 2);
+      return fetch(mUrl, { cache: "no-store" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("manifest " + r.status);
+          return r.json();
+        })
+        .then(function (m) {
+          return Math.max(1, parseInt(m.pages, 10) || 1);
+        })
+        .catch(function () {
+          return probeTotal();
+        });
+    }).then(function (t) {
+      total = Math.max(1, t);
+      pageCount = total + 1; // + synthetic back cover
+
+      images = [];
+      for (var i = 1; i <= total; i++) images.push(url(i));
+
+      var bcW = 1200;
+      var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
+      images.push(makeBackCoverDataUrl(bcW, bcH));
+
+      maxSpread = Math.max(0, Math.ceil((pageCount - 2) / 2));
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
       buildStacks();
-
-      setFaceImg(faceF, imgF, 1, false);
-      setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
-      leaf.className = "leaf pos-r";
-      leaf.style.display = "block";
-      leaf.style.transition = "none";
-      leaf.style.transform = "rotateY(0deg)";
-
-      setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
-      setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
-
-      layout();
-      updateUI();
-      loader.classList.add("gone");
-
-      return preload(total >= 3 ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2]);
-    }).then(function () {
-      revealBook(card, ev);
-      wake();
+      computeLayout();
+      createFlipbook(0, false);
     }).catch(function (e) {
       failLoad("Couldn't load this issue. The page images may still be generating — try again in a minute. (" + (e && e.message ? e.message : e) + ")");
     });
   }
 
-  function probe() {
-    var n = 1;
-    function step(i) {
-      return new Promise(function (res) {
-        var im = new Image();
-        im.onload = function () { n = i; res(step(i + 1)); };
-        im.onerror = function () { res(null); };
-        im.src = url(i);
-      });
-    }
-    return step(2).then(function () { total = n; });
-  }
-
-  function revealBook(card, ev) {
-    var done = function () {
-      book.classList.add("visible");
-      reader.classList.add("is-open");
-      void shine.offsetWidth;
-      shine.classList.add("go");
-      if (total >= 2) showHint("Click to open");
-    };
-
-    if (RM || !ev) { done(); return; }
-
-    var srcEl = card.querySelector(".cover img");
-    var useImg = srcEl && srcEl.complete && srcEl.naturalWidth > 0;
-    var src = (useImg ? srcEl : card.querySelector(".cover")).getBoundingClientRect();
-    var dst = halfR.getBoundingClientRect();
-    if (!dst.width || !dst.height) { done(); return; }
-
-    var clone;
-    if (useImg) {
-      clone = new Image();
-      clone.src = srcEl.src;
-    } else {
-      clone = document.createElement("div");
-      clone.style.background = "linear-gradient(150deg,#0A192F,#1E3A8A)";
-    }
-
-    clone.className = "fly";
-    clone.style.left = dst.left + "px";
-    clone.style.top = dst.top + "px";
-    clone.style.width = dst.width + "px";
-    clone.style.height = dst.height + "px";
-    clone.style.transformOrigin = "top left";
-    document.body.appendChild(clone);
-
-    var sx = src.width / dst.width;
-    var sy = src.height / dst.height;
-    var tx = src.left - dst.left;
-    var ty = src.top - dst.top;
-
-    var anim = clone.animate([
-      { transform: "translate(" + tx + "px," + ty + "px) scale(" + sx + "," + sy + ")", borderRadius: "16px", opacity: 1 },
-      { transform: "translate(0px,0px) scale(1,1)", borderRadius: "4px", opacity: 1 }
-    ], { duration: 620, easing: "cubic-bezier(0.22,1,0.36,1)" });
-
-    anim.onfinish = function () {
-      if (clone.parentNode) clone.parentNode.removeChild(clone);
-      done();
-    };
-    anim.oncancel = anim.onfinish;
-  }
-
   function closeReader() {
     jumpToken++;
-    jumping = false;
+    isJumping = false;
     stopHeld();
-    stopBgPreload();
+    hideSparks();
     hideHint();
     hideEnd();
     hideTip();
     clearTimeout(idleTimer);
+    destroyFlipbook();
 
     reader.classList.add("is-closing");
     reader.classList.remove("idle");
-
-    book.style.transition = "transform 0.42s cubic-bezier(0.4,0,1,1), opacity 0.42s ease";
-    book.style.transform = "scale(0.9) translateY(24px)";
-    book.classList.remove("visible");
+    bookWrap.classList.remove("visible");
 
     setTimeout(function () {
       reader.hidden = true;
-      reader.classList.remove("is-open", "is-closing", "state-closed");
-      book.style.transition = "";
-      book.style.transform = "";
-      resetLeaf();
+      reader.classList.remove("is-open", "is-closing");
       document.body.style.overflow = "";
       if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
-    }, 430);
+    }, 350);
   }
 
   /* ---------- events ---------- */
   cards.forEach(function (card) {
-    card.addEventListener("click", function (ev) { openReader(card, ev); });
+    card.addEventListener("click", function () { openReader(card); });
     card.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" || ev.key === " ") {
         ev.preventDefault();
-        openReader(card, ev);
+        openReader(card);
       }
     });
-  });
-
-  zoneR.addEventListener("click", function () {
-    if (busy || jumping) return;
-    if (bookState === "closed-front") openMagazine();
-    else if (bookState === "closed-back") return;
-    else navigateOnce(1);
-  });
-
-  zoneL.addEventListener("click", function () {
-    if (busy || jumping) return;
-    if (bookState === "closed-back") reopenFromBack();
-    else navigateOnce(-1);
   });
 
   function visibleSheetsFor(container) {
@@ -2804,7 +2131,7 @@ body {
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (bookState !== "open") {
+      if (currentIdx <= 0 || currentIdx >= pageCount - 1) {
         hideTip();
         var m0 = hoverMarkerFor(container);
         if (m0) m0.style.opacity = "0";
@@ -2833,7 +2160,7 @@ body {
     });
 
     container.addEventListener("click", function (e) {
-      if (bookState !== "open" || busy || jumping) return;
+      if (currentIdx <= 0 || currentIdx >= pageCount - 1 || isJumping) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -2843,7 +2170,7 @@ body {
       if (!sheet) return;
 
       var target = parseInt(sheet.dataset.spread, 10);
-      if (!isNaN(target)) flipToSpread(target, true);
+      if (!isNaN(target)) jumpToSpread(target, true);
     });
   }
 
@@ -2851,28 +2178,28 @@ body {
   bindStack(stackL);
 
   document.getElementById("r-close").addEventListener("click", closeReader);
-  dNext.addEventListener("click", function () { navigateOnce(1); });
-  dPrev.addEventListener("click", function () { navigateOnce(-1); });
-  edgeR.addEventListener("click", function () { navigateOnce(1); });
-  edgeL.addEventListener("click", function () { navigateOnce(-1); });
+  dNext.addEventListener("click", function () { stopHeld(); requestFlip(1); });
+  dPrev.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
+  edgeR.addEventListener("click", function () { stopHeld(); requestFlip(1); });
+  edgeL.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy || jumping) return;
+    if (maxSpread < 1 || isJumping) return;
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
-    flipToSpread(target, true);
+    jumpToSpread(target, true);
   });
 
   dPages.addEventListener("click", function () {
-    if (bookState !== "open" || busy || jumping) return;
+    if (isJumping) return;
 
     var input = document.createElement("input");
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
-    input.max = String(total);
-    input.value = String(spread * 2);
+    input.max = String(total + 1); // +1 for back cover
+    input.value = String(Math.min(total + 1, currentIdx + 1));
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -2889,15 +2216,15 @@ body {
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        if (val <= 1) {
-          closeMagazine();
-        } else {
-          var targetSpread = pageToSpread(val);
-          flipToSpread(targetSpread, true);
-        }
+        var targetIdx;
+        if (val <= 1) targetIdx = 0;
+        else if (val > total) targetIdx = pageCount - 1;
+        else targetIdx = val - 1;
+
+        jumpToIndex(targetIdx, true);
       }
 
-      updateUI();
+      updateFromPageFlip();
     }
 
     input.addEventListener("keydown", function (e) {
@@ -2914,30 +2241,9 @@ body {
   });
 
   document.getElementById("end-again").addEventListener("click", function () {
-    if (busy || jumping) return;
+    if (!pageFlip || isJumping) return;
     hideEnd();
-
-    jumpToken++;
-    jumping = false;
-
-    resetLeaf();
-    bookState = "closed-front";
-    bookPos.classList.remove("closed-back");
-    bookPos.classList.add("closed");
-    reader.classList.add("state-closed");
-
-    setFaceImg(faceF, imgF, 1, false);
-    setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
-    leaf.className = "leaf pos-r";
-    leaf.style.display = "block";
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(0deg)";
-
-    setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
-    setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
-
-    updateUI();
-    setTimeout(openMagazine, 320);
+    jumpToIndex(0, false);
   });
 
   document.getElementById("end-close").addEventListener("click", closeReader);
@@ -2952,6 +2258,8 @@ body {
 
   document.addEventListener("keydown", function (e) {
     if (reader.hidden) return;
+    if (e.target && (e.target.tagName === "INPUT" || e.target.isContentEditable)) return;
+
     if (e.key === "Escape") { closeReader(); return; }
 
     var dir = 0;
@@ -2960,13 +2268,13 @@ body {
     else return;
 
     e.preventDefault();
-
-    if (jumping) return;
+    if (isJumping) return;
 
     if (e.repeat) {
       startHeld(dir);
     } else {
-      navigateOnce(dir);
+      stopHeld();
+      requestFlip(dir);
       clearTimeout(holdTimeout);
       holdTimeout = setTimeout(function () { startHeld(dir); }, 320);
     }
@@ -2979,39 +2287,31 @@ body {
     }
   });
 
-  var tx0 = 0, ty0 = 0, tt0 = 0, tracking = false;
-  reader.addEventListener("touchstart", function (e) {
-    if (e.touches.length !== 1) { tracking = false; return; }
-    tx0 = e.touches[0].clientX;
-    ty0 = e.touches[0].clientY;
-    tt0 = Date.now();
-    tracking = true;
-  }, { passive: true });
+  var resizeTimer = null;
+  function handleResize() {
+    if (reader.hidden || isInitializing || !pageFlip || !images.length) return;
 
-  reader.addEventListener("touchend", function (e) {
-    if (!tracking) return;
-    tracking = false;
+    var oldW = pageW;
+    var oldH = pageH;
+    computeLayout();
 
-    var t = e.changedTouches[0];
-    var dx = t.clientX - tx0;
-    var dy = t.clientY - ty0;
-    var dt = Date.now() - tt0;
+    if (Math.abs(oldW - pageW) < 2 && Math.abs(oldH - pageH) < 2) {
+      updateStacks();
+      return;
+    }
 
-    if (Math.abs(dx) < 46 || Math.abs(dx) < Math.abs(dy) * 1.25 || dt > 900) return;
-    if (jumping) return;
-    if (dx < 0) navigateOnce(1);
-    else navigateOnce(-1);
-  }, { passive: true });
+    var start = getCurrentIndex();
+    createFlipbook(start, true);
+  }
 
-  var rt = null;
   window.addEventListener("resize", function () {
     if (reader.hidden) return;
-    clearTimeout(rt);
-    rt = setTimeout(function () { layout(); }, 160);
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(handleResize, 180);
   });
 
   document.addEventListener("fullscreenchange", function () {
-    if (!reader.hidden) layout();
+    if (!reader.hidden) setTimeout(handleResize, 80);
   });
 })();
 </script>
