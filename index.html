@@ -698,11 +698,11 @@ body {
   );
 }
 
-/* Internet Archive style vertical page sheets, connected like a real book edge */
+/* Internet Archive style vertical page sheets, same height as pages */
 .page-stack {
   position: absolute;
-  top: 1.5%;
-  bottom: 1.5%;
+  top: 0;
+  bottom: 0;
   z-index: 7;
   cursor: pointer;
   opacity: 0;
@@ -715,12 +715,12 @@ body {
 }
 .page-stack--r {
   left: 100%;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
   background: transparent;
 }
 .page-stack--l {
   right: 100%;
-  border-radius: 4px 0 0 4px;
+  border-radius: 0;
   background: transparent;
 }
 .sheet {
@@ -744,7 +744,7 @@ body {
   background: rgba(0,0,0,0.32);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.12s ease, left 0.08s linear, width 0.08s linear;
   z-index: 3;
 }
 
@@ -1461,6 +1461,10 @@ body {
   var BOOK_DUR = 950;
   var STACK_MAX = 96;
 
+  var SMART_JUMP_BUDGET = 420;
+  var SMART_JUMP_MIN = 16;
+  var SMART_JUMP_MAX = 70;
+
   function parseIssueName(fileName) {
     var name = String(fileName || "").replace(/\.pdf$/i, "");
     var m = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
@@ -1706,6 +1710,8 @@ body {
   var stackLVisible = [];
   var stackRHover = null;
   var stackLHover = null;
+  var jumping = false;
+  var jumpToken = 0;
 
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
@@ -1713,6 +1719,24 @@ body {
     var u = url(n);
     var im = cache[u];
     return !!(im && im.complete && im.naturalWidth);
+  }
+
+  function isSpreadLoaded(s) {
+    if (s < 1 || s > maxSpread) return false;
+    var left = s * 2;
+    var right = s * 2 + 1;
+    if (!isLoaded(left)) return false;
+    if (right <= total && !isLoaded(right)) return false;
+    return true;
+  }
+
+  function consecutiveLoadedCount(start, target, dir) {
+    var count = 0;
+    for (var s = start; dir > 0 ? s <= target : s >= target; s += dir) {
+      if (isSpreadLoaded(s)) count++;
+      else break;
+    }
+    return count;
   }
 
   function preload(list) {
@@ -2085,7 +2109,7 @@ body {
 
   /* ---------- OPEN magazine ---------- */
   function openMagazine() {
-    if (busy || bookState !== "closed-front") return;
+    if (busy || jumping || bookState !== "closed-front") return;
     busy = true;
     hideHint();
     hideEnd();
@@ -2127,7 +2151,7 @@ body {
 
   /* ---------- CLOSE magazine ---------- */
   function closeMagazine() {
-    if (busy || bookState !== "open") return;
+    if (busy || jumping || bookState !== "open") return;
     busy = true;
     hideHint();
     hideEnd();
@@ -2164,7 +2188,7 @@ body {
 
   /* ---------- FINISH: back cover closes to the LEFT ---------- */
   function finishMagazine() {
-    if (busy) return;
+    if (busy || jumping) return;
     busy = true;
     hideHint();
 
@@ -2203,7 +2227,7 @@ body {
 
   /* ---------- GO BACK from back cover ---------- */
   function reopenFromBack() {
-    if (busy || bookState !== "closed-back") return;
+    if (busy || jumping || bookState !== "closed-back") return;
     busy = true;
     hideEnd();
     hideHint();
@@ -2242,8 +2266,8 @@ body {
   }
 
   /* ---------- single spread flip ---------- */
-  function doFlip(dir, duration, instant) {
-    if (busy || bookState !== "open") return Promise.resolve();
+  function doFlip(dir, duration, instant, allowJumpFlip) {
+    if (busy || (!allowJumpFlip && jumping) || bookState !== "open") return Promise.resolve();
     if (dir > 0 && spread >= maxSpread) return Promise.resolve();
     if (dir < 0 && spread <= 1) return Promise.resolve();
 
@@ -2316,38 +2340,104 @@ body {
     });
   }
 
-  /* ---------- jump to a spread with uninterrupted riffle ---------- */
-  function flipToSpread(target, sparks) {
-    if (bookState !== "open" || busy) return;
+  function finishJump(token) {
+    if (token !== jumpToken) return;
+    jumping = false;
+    hideSparks();
+    updateUI();
+  }
+
+  /* ---------- smart jump: load target only, riffle loaded pages quickly, skip unloaded ---------- */
+  function jumpToSpread(target, sparks) {
+    if (bookState !== "open" || busy || jumping) return;
     target = Math.max(1, Math.min(maxSpread, target));
     if (target === spread) return;
 
-    var dir = target > spread ? 1 : -1;
+    stopHeld();
+    hideHint();
 
-    preload([target * 2, target * 2 + 1]);
+    var dir = target > spread ? 1 : -1;
+    jumping = true;
+    var token = ++jumpToken;
 
     if (sparks) showSparks(dir);
-    stepToSpread(target, dir, sparks);
-  }
 
-  function stepToSpread(target, dir, sparks) {
-    if (bookState !== "open") {
-      if (sparks) hideSparks();
-      return;
-    }
-    if (spread === target) {
-      if (sparks) hideSparks();
-      return;
-    }
+    var targetLeft = target * 2;
+    var targetRight = target * 2 + 1;
 
-    var before = spread;
-    doFlip(dir, JUMP_DUR, true).then(function () {
-      if (spread === before) {
-        if (sparks) hideSparks();
+    preload([targetLeft, targetRight]).then(function () {
+      if (token !== jumpToken || reader.hidden || bookState !== "open") {
+        finishJump(token);
         return;
       }
-      stepToSpread(target, dir, sparks);
+
+      function step() {
+        if (token !== jumpToken || reader.hidden || bookState !== "open") {
+          finishJump(token);
+          return;
+        }
+
+        if (spread === target) {
+          finishJump(token);
+          return;
+        }
+
+        // If current displayed spread is not loaded, don't try to animate from it.
+        if (!isSpreadLoaded(spread)) {
+          spread = target;
+          paint();
+          finishJump(token);
+          return;
+        }
+
+        var next = spread + dir;
+        if (next < 1 || next > maxSpread) {
+          spread = target;
+          paint();
+          finishJump(token);
+          return;
+        }
+
+        // If the next spread is not loaded, skip all remaining middle pages instantly.
+        if (!isSpreadLoaded(next)) {
+          spread = target;
+          paint();
+          finishJump(token);
+          return;
+        }
+
+        var loadedRun = consecutiveLoadedCount(next, target, dir);
+        var dur = loadedRun > 0
+          ? Math.max(SMART_JUMP_MIN, Math.min(SMART_JUMP_MAX, Math.round(SMART_JUMP_BUDGET / loadedRun)))
+          : JUMP_DUR;
+
+        var before = spread;
+        doFlip(dir, dur, true, true).then(function () {
+          if (token !== jumpToken) {
+            finishJump(token);
+            return;
+          }
+
+          // If doFlip could not run, complete instantly.
+          if (spread === before) {
+            spread = target;
+            paint();
+            finishJump(token);
+            return;
+          }
+
+          step();
+        });
+      }
+
+      step();
+    }).catch(function () {
+      finishJump(token);
     });
+  }
+
+  function flipToSpread(target, sparks) {
+    jumpToSpread(target, sparks);
   }
 
   function pageToSpread(pageNum) {
@@ -2356,7 +2446,7 @@ body {
   }
 
   function navigateOnce(dir) {
-    if (busy) return;
+    if (busy || jumping) return;
     ensureAudio();
 
     if (bookState === "closed-front") {
@@ -2382,6 +2472,7 @@ body {
 
   /* ---------- held-key rapid flipping ---------- */
   function startHeld(dir) {
+    if (jumping) return;
     if (heldDir === dir && heldLoopRunning) return;
     heldDir = dir;
     if (!heldLoopRunning) {
@@ -2399,6 +2490,10 @@ body {
 
   function heldLoop() {
     if (!heldLoopRunning || heldDir === 0) return;
+    if (jumping) {
+      stopHeld();
+      return;
+    }
     if (busy) {
       setTimeout(heldLoop, 20);
       return;
@@ -2479,6 +2574,8 @@ body {
     maxSpread = 0;
     spread = 1;
     busy = false;
+    jumping = false;
+    jumpToken++;
     bookState = "closed-front";
     cache = Object.create(null);
     inflight = Object.create(null);
@@ -2608,6 +2705,8 @@ body {
   }
 
   function closeReader() {
+    jumpToken++;
+    jumping = false;
     stopHeld();
     stopBgPreload();
     hideHint();
@@ -2645,14 +2744,14 @@ body {
   });
 
   zoneR.addEventListener("click", function () {
-    if (busy) return;
+    if (busy || jumping) return;
     if (bookState === "closed-front") openMagazine();
     else if (bookState === "closed-back") return;
     else navigateOnce(1);
   });
 
   zoneL.addEventListener("click", function () {
-    if (busy) return;
+    if (busy || jumping) return;
     if (bookState === "closed-back") reopenFromBack();
     else navigateOnce(-1);
   });
@@ -2703,7 +2802,7 @@ body {
     marker.style.opacity = "1";
   }
 
-  function bindStack(container, isRight) {
+  function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
       if (bookState !== "open") {
         hideTip();
@@ -2734,7 +2833,7 @@ body {
     });
 
     container.addEventListener("click", function (e) {
-      if (bookState !== "open" || busy) return;
+      if (bookState !== "open" || busy || jumping) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -2748,8 +2847,8 @@ body {
     });
   }
 
-  bindStack(stackR, true);
-  bindStack(stackL, false);
+  bindStack(stackR);
+  bindStack(stackL);
 
   document.getElementById("r-close").addEventListener("click", closeReader);
   dNext.addEventListener("click", function () { navigateOnce(1); });
@@ -2758,7 +2857,7 @@ body {
   edgeL.addEventListener("click", function () { navigateOnce(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy) return;
+    if (bookState !== "open" || busy || jumping) return;
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
@@ -2766,7 +2865,7 @@ body {
   });
 
   dPages.addEventListener("click", function () {
-    if (bookState !== "open" || busy) return;
+    if (bookState !== "open" || busy || jumping) return;
 
     var input = document.createElement("input");
     input.type = "number";
@@ -2794,7 +2893,6 @@ body {
           closeMagazine();
         } else {
           var targetSpread = pageToSpread(val);
-          preload([targetSpread * 2, targetSpread * 2 + 1]);
           flipToSpread(targetSpread, true);
         }
       }
@@ -2816,8 +2914,11 @@ body {
   });
 
   document.getElementById("end-again").addEventListener("click", function () {
-    if (busy) return;
+    if (busy || jumping) return;
     hideEnd();
+
+    jumpToken++;
+    jumping = false;
 
     resetLeaf();
     bookState = "closed-front";
@@ -2860,6 +2961,8 @@ body {
 
     e.preventDefault();
 
+    if (jumping) return;
+
     if (e.repeat) {
       startHeld(dir);
     } else {
@@ -2895,6 +2998,7 @@ body {
     var dt = Date.now() - tt0;
 
     if (Math.abs(dx) < 46 || Math.abs(dx) < Math.abs(dy) * 1.25 || dt > 900) return;
+    if (jumping) return;
     if (dx < 0) navigateOnce(1);
     else navigateOnce(-1);
   }, { passive: true });
