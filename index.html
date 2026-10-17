@@ -730,25 +730,22 @@ body {
   height: 100%;
   background: #F7F4EA;
   border: none;
-  cursor: pointer;
-  transition: background 0.14s ease;
+  pointer-events: none;
 }
 .sheet.sheet-gray {
   background: #D7D1C4;
 }
-.sheet::after {
-  content: "";
+.stack-hover {
   position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0);
-  transition: background 0.12s ease;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  background: rgba(0,0,0,0.32);
   pointer-events: none;
-}
-.sheet:hover::after {
-  background: rgba(0,0,0,0.28);
-}
-.sheet:active::after {
-  background: rgba(0,0,0,0.44);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  z-index: 3;
 }
 
 .sheet-tip {
@@ -1462,6 +1459,7 @@ body {
   var RAPID_DUR = 110;
   var JUMP_DUR = 70;
   var BOOK_DUR = 950;
+  var STACK_MAX = 96;
 
   function parseIssueName(fileName) {
     var name = String(fileName || "").replace(/\.pdf$/i, "");
@@ -1704,6 +1702,10 @@ body {
   var bgIndex = 1;
   var stackRSheets = [];
   var stackLSheets = [];
+  var stackRVisible = [];
+  var stackLVisible = [];
+  var stackRHover = null;
+  var stackLHover = null;
 
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
@@ -1836,7 +1838,7 @@ body {
   }
 
   function layout() {
-    var pad = 260;
+    var pad = 300;
     var availW = Math.max(120, stage.clientWidth - pad);
     var availH = Math.max(160, stage.clientHeight - 150);
     var a = aspect * 2;
@@ -1864,6 +1866,8 @@ body {
     stackL.innerHTML = "";
     stackRSheets = [];
     stackLSheets = [];
+    stackRVisible = [];
+    stackLVisible = [];
 
     for (var s = 1; s <= maxSpread; s++) {
       var sheetClass = "sheet" + (s % 2 === 0 ? " sheet-gray" : "");
@@ -1883,6 +1887,14 @@ body {
       stackLSheets.push(lSheet);
     }
 
+    stackRHover = document.createElement("div");
+    stackRHover.className = "stack-hover";
+    stackR.appendChild(stackRHover);
+
+    stackLHover = document.createElement("div");
+    stackLHover.className = "stack-hover";
+    stackL.appendChild(stackLHover);
+
     updateStacks();
   }
 
@@ -1891,8 +1903,8 @@ body {
     var read = Math.max(0, spread - 1);
     var open = bookState === "open";
 
-    var wR = (open && unread > 0) ? Math.min(56, Math.max(10, unread * 1.6)) : 0;
-    var wL = (open && read > 0) ? Math.min(56, Math.max(10, read * 1.6)) : 0;
+    var wR = (open && unread > 0) ? Math.min(STACK_MAX, Math.max(14, unread * 2)) : 0;
+    var wL = (open && read > 0) ? Math.min(STACK_MAX, Math.max(14, read * 2)) : 0;
 
     stackR.style.width = wR + "px";
     stackL.style.width = wL + "px";
@@ -1901,15 +1913,32 @@ body {
     stackR.style.pointerEvents = (open && unread > 0) ? "auto" : "none";
     stackL.style.pointerEvents = (open && read > 0) ? "auto" : "none";
 
+    stackRVisible = [];
+    stackLVisible = [];
+
     stackRSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      sheet.style.display = (open && s > spread) ? "" : "none";
+      if (open && s > spread) {
+        sheet.style.display = "";
+        stackRVisible.push(sheet);
+      } else {
+        sheet.style.display = "none";
+      }
     });
 
     stackLSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      sheet.style.display = (open && s < spread) ? "" : "none";
+      if (open && s < spread) {
+        sheet.style.display = "";
+        stackLVisible.push(sheet);
+      } else {
+        sheet.style.display = "none";
+      }
     });
+
+    if (stackRHover) stackRHover.style.opacity = "0";
+    if (stackLHover) stackLHover.style.opacity = "0";
+    hideTip();
   }
 
   function updateUI() {
@@ -2628,35 +2657,99 @@ body {
     else navigateOnce(-1);
   });
 
-  function bindStack(container) {
-    container.addEventListener("mouseover", function (e) {
-      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
-      if (!sheet) return;
-      showTip(sheet.dataset.label || "");
-    });
+  function visibleSheetsFor(container) {
+    return container === stackR ? stackRVisible : stackLVisible;
+  }
 
-    container.addEventListener("mousemove", function (e) {
-      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
-      if (!sheet) { hideTip(); return; }
+  function hoverMarkerFor(container) {
+    return container === stackR ? stackRHover : stackLHover;
+  }
+
+  function stackIndexFromEvent(container, e) {
+    var arr = visibleSheetsFor(container);
+    if (!arr.length) return -1;
+
+    var rect = container.getBoundingClientRect();
+    if (rect.width <= 0) return -1;
+
+    var frac = (e.clientX - rect.left) / rect.width;
+    if (frac < 0) frac = 0;
+    if (frac >= 1) frac = 0.999999;
+
+    var idx = Math.floor(frac * arr.length);
+    if (idx < 0) idx = 0;
+    if (idx >= arr.length) idx = arr.length - 1;
+    return idx;
+  }
+
+  function setStackHoverMarker(container, idx) {
+    var marker = hoverMarkerFor(container);
+    var arr = visibleSheetsFor(container);
+    if (!marker || idx < 0 || !arr.length) {
+      if (marker) marker.style.opacity = "0";
+      return;
+    }
+
+    var rect = container.getBoundingClientRect();
+    var segW = rect.width / arr.length;
+    var markW = Math.max(3, segW);
+    var left = idx * segW + segW / 2 - markW / 2;
+
+    if (left < 0) left = 0;
+    if (left + markW > rect.width) left = Math.max(0, rect.width - markW);
+
+    marker.style.width = markW + "px";
+    marker.style.left = left + "px";
+    marker.style.opacity = "1";
+  }
+
+  function bindStack(container, isRight) {
+    container.addEventListener("pointermove", function (e) {
+      if (bookState !== "open") {
+        hideTip();
+        var m0 = hoverMarkerFor(container);
+        if (m0) m0.style.opacity = "0";
+        return;
+      }
+
+      var idx = stackIndexFromEvent(container, e);
+      if (idx < 0) {
+        hideTip();
+        var m1 = hoverMarkerFor(container);
+        if (m1) m1.style.opacity = "0";
+        return;
+      }
+
+      var arr = visibleSheetsFor(container);
+      var sheet = arr[idx];
+      showTip(sheet && sheet.dataset.label ? sheet.dataset.label : "");
       moveTip(e);
+      setStackHoverMarker(container, idx);
     });
 
-    container.addEventListener("mouseout", function (e) {
-      var related = e.relatedTarget;
-      if (related && related.closest && related.closest(".sheet")) return;
+    container.addEventListener("pointerleave", function () {
       hideTip();
+      var marker = hoverMarkerFor(container);
+      if (marker) marker.style.opacity = "0";
     });
 
     container.addEventListener("click", function (e) {
-      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
+      if (bookState !== "open" || busy) return;
+
+      var idx = stackIndexFromEvent(container, e);
+      if (idx < 0) return;
+
+      var arr = visibleSheetsFor(container);
+      var sheet = arr[idx];
       if (!sheet) return;
+
       var target = parseInt(sheet.dataset.spread, 10);
       if (!isNaN(target)) flipToSpread(target, true);
     });
   }
 
-  bindStack(stackR);
-  bindStack(stackL);
+  bindStack(stackR, true);
+  bindStack(stackL, false);
 
   document.getElementById("r-close").addEventListener("click", closeReader);
   dNext.addEventListener("click", function () { navigateOnce(1); });
