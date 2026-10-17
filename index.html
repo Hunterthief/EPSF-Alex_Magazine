@@ -12,9 +12,6 @@ title: Home
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
 
-<!-- StPageFlip / page-flip -->
-<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/page-flip.browser.js"></script>
-
 <style>
 :root {
   --ink: #0A192F;
@@ -604,6 +601,7 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }
 #flipbook canvas {
   display: block;
@@ -1216,6 +1214,132 @@ body {
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
 
+  /* ===================== PAGE FLIP LOADER ===================== */
+  var PAGE_FLIP_ESM_URLS = [
+    '{{ "/assets/vendor/page-flip.esm.js" | relative_url }}',
+    "https://esm.sh/page-flip@2.0.7",
+    "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/+esm",
+    "https://esm.run/page-flip@2.0.7"
+  ];
+
+  var PAGE_FLIP_SCRIPT_URLS = [
+    '{{ "/assets/vendor/page-flip.browser.js" | relative_url }}',
+    "https://cdn.jsdelivr.net/gh/Nodlik/StPageFlip@2.0.7/dist/page-flip.browser.js",
+    "https://unpkg.com/page-flip@2.0.7/dist/page-flip.browser.js",
+    "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/page-flip.browser.js"
+  ];
+
+  var pageFlipLoadPromise = null;
+  var pageFlipLastError = null;
+
+  function hasPageFlip() {
+    return (
+      typeof window.St !== "undefined" &&
+      window.St &&
+      typeof window.St.PageFlip === "function"
+    );
+  }
+
+  function dynamicImport(url) {
+    try {
+      return Function("u", "return import(u)")(url);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  function pickPageFlipConstructor(mod) {
+    return (
+      mod &&
+      (
+        mod.PageFlip ||
+        (mod.default && (mod.default.PageFlip || mod.default)) ||
+        (mod.st && mod.st.PageFlip)
+      )
+    );
+  }
+
+  function setGlobalPageFlip(Ctor) {
+    if (typeof Ctor !== "function") {
+      throw new Error("PageFlip constructor not found");
+    }
+
+    window.St = window.St || {};
+    window.St.PageFlip = Ctor;
+  }
+
+  function loadPageFlipEsm(src) {
+    if (!src) return Promise.reject(new Error("empty ESM url"));
+
+    return dynamicImport(src).then(function (mod) {
+      var Ctor = pickPageFlipConstructor(mod);
+
+      if (!Ctor) {
+        throw new Error("No PageFlip export found in: " + src);
+      }
+
+      setGlobalPageFlip(Ctor);
+    });
+  }
+
+  function loadPageFlipScript(src) {
+    if (!src) return Promise.reject(new Error("empty script url"));
+
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+
+      s.onload = function () {
+        if (hasPageFlip()) {
+          resolve();
+        } else {
+          reject(new Error("Script loaded but St.PageFlip is missing: " + src));
+        }
+      };
+
+      s.onerror = function () {
+        reject(new Error("Script failed to load: " + src));
+      };
+
+      document.head.appendChild(s);
+    });
+  }
+
+  function tryEach(urls, fn) {
+    return urls.reduce(function (chain, url) {
+      return chain.catch(function () {
+        return fn(url);
+      });
+    }, Promise.reject(new Error("no urls configured")));
+  }
+
+  function ensurePageFlip() {
+    if (hasPageFlip()) return Promise.resolve();
+    if (pageFlipLoadPromise) return pageFlipLoadPromise;
+
+    pageFlipLoadPromise = tryEach(PAGE_FLIP_ESM_URLS, loadPageFlipEsm)
+      .catch(function (esmError) {
+        pageFlipLastError = esmError;
+        return tryEach(PAGE_FLIP_SCRIPT_URLS, loadPageFlipScript);
+      })
+      .then(function () {
+        if (!hasPageFlip()) {
+          throw new Error("Page flip library did not register St.PageFlip");
+        }
+
+        pageFlipLoadPromise = null;
+        pageFlipLastError = null;
+      })
+      .catch(function (err) {
+        pageFlipLoadPromise = null;
+        pageFlipLastError = err;
+        throw err;
+      });
+
+    return pageFlipLoadPromise;
+  }
+
   function parseIssueName(fileName) {
     var name = String(fileName || "").replace(/\.pdf$/i, "");
     var m = name.match(/^(\d{4})-(\d{2})(?:[-_](.+))?$/);
@@ -1427,8 +1551,9 @@ body {
   var dFill      = document.getElementById("d-fill");
 
   var pagesUrl = "";
-  var total = 1;             // original page images count
-  var pageCount = 0;         // total StPageFlip pages including synthetic back cover
+  var total = 1;
+  var pageCount = 0;
+  var contentLastIdx = 0;
   var maxSpread = 0;
   var aspect = 0.72;
   var pageW = 0;
@@ -1586,20 +1711,19 @@ body {
 
   function spreadFromIndex(idx) {
     if (idx <= 0) return 0;
-    if (idx >= pageCount - 1) return maxSpread;
-    return Math.ceil(idx / 2);
+    if (idx >= contentLastIdx) return maxSpread;
+    return Math.max(0, Math.min(maxSpread, Math.ceil(idx / 2)));
   }
 
   function indexFromSpread(s) {
     var idx = 2 * s - 1;
-    var maxSoft = pageCount - 2;
-    if (idx > maxSoft) idx = maxSoft;
+    if (idx > contentLastIdx) idx = contentLastIdx;
     if (idx < 1) idx = 1;
     return idx;
   }
 
   function updateStacks() {
-    var open = currentIdx > 0 && currentIdx < pageCount - 1;
+    var open = currentIdx > 0 && currentIdx < contentLastIdx;
     var currentSpread = spreadFromIndex(currentIdx);
     var unread = Math.max(0, maxSpread - currentSpread);
     var read = Math.max(0, currentSpread - 1);
@@ -1644,7 +1768,12 @@ body {
 
   function getCurrentIndex() {
     if (!pageFlip) return currentIdx;
-    try { return pageFlip.getCurrentPageIndex(); } catch (e) { return currentIdx; }
+    try {
+      var i = pageFlip.getCurrentPageIndex();
+      return typeof i === "number" ? i : currentIdx;
+    } catch (e) {
+      return currentIdx;
+    }
   }
 
   function updateDock() {
@@ -1652,13 +1781,13 @@ body {
       dPages.textContent = "Cover";
       dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
       dPrev.disabled = true;
-      dNext.disabled = pageCount < 2;
+      dNext.disabled = contentLastIdx < 1;
       edgeL.classList.add("off");
-      edgeR.classList.toggle("off", pageCount < 2);
+      edgeR.classList.toggle("off", contentLastIdx < 1);
       return;
     }
 
-    if (currentIdx >= pageCount - 1) {
+    if (currentIdx >= contentLastIdx) {
       dPages.textContent = "Back Cover";
       dFill.style.width = "100%";
       dPrev.disabled = false;
@@ -1692,13 +1821,14 @@ body {
   }
 
   function updateEnd() {
-    if (currentIdx >= pageCount - 1) showEnd();
+    if (currentIdx >= contentLastIdx) showEnd();
     else hideEnd();
   }
 
   function updateFromPageFlip(idx) {
     if (idx === undefined) idx = getCurrentIndex();
-    currentIdx = Math.max(0, Math.min(pageCount - 1, idx));
+    idx = Math.max(0, Math.min(contentLastIdx, idx));
+    currentIdx = idx;
     updateStacks();
     updateDock();
     updateHint();
@@ -1796,8 +1926,12 @@ body {
   function createFlipbook(startIndex, hideLoader) {
     destroyFlipbook();
 
-    if (typeof St === "undefined" || !St.PageFlip) {
-      failLoad("Page flip library failed to load. Check your connection or CDN access.");
+    if (!hasPageFlip()) {
+      var detail = pageFlipLastError && pageFlipLastError.message
+        ? pageFlipLastError.message
+        : "St.PageFlip is not available.";
+
+      failLoad("Page flip library is not ready. " + detail);
       return;
     }
 
@@ -1837,6 +1971,12 @@ body {
 
     pageFlip.on("init", function () {
       isInitializing = false;
+
+      try {
+        var libCount = pageFlip.getPageCount();
+        if (libCount && libCount > pageCount) pageCount = libCount;
+      } catch (e) {}
+
       if (!suppressLoader) loader.classList.add("gone");
       bookWrap.classList.add("visible");
       reader.classList.add("is-open");
@@ -1845,6 +1985,12 @@ body {
 
     pageFlip.on("flip", function (e) {
       var idx = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
+
+      if (idx > contentLastIdx) {
+        idx = contentLastIdx;
+        try { pageFlip.turnToPage(contentLastIdx); } catch (err) {}
+      }
+
       updateFromPageFlip(idx);
     });
 
@@ -1863,7 +2009,7 @@ body {
     hideHint();
 
     if (dir > 0) {
-      if (currentIdx >= pageCount - 1) return;
+      if (currentIdx >= contentLastIdx) return;
       try { pageFlip.flipNext("bottom"); } catch (e) {}
     } else {
       if (currentIdx <= 0) return;
@@ -1881,7 +2027,7 @@ body {
 
   function jumpToIndex(target, sparks) {
     if (!pageFlip) return;
-    target = Math.max(0, Math.min(pageCount - 1, target));
+    target = Math.max(0, Math.min(contentLastIdx, target));
     var cur = getCurrentIndex();
     if (target === cur) return;
 
@@ -1945,7 +2091,7 @@ body {
     }
 
     if (heldDir > 0) {
-      if (currentIdx >= pageCount - 1) {
+      if (currentIdx >= contentLastIdx) {
         stopHeld();
         return;
       }
@@ -1992,6 +2138,7 @@ body {
 
     total = 1;
     pageCount = 0;
+    contentLastIdx = 0;
     maxSpread = 0;
     currentIdx = 0;
     images = [];
@@ -2027,7 +2174,6 @@ body {
         });
     }).then(function (t) {
       total = Math.max(1, t);
-      pageCount = total + 1; // + synthetic back cover
 
       images = [];
       for (var i = 1; i <= total; i++) images.push(url(i));
@@ -2036,16 +2182,33 @@ body {
       var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
       images.push(makeBackCoverDataUrl(bcW, bcH));
 
-      maxSpread = Math.max(0, Math.ceil((pageCount - 2) / 2));
+      contentLastIdx = images.length - 1;
+      pageCount = images.length;
+      maxSpread = Math.max(0, Math.floor(total / 2));
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-      buildStacks();
-      computeLayout();
-      createFlipbook(0, false);
+      return ensurePageFlip().then(function () {
+        buildStacks();
+        computeLayout();
+        createFlipbook(0, false);
+      });
     }).catch(function (e) {
-      failLoad("Couldn't load this issue. The page images may still be generating — try again in a minute. (" + (e && e.message ? e.message : e) + ")");
+      var msg = (e && e.message) ? e.message : String(e);
+
+      if (/PageFlip|page-flip|St\.PageFlip|import|ESM|Script/i.test(msg)) {
+        failLoad(
+          "Page flip library could not be loaded. Add a compiled bundle at assets/vendor/page-flip.esm.js or assets/vendor/page-flip.browser.js, or allow CDN access to page-flip. Details: " +
+          msg
+        );
+      } else {
+        failLoad(
+          "Couldn't load this issue. The page images may still be generating — try again in a minute. (" +
+          msg +
+          ")"
+        );
+      }
     });
   }
 
@@ -2131,7 +2294,7 @@ body {
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (currentIdx <= 0 || currentIdx >= pageCount - 1) {
+      if (currentIdx <= 0 || currentIdx >= contentLastIdx) {
         hideTip();
         var m0 = hoverMarkerFor(container);
         if (m0) m0.style.opacity = "0";
@@ -2160,7 +2323,7 @@ body {
     });
 
     container.addEventListener("click", function (e) {
-      if (currentIdx <= 0 || currentIdx >= pageCount - 1 || isJumping) return;
+      if (currentIdx <= 0 || currentIdx >= contentLastIdx || isJumping) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -2198,7 +2361,7 @@ body {
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
-    input.max = String(total + 1); // +1 for back cover
+    input.max = String(total + 1);
     input.value = String(Math.min(total + 1, currentIdx + 1));
 
     dPages.style.display = "none";
@@ -2218,7 +2381,7 @@ body {
       if (jump && !isNaN(val)) {
         var targetIdx;
         if (val <= 1) targetIdx = 0;
-        else if (val > total) targetIdx = pageCount - 1;
+        else if (val > total) targetIdx = contentLastIdx;
         else targetIdx = val - 1;
 
         jumpToIndex(targetIdx, true);
