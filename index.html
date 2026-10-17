@@ -34,7 +34,6 @@ body {
   line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
 }
 
-/* ============ HEADER ============ */
 .site-header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(255,255,255,0.82);
@@ -47,7 +46,6 @@ body {
 .logo-text { font-family: var(--display); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.01em; }
 .logo-sub { font-size: 0.62rem; font-weight: 700; color: var(--primary); letter-spacing: 0.28em; text-transform: uppercase; margin-top: 6px; }
 
-/* ============ HERO ============ */
 .hero {
   position: relative; padding: 110px 28px 90px; text-align: center; overflow: hidden;
   background:
@@ -81,7 +79,6 @@ body {
 .hero-stat span { display: block; margin-top: 8px; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
 
-/* ============ SECTIONS ============ */
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 .section { padding: 84px 0 10px; }
 .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
@@ -89,7 +86,6 @@ body {
 .section-head h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 46px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); border-radius: 2px; }
 .section-head .note { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
 
-/* ============ FEATURED CARD ============ */
 .featured-slot { margin-bottom: 92px; }
 .card-featured {
   position: relative; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
@@ -126,7 +122,6 @@ body {
 }
 .card-featured:hover .cta, .card:hover .cta { background: var(--primary); gap: 18px; }
 
-/* ============ GRID CARDS ============ */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 34px; padding-bottom: 90px; }
 .card {
   position: relative; display: block; background: var(--white); border-radius: 16px; overflow: hidden;
@@ -159,15 +154,12 @@ body {
 .empty-state { text-align: center; padding: 90px 20px; color: var(--muted); border: 1px dashed var(--border); border-radius: 20px; background: rgba(255,255,255,0.5); }
 .empty-state h3 { font-family: var(--display); font-size: 1.5rem; color: var(--ink); margin-bottom: 8px; }
 
-/* ============ FOOTER ============ */
 .site-footer { background: var(--ink); color: rgba(255,255,255,0.62); padding: 54px 28px; margin-top: 40px; text-align: center; position: relative; }
 .site-footer::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
 .site-footer .f-logo { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
 .site-footer p { font-size: 0.8rem; }
 
-/* ==================================================================
-   READER
-   ================================================================== */
+/* ============ READER ============ */
 .reader {
   position: fixed; inset: 0; z-index: 9000;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
@@ -184,7 +176,6 @@ body {
 .reader.is-open .reader-fade { opacity: 0; }
 .reader.is-closing .reader-fade { opacity: 1; }
 
-/* top bar */
 .r-top {
   position: absolute; top: 0; left: 0; right: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 28px;
@@ -208,24 +199,18 @@ body {
 .r-btn.icon { width: 38px; padding: 0; justify-content: center; }
 .r-btn.close:hover { background: rgba(220,60,60,0.28); border-color: rgba(255,110,110,0.6); }
 
-/* stage / book positioning */
 .r-stage { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 2600px; perspective-origin: 50% 46%; }
 .book-pos { position: relative; transform-style: preserve-3d; transition: transform 1.15s var(--ease-book); }
 .book-pos.closed { transform: translateX(-25%); }
-.book {
-  position: relative; transform-style: preserve-3d; opacity: 0;
-  transition: opacity 0.5s ease;
-}
+.book { position: relative; transform-style: preserve-3d; opacity: 0; transition: opacity 0.5s ease; }
 .book.visible { opacity: 1; }
-
-/* ground shadow (kept off the 3D element so it never flattens) */
 .book-shadow {
   position: absolute; left: 50%; top: 100%; margin-top: 14px; transform: translateX(-50%);
   width: 78%; height: 34px; pointer-events: none;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
   filter: blur(14px); opacity: 0; transition: opacity 0.6s ease;
 }
-.book.visible ~ .book-shadow, .book.visible .book-shadow { opacity: 1; }
+.book.visible ~ .book-shadow { opacity: 1; }
 
 .half { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; background: #FAFAF7; z-index: 2; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45); }
 .half--l { left: 0; transition: opacity 0.55s ease; }
@@ -254,7 +239,6 @@ body {
   background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.1) 26%, rgba(0,0,0,0.4) 47%, rgba(0,0,0,0.46) 50%, rgba(0,0,0,0.4) 53%, rgba(0,0,0,0.1) 74%, transparent 100%);
 }
 
-/* turning leaf */
 .leaf { position: absolute; top: 0; width: 50%; height: 100%; transform-style: preserve-3d; display: none; z-index: 20; will-change: transform; }
 .leaf.pos-r { left: 50%; transform-origin: left center; }
 .leaf.pos-l { left: 0; transform-origin: right center; }
@@ -266,7 +250,6 @@ body {
 .face.is-empty img { display: none; }
 .face.is-backcover img, .face.is-backcover .inner-cover { display: none; }
 
-/* moving shade on the turning page */
 .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
 .face--f::after { background: linear-gradient(to left, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
 .face--b::after { background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
@@ -275,7 +258,6 @@ body {
 @keyframes shadeA { 0% { opacity: 0; } 48% { opacity: 0.9; } 100% { opacity: 0; } }
 @keyframes shadeB { 0% { opacity: 0.75; } 52% { opacity: 0.2; } 100% { opacity: 0; } }
 
-/* back cover design */
 .backcover-design {
   position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
   gap: 14px; padding: 30px; text-align: center; color: #fff;
@@ -288,7 +270,6 @@ body {
 .bc-rule { width: 40px; height: 2px; background: var(--accent); border-radius: 2px; }
 .bc-thanks { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-top: 4px; }
 
-/* cover shine */
 .shine { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
 .shine i {
   position: absolute; top: -30%; bottom: -30%; width: 42%;
@@ -298,14 +279,12 @@ body {
 .shine.go i { animation: sweep 1.5s var(--ease-out) forwards; }
 @keyframes sweep { to { transform: translateX(320%) skewX(-14deg); } }
 
-/* invisible click zones over the pages */
 .zone { position: absolute; top: 0; bottom: 0; z-index: 15; cursor: pointer; }
 .zone--l { left: 0; width: 50%; }
 .zone--r { right: 0; width: 50%; }
+/* hide the left zone only while the magazine is closed */
 .reader.state-closed .zone--l { display: none; }
-.reader.state-closed .zone--r { cursor: pointer; }
 
-/* edge arrows */
 .edge {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 42;
   width: 54px; height: 54px; border-radius: 50%;
@@ -320,7 +299,6 @@ body {
 .edge--r { right: 22px; }
 .edge.off { opacity: 0; pointer-events: none; }
 
-/* bottom dock */
 .dock {
   position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 45;
   display: flex; align-items: center; gap: 20px; padding: 12px 20px; border-radius: 100px;
@@ -337,14 +315,12 @@ body {
 .dock-track { width: 100%; height: 2px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
 .dock-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); border-radius: 2px; transition: width 0.55s var(--ease-out); }
 
-/* idle */
 .reader.idle .r-top, .reader.idle .dock, .reader.idle .edge { opacity: 0; pointer-events: none; }
 .reader.idle .r-top { transform: translateY(-14px); }
 .reader.idle .dock { transform: translateX(-50%) translateY(18px); }
 .reader.idle .edge { transform: translateY(-50%) scale(0.9); }
 .reader.idle { cursor: none; }
 
-/* hint */
 .hint {
   position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%); z-index: 44;
   display: none; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 100px;
@@ -359,7 +335,6 @@ body {
   50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); }
 }
 
-/* end card (after finishing) */
 .end-card {
   position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%); z-index: 46;
   display: none; flex-direction: column; align-items: center; gap: 14px;
@@ -372,19 +347,14 @@ body {
 .end-card.show { display: flex; }
 @keyframes endIn { from { opacity: 0; transform: translateX(-50%) translateY(16px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 .end-card .end-label { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: #fff; }
-.end-card .end-sub { font-size: 0.78rem; color: rgba(255,255,255,0.65); letter-spacing: 0.02em; }
+.end-card .end-sub { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
 .end-actions { display: flex; gap: 10px; margin-top: 4px; }
-.end-actions button {
-  height: 38px; padding: 0 20px; border-radius: 100px; cursor: pointer;
-  font-family: var(--body); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-  transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out);
-}
+.end-actions button { height: 38px; padding: 0 20px; border-radius: 100px; cursor: pointer; font-family: var(--body); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
 .end-again { background: var(--accent); border: none; color: #1A1403; }
 .end-again:hover { background: var(--accent-soft); transform: translateY(-1px); }
 .end-close { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #fff; }
 .end-close:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 
-/* loader */
 .loader { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(ellipse at 50% 45%, #16233C 0%, #080E1A 70%); transition: opacity 0.45s ease; }
 .loader.gone { opacity: 0; pointer-events: none; }
 .loader-ring { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(212,175,55,0.18); border-top-color: var(--accent); animation: spin 0.85s linear infinite; }
@@ -393,10 +363,8 @@ body {
 .loader.err .loader-ring { display: none; }
 .loader.err .loader-txt { color: #FF9A9A; letter-spacing: 0.06em; text-transform: none; font-family: var(--body); font-size: 0.9rem; max-width: 34ch; text-align: center; line-height: 1.6; }
 
-/* fly clone */
 .fly { position: fixed; z-index: 9500; pointer-events: none; object-fit: cover; transform-origin: top left; will-change: transform; box-shadow: 0 30px 70px rgba(0,0,0,0.6); border-radius: 4px; }
 
-/* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
   .card-featured { grid-template-columns: 1fr; }
   .card-featured .cover { aspect-ratio: 4/3; }
@@ -728,28 +696,43 @@ body {
   var spread = 1;
   var aspect = 0.72;
   var busy = false;
-  var bookState = "closed-front";   // closed-front | open | closed-back
+  var bookState = "closed-front";
   var idleTimer = null;
-  var cache = Object.create(null);
+  var cache = Object.create(null);     // url -> Image
+  var inflight = Object.create(null);  // url -> Promise (dedupes concurrent loads)
 
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
+  /* robust preload: one shared promise per image so nothing races */
   function preload(list) {
-    var jobs = [];
-    (list || []).forEach(function (n) {
-      if (n === null || n === undefined || n < 1 || n > total) return;
+    var jobs = (list || []).map(function (n) {
+      if (n === null || n === undefined || n < 1 || n > total) return Promise.resolve(null);
       var u = url(n);
-      jobs.push(new Promise(function (res) {
-        if (cache[u] && cache[u].complete && cache[u].naturalWidth) return res(cache[u]);
-        var im = cache[u] || new Image();
-        cache[u] = im;
-        if (im.complete && im.naturalWidth) return res(im);
+      if (inflight[u]) return inflight[u];
+      var im = cache[u] || new Image();
+      cache[u] = im;
+      if (im.complete && im.naturalWidth) {
+        inflight[u] = Promise.resolve(im);
+        return inflight[u];
+      }
+      inflight[u] = new Promise(function (res) {
         im.onload = function () { res(im); };
         im.onerror = function () { res(null); };
         im.src = u;
-      }));
+      });
+      return inflight[u];
     });
     return Promise.all(jobs);
+  }
+
+  /* preload the next 6 pages ahead of a spread (+2 behind for smooth back-flips) */
+  function preloadAhead(s) {
+    var rightPage = s * 2 + 1;
+    var pages = [];
+    for (var i = 1; i <= 6; i++) pages.push(rightPage + i);
+    pages.push(s * 2 - 1);
+    pages.push(s * 2 - 2);
+    preload(pages); // fire and forget
   }
 
   function setHalf(imgEl, halfEl, n) {
@@ -817,7 +800,6 @@ body {
     dPages.textContent = (f === l ? f : f + "–" + l) + " / " + total;
     dFill.style.width = Math.round((l / total) * 100) + "%";
     var atStart = spread <= 1;
-    var atEnd = spread >= maxSpread;
     dPrev.disabled = atStart;
     dNext.disabled = false;
     edgeL.classList.toggle("off", atStart);
@@ -842,15 +824,12 @@ body {
     faceF.classList.remove("is-backcover");
   }
 
-  function showHint(txt) {
-    hintTxt.textContent = txt;
-    hint.classList.add("show");
-  }
+  function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
   function hideHint() { hint.classList.remove("show"); }
   function showEnd() { endCard.classList.add("show"); }
   function hideEnd() { endCard.classList.remove("show"); }
 
-  /* ---------- OPEN the magazine (cover flips, glides to spread) ---------- */
+  /* ---------- OPEN the magazine ---------- */
   function openMagazine() {
     if (busy || bookState !== "closed-front") return;
     busy = true;
@@ -872,6 +851,10 @@ body {
     leaf.style.transition = "transform 1.15s cubic-bezier(0.645,0.045,0.355,1)";
     leaf.style.transform = "rotateY(-180deg)";
     bookPos.classList.remove("closed");
+    reader.classList.remove("state-closed"); // re-enable the left click zone
+
+    // preload ahead while the cover opens
+    preloadAhead(1);
 
     waitFlip(1150).then(function () {
       setHalf(imgL, halfL, 2);
@@ -880,7 +863,6 @@ body {
       bookState = "open";
       busy = false;
       paint();
-      warm();
     });
   }
 
@@ -911,6 +893,7 @@ body {
       setHalf(imgR, halfR, 1);
       bookState = "closed-front";
       busy = false;
+      reader.classList.add("state-closed");
       updateUI();
       showHint("Click to open");
     });
@@ -941,12 +924,13 @@ body {
       resetLeaf();
       bookState = "closed-back";
       busy = false;
+      reader.classList.add("state-closed");
       updateUI();
       showEnd();
     });
   }
 
-  /* ---------- normal page flip (open state) ---------- */
+  /* ---------- normal page flip ---------- */
   function flipSpread(dir) {
     if (busy || bookState !== "open") return Promise.resolve();
     if (dir > 0 && spread >= maxSpread) return Promise.resolve();
@@ -969,6 +953,7 @@ body {
       staticPage = nextSpread * 2;
     }
 
+    // pages needed for THIS flip (usually already cached thanks to preloadAhead)
     return preload([front, back, staticPage]).then(function () {
       if (dir > 0) {
         setHalf(imgR, halfR, staticPage);
@@ -989,6 +974,9 @@ body {
       leaf.style.transition = "transform 1.05s cubic-bezier(0.55,0.085,0.68,0.53)";
       leaf.style.transform = dir > 0 ? "rotateY(-180deg)" : "rotateY(180deg)";
 
+      // while this flip animates, preload the next 6 pages for the flip after
+      preloadAhead(nextSpread);
+
       return waitFlip(1050);
     }).then(function () {
       if (dir > 0) setHalf(imgL, halfL, back);
@@ -997,7 +985,6 @@ body {
       spread = nextSpread;
       busy = false;
       paint();
-      warm();
     }).catch(function () { resetLeaf(); busy = false; paint(); });
   }
 
@@ -1015,12 +1002,6 @@ body {
     flipSpread(-1);
   }
 
-  function warm() {
-    var s = spread;
-    preload([2 * s, 2 * s + 1, 2 * s + 2, 2 * s + 3, 2 * s - 1]);
-  }
-
-  /* ---------- idle chrome ---------- */
   function wake() {
     reader.classList.remove("idle");
     clearTimeout(idleTimer);
@@ -1028,7 +1009,6 @@ body {
   }
   ["mousemove", "touchstart", "keydown"].forEach(function (ev) { reader.addEventListener(ev, wake, { passive: true }); });
 
-  /* ---------- open / close reader ---------- */
   function failLoad(msg) {
     loader.classList.remove("gone");
     loader.classList.add("err");
@@ -1044,6 +1024,7 @@ body {
     total = 1; maxSpread = 0; spread = 1; busy = false;
     bookState = "closed-front";
     cache = Object.create(null);
+    inflight = Object.create(null);
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
     reader.hidden = false;
@@ -1055,18 +1036,10 @@ body {
     book.classList.remove("visible");
     bookPos.classList.add("closed");
 
-    var p1 = new Image();
-    cache[url(1)] = p1;
-
-    new Promise(function (res, rej) {
-      var settled = false;
-      var ok = function () { if (!settled) { settled = true; res(); } };
-      var bad = function () { if (!settled) { settled = true; rej(new Error("load")); } };
-      p1.onload = ok; p1.onerror = bad;
-      p1.src = url(1);
-      setTimeout(function () { if (!settled) { settled = true; rej(new Error("timeout")); } }, 9000);
-    }).then(function () {
-      if (p1.naturalWidth && p1.naturalHeight) aspect = p1.naturalWidth / p1.naturalHeight;
+    preload([1]).then(function (imgs) {
+      var p1 = imgs[0];
+      if (!p1 || !p1.naturalWidth || !p1.naturalHeight) throw new Error("load");
+      aspect = p1.naturalWidth / p1.naturalHeight;
       var mUrl = pagesUrl + "/manifest.json";
       return fetch(mUrl, { cache: "no-store" }).then(function (r) {
         if (!r.ok) throw new Error("manifest " + r.status);
@@ -1079,7 +1052,6 @@ body {
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-      // closed state: cover centered
       setFaceImg(faceF, imgF, 1);
       setFaceImg(faceB, imgB, total >= 2 ? 2 : null);
       leaf.className = "leaf pos-r";
@@ -1092,7 +1064,8 @@ body {
       layout();
       updateUI();
       loader.classList.add("gone");
-      return preload(total >= 3 ? [1, 2, 3, 4] : [1, 2]);
+      // preload the opening pages plus the first batch ahead
+      return preload(total >= 3 ? [1, 2, 3, 4, 5, 6, 7] : [1, 2]);
     }).then(function () {
       revealBook(card, ev);
       wake();
@@ -1114,12 +1087,10 @@ body {
     return step(2).then(function () { total = n; });
   }
 
-  /* fly the card cover into the closed magazine position */
   function revealBook(card, ev) {
     var done = function () {
       book.classList.add("visible");
       reader.classList.add("is-open");
-      reader.classList.add("state-closed");
       void shine.offsetWidth;
       shine.classList.add("go");
       if (total >= 2) showHint("Click to open");
@@ -1212,9 +1183,9 @@ body {
   document.getElementById("end-again").addEventListener("click", function () {
     if (busy) return;
     hideEnd();
-    // reset to closed-front then open
     bookState = "closed-front";
     bookPos.classList.add("closed");
+    reader.classList.add("state-closed");
     setFaceImg(faceF, imgF, 1);
     setFaceImg(faceB, imgB, total >= 2 ? 2 : null);
     leaf.className = "leaf pos-r";
@@ -1223,7 +1194,6 @@ body {
     leaf.style.transform = "rotateY(0deg)";
     setHalf(imgL, halfL, total >= 2 ? 2 : null);
     setHalf(imgR, halfR, total >= 3 ? 3 : null);
-    reader.classList.add("state-closed");
     updateUI();
     setTimeout(openMagazine, 350);
   });
@@ -1244,7 +1214,6 @@ body {
     if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
   });
 
-  /* swipe */
   var tx0 = 0, ty0 = 0, tt0 = 0, tracking = false;
   reader.addEventListener("touchstart", function (e) {
     if (e.touches.length !== 1) { tracking = false; return; }
