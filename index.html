@@ -10,7 +10,7 @@ title: Home
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -23,8 +23,8 @@ title: Home
   --accent-soft: #E8C86A;
   --muted: #6B7A90;
   --border: #E3E8EF;
-  --display: "Playfair Display", Georgia, serif;
-  --body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --display: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --body: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-book: cubic-bezier(0.645, 0.045, 0.355, 1);
 }
@@ -108,8 +108,8 @@ body {
 .hero h1 {
   font-family: var(--display);
   font-weight: 900;
-  font-size: clamp(2.6rem, 7.2vw, 5.4rem);
-  line-height: 1.02;
+  font-size: clamp(2.4rem, 6.8vw, 5rem);
+  line-height: 1.04;
   letter-spacing: -0.03em;
   max-width: 15ch;
   margin: 0 auto 22px;
@@ -118,7 +118,7 @@ body {
 }
 .hero h1 em {
   font-style: italic;
-  font-weight: 600;
+  font-weight: 700;
   background: linear-gradient(100deg, var(--primary), var(--accent) 90%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -128,7 +128,7 @@ body {
   max-width: 46ch;
   margin: 0 auto;
   color: var(--muted);
-  font-size: 1.06rem;
+  font-size: 1.02rem;
   opacity: 0;
   animation: fadeUp 0.9s var(--ease-out) 0.34s forwards;
 }
@@ -146,7 +146,7 @@ body {
   display: block;
   font-family: var(--display);
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--ink);
   line-height: 1;
 }
@@ -177,7 +177,7 @@ body {
 .section-head h2 {
   font-family: var(--display);
   font-size: clamp(1.8rem, 3.4vw, 2.6rem);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.02em;
   position: relative;
   padding-bottom: 14px;
@@ -194,7 +194,7 @@ body {
 .section-head .note {
   font-size: 0.82rem;
   color: var(--muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .featured-slot { margin-bottom: 92px; }
@@ -280,9 +280,9 @@ body {
 
 .issue-title {
   font-family: var(--display);
-  font-size: clamp(1.7rem, 3vw, 2.5rem);
-  font-weight: 700;
-  line-height: 1.14;
+  font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.16;
   letter-spacing: -0.02em;
 }
 .issue-meta {
@@ -291,7 +291,7 @@ body {
   gap: 12px;
   font-size: 0.78rem;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -318,7 +318,7 @@ body {
   background: var(--ink);
   color: #fff;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   transition: background 0.35s var(--ease-out), gap 0.35s var(--ease-out);
@@ -409,7 +409,7 @@ body {
 }
 .card:hover .cover-cta { opacity: 1; transform: translate(-50%, 0); }
 .card .body { padding: 20px 22px 24px; }
-.card .issue-title { font-size: 1.18rem; margin-bottom: 6px; }
+.card .issue-title { font-size: 1.08rem; margin-bottom: 6px; }
 .card .issue-meta { font-size: 0.68rem; gap: 8px; }
 .fallback-brand {
   font-family: var(--display);
@@ -417,11 +417,12 @@ body {
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--accent);
+  font-weight: 800;
 }
 .fallback-title {
   font-family: var(--display);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   line-height: 1.25;
 }
 .empty-state {
@@ -435,6 +436,7 @@ body {
 .empty-state h3 {
   font-family: var(--display);
   font-size: 1.5rem;
+  font-weight: 800;
   color: var(--ink);
   margin-bottom: 8px;
 }
@@ -457,7 +459,7 @@ body {
 .site-footer .f-logo {
   font-family: var(--display);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
   margin-bottom: 8px;
 }
@@ -521,7 +523,7 @@ body {
 .r-brand {
   font-family: var(--display);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--accent);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -530,8 +532,8 @@ body {
 .r-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
 .r-title {
   font-family: var(--display);
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1.02rem;
+  font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
@@ -551,7 +553,7 @@ body {
   color: rgba(255,255,255,0.86);
   font-family: var(--body);
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
@@ -709,7 +711,7 @@ body {
   border-radius: 9px;
   font-family: var(--body);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -836,7 +838,7 @@ body {
 .dock-mid { display: flex; flex-direction: column; align-items: center; gap: 9px; min-width: 172px; }
 .dock-pages {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.72);
@@ -855,7 +857,7 @@ body {
   text-align: center;
   font-family: var(--body);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   outline: none;
   -moz-appearance: textfield;
 }
@@ -905,7 +907,7 @@ body {
   border: 1px solid rgba(212,175,55,0.5);
   color: var(--accent-soft);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   backdrop-filter: blur(10px);
@@ -944,7 +946,7 @@ body {
   from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-.end-card .end-label { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: #fff; }
+.end-card .end-label { font-family: var(--display); font-size: 1.15rem; font-weight: 800; color: #fff; }
 .end-card .end-sub { font-size: 0.74rem; color: rgba(255,255,255,0.65); }
 .end-actions { display: flex; gap: 10px; margin-top: 2px; }
 .end-actions button {
@@ -954,7 +956,7 @@ body {
   cursor: pointer;
   font-family: var(--body);
   font-size: 0.66rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out);
@@ -989,6 +991,7 @@ body {
 .loader-txt {
   font-family: var(--display);
   font-size: 0.86rem;
+  font-weight: 700;
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.55);
@@ -1000,9 +1003,132 @@ body {
   text-transform: none;
   font-family: var(--body);
   font-size: 0.9rem;
+  font-weight: 600;
   max-width: 34ch;
   text-align: center;
   line-height: 1.6;
+}
+
+/* ============ ZOOM VIEWER ============ */
+.zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(4, 7, 13, 0.97);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.zoom-overlay[hidden] { display: none; }
+.zoom-overlay.open { opacity: 1; }
+
+.zoom-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(4,7,13,0.92), rgba(4,7,13,0.35), transparent);
+}
+
+.zoom-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.zoom-title .r-title {
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.zoom-btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+  font-family: var(--body);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease-out);
+  user-select: none;
+}
+.zoom-btn:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(212,175,55,0.6);
+  transform: translateY(-1px);
+}
+.zoom-btn.percent {
+  min-width: 72px;
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+.zoom-btn.close:hover {
+  background: rgba(220,60,60,0.24);
+  border-color: rgba(255,110,110,0.55);
+}
+
+.zoom-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  cursor: grab;
+}
+.zoom-stage.dragging { cursor: grabbing; }
+
+.zoom-pages {
+  display: flex;
+  gap: 12px;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.zoom-pages img {
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.58);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.zoom-hint {
+  padding: 12px 20px 18px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.58);
 }
 
 @media (max-width: 900px) {
@@ -1015,7 +1141,7 @@ body {
   .section { padding: 60px 0 6px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
   .card .body { padding: 16px 16px 20px; }
-  .card .issue-title { font-size: 1rem; }
+  .card .issue-title { font-size: 0.98rem; }
   .card .issue-meta { font-size: 0.6rem; }
   .r-top { padding: 14px 16px; }
   .r-title, .r-sep { display: none; }
@@ -1027,6 +1153,11 @@ body {
   .hint { bottom: 92px; font-size: 0.62rem; padding: 10px 18px; }
   .end-card { top: 72px; padding: 12px 16px; }
   .page-stack { display: none; }
+  .zoom-top { padding: 12px 14px; }
+  .zoom-controls { gap: 6px; }
+  .zoom-btn { min-width: 34px; height: 34px; padding: 0 10px; font-size: 0.76rem; }
+  .zoom-btn.percent { min-width: 62px; }
+  .zoom-hint { font-size: 0.62rem; padding: 10px 14px 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1176,6 +1307,14 @@ body {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
         <span class="lbl">PDF</span>
       </a>
+      <button class="r-btn icon" id="r-zoom" title="Zoom" aria-label="Zoom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+          <path d="M11 8v6"></path>
+          <path d="M8 11h6"></path>
+        </svg>
+      </button>
       <button class="r-btn icon" id="r-fs" title="Fullscreen" aria-label="Fullscreen">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
@@ -1227,6 +1366,32 @@ body {
   <div class="loader" id="loader">
     <div class="loader-ring"></div>
     <div class="loader-txt" id="loader-txt">Preparing issue</div>
+  </div>
+</div>
+
+<!-- ================= ZOOM VIEWER ================= -->
+<div class="zoom-overlay" id="zoom-overlay" hidden>
+  <div class="zoom-top">
+    <div class="zoom-title">
+      <span class="r-brand">EPSF Alex</span>
+      <span class="r-sep"></span>
+      <span class="r-title" id="zoom-label">Zoom</span>
+    </div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" id="zoom-out" aria-label="Zoom out">−</button>
+      <span class="zoom-btn percent" id="zoom-percent">100%</span>
+      <button class="zoom-btn" id="zoom-in" aria-label="Zoom in">+</button>
+      <button class="zoom-btn" id="zoom-reset">Fit</button>
+      <button class="zoom-btn close" id="zoom-close" aria-label="Close zoom">×</button>
+    </div>
+  </div>
+
+  <div class="zoom-stage" id="zoom-stage">
+    <div class="zoom-pages" id="zoom-pages"></div>
+  </div>
+
+  <div class="zoom-hint">
+    Scroll / pinch to zoom • drag to pan • double-tap to toggle • Esc to close
   </div>
 </div>
 
@@ -1609,6 +1774,41 @@ body {
   var jumpToken = 0;
   var isJumping = false;
   var idleTimer = null;
+  var isPortrait = false;
+
+  var rZoom        = document.getElementById("r-zoom");
+  var zoomOverlay  = document.getElementById("zoom-overlay");
+  var zoomStage    = document.getElementById("zoom-stage");
+  var zoomPages    = document.getElementById("zoom-pages");
+  var zoomLabel    = document.getElementById("zoom-label");
+  var zoomPercent  = document.getElementById("zoom-percent");
+  var zoomInBtn    = document.getElementById("zoom-in");
+  var zoomOutBtn   = document.getElementById("zoom-out");
+  var zoomResetBtn = document.getElementById("zoom-reset");
+  var zoomCloseBtn = document.getElementById("zoom-close");
+
+  var zoom = {
+    open: false,
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    fitScale: 1,
+    minScale: 0.2,
+    maxScale: 8,
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    lastDist: 0,
+    lastMidX: 0,
+    lastMidY: 0,
+    downX: 0,
+    downY: 0,
+    moved: false,
+    lastTapTime: 0,
+    lastTapX: 0,
+    lastTapY: 0,
+    pointers: new Map()
+  };
 
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
@@ -1658,10 +1858,10 @@ body {
           '<circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>' +
           '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>' +
         '</g>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 0.15) + '" text-anchor="middle" font-family="Georgia, serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="700" fill="#FFFFFF">EPSF Alex</text>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.55">PE MAGAZINE</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.15) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="800" fill="#FFFFFF">EPSF Alex</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.55">PE MAGAZINE</text>' +
         '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 1.05) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#D4AF37"/>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 1.55) + '" text-anchor="middle" font-family="Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.78">THANK YOU FOR READING</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.55) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.78">THANK YOU FOR READING</text>' +
       '</svg>';
 
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -1669,25 +1869,45 @@ body {
 
   function computeLayout() {
     var narrow = window.innerWidth < 900;
-    var padX = narrow ? 40 : 260;
-    var padY = narrow ? 120 : 160;
+    isPortrait = narrow;
+
+    var padX = narrow ? 24 : 140;
+    var padY = narrow ? 96 : 140;
 
     var availW = Math.max(180, stage.clientWidth - padX);
     var availH = Math.max(180, stage.clientHeight - padY);
-    var ratio = (aspect || 0.72) * 2;
 
-    var w = availW;
-    var h = w / ratio;
-    if (h > availH) {
-      h = availH;
-      w = h * ratio;
+    if (isPortrait) {
+      var w = availW;
+      var h = w / (aspect || 0.72);
+
+      if (h > availH) {
+        h = availH;
+        w = h * (aspect || 0.72);
+      }
+
+      pageW = Math.floor(w);
+      pageH = Math.floor(h);
+
+      bookWrap.style.width = pageW + "px";
+      bookWrap.style.height = pageH + "px";
+    } else {
+      var ratio = (aspect || 0.72) * 2;
+
+      var w2 = availW;
+      var h2 = w2 / ratio;
+
+      if (h2 > availH) {
+        h2 = availH;
+        w2 = h2 * ratio;
+      }
+
+      pageW = Math.floor(w2 / 2);
+      pageH = Math.floor(h2);
+
+      bookWrap.style.width = (pageW * 2) + "px";
+      bookWrap.style.height = pageH + "px";
     }
-
-    pageW = Math.floor(w / 2);
-    pageH = Math.floor(h);
-
-    bookWrap.style.width = (pageW * 2) + "px";
-    bookWrap.style.height = pageH + "px";
   }
 
   function spreadLabel(s) {
@@ -1749,7 +1969,7 @@ body {
   }
 
   function updateStacks() {
-    var open = currentIdx > 0 && currentIdx < contentLastIdx;
+    var open = !isPortrait && currentIdx > 0 && currentIdx < contentLastIdx;
     var currentSpread = spreadFromIndex(currentIdx);
     var unread = Math.max(0, maxSpread - currentSpread);
     var read = Math.max(0, currentSpread - 1);
@@ -1823,14 +2043,24 @@ body {
       return;
     }
 
-    var leftImg = currentIdx + 1;
-    var rightImg = currentIdx + 2;
-    if (leftImg > total) leftImg = total;
-    if (rightImg > total) rightImg = 0;
+    if (isPortrait) {
+      var pageNum = currentIdx + 1;
+      if (pageNum > total) pageNum = total;
 
-    dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
-    var lastVisible = rightImg || leftImg;
-    dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
+      dPages.textContent = "Page " + pageNum + " / " + total;
+      dFill.style.width = Math.round((pageNum / Math.max(total, 1)) * 100) + "%";
+    } else {
+      var leftImg = currentIdx + 1;
+      var rightImg = currentIdx + 2;
+
+      if (leftImg > total) leftImg = total;
+      if (rightImg > total) rightImg = 0;
+
+      dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
+
+      var lastVisible = rightImg || leftImg;
+      dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
+    }
 
     dPrev.disabled = false;
     dNext.disabled = false;
@@ -1840,7 +2070,7 @@ body {
 
   function updateHint() {
     if (currentIdx === 0) {
-      showHint("Drag a corner or click to flip");
+      showHint(isPortrait ? "Swipe or tap to flip" : "Drag a corner or click to flip");
     } else {
       hideHint();
     }
@@ -1855,6 +2085,7 @@ body {
     if (!bookWrap) return;
 
     var canStatic =
+      !isPortrait &&
       contentLastIdx > 0 &&
       sfState === "read" &&
       !isJumping &&
@@ -2006,7 +2237,7 @@ body {
         height: pageH,
         size: "fixed",
         showCover: true,
-        usePortrait: false,
+        usePortrait: isPortrait,
         flippingTime: RM ? 1 : 700,
         maxShadowOpacity: 0.75,
         mobileScrollSupport: false,
@@ -2182,10 +2413,317 @@ body {
     loaderTxt.textContent = msg;
   }
 
+  /* ---------- zoom viewer ---------- */
+  function clampNum(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function getZoomSources() {
+    if (!images.length) return [];
+
+    if (currentIdx >= contentLastIdx) {
+      return [images[contentLastIdx]];
+    }
+
+    if (currentIdx <= 0) {
+      return [images[0]];
+    }
+
+    if (isPortrait) {
+      return [images[currentIdx]];
+    }
+
+    var arr = [images[currentIdx]];
+    if (images[currentIdx + 1]) arr.push(images[currentIdx + 1]);
+    return arr;
+  }
+
+  function getZoomLabel() {
+    if (!images.length) return "Zoom";
+
+    if (currentIdx <= 0) return "Cover";
+    if (currentIdx >= contentLastIdx) return "Back Cover";
+
+    if (isPortrait) {
+      return "Page " + (currentIdx + 1);
+    }
+
+    var left = currentIdx + 1;
+    var right = currentIdx + 2;
+    if (right > total) right = 0;
+
+    return right ? "Pages " + left + "–" + right : "Page " + left;
+  }
+
+  function applyZoomTransform() {
+    if (!zoomPages) return;
+    zoomPages.style.transform =
+      "translate(" + zoom.tx + "px," + zoom.ty + "px) scale(" + zoom.scale + ")";
+
+    if (zoomPercent) {
+      zoomPercent.textContent = Math.round(zoom.scale * 100) + "%";
+    }
+  }
+
+  function fitZoom() {
+    if (!zoomStage || !zoomPages) return;
+
+    var imgs = zoomPages.querySelectorAll("img");
+    if (!imgs.length) return;
+
+    var rect = zoomStage.getBoundingClientRect();
+    var gap = 12;
+    var totalW = 0;
+    var maxH = 0;
+
+    imgs.forEach(function (img, i) {
+      totalW += (img.naturalWidth || img.width || 1);
+      maxH = Math.max(maxH, img.naturalHeight || img.height || 1);
+      if (i < imgs.length - 1) totalW += gap;
+    });
+
+    var fit = Math.min(
+      (rect.width - 32) / Math.max(totalW, 1),
+      (rect.height - 32) / Math.max(maxH, 1)
+    );
+
+    fit = clampNum(fit, 0.05, 1);
+
+    zoom.fitScale = fit;
+    zoom.minScale = fit * 0.75;
+    zoom.maxScale = Math.max(8, fit * 10);
+    zoom.scale = fit;
+    zoom.tx = 0;
+    zoom.ty = 0;
+
+    applyZoomTransform();
+  }
+
+  function openZoom() {
+    if (!images.length || !zoomOverlay || !zoomPages || !zoomStage) return;
+
+    var srcs = getZoomSources();
+    if (!srcs.length) return;
+
+    zoomPages.innerHTML = "";
+    zoomLabel.textContent = getZoomLabel();
+
+    var loaded = 0;
+
+    srcs.forEach(function (src) {
+      var img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      img.draggable = false;
+
+      img.onload = function () {
+        loaded++;
+        if (loaded === srcs.length) fitZoom();
+      };
+
+      img.onerror = function () {
+        loaded++;
+        if (loaded === srcs.length) fitZoom();
+      };
+
+      zoomPages.appendChild(img);
+    });
+
+    zoomOverlay.hidden = false;
+    requestAnimationFrame(function () {
+      zoomOverlay.classList.add("open");
+    });
+
+    zoom.open = true;
+    zoom.scale = 1;
+    zoom.tx = 0;
+    zoom.ty = 0;
+    applyZoomTransform();
+  }
+
+  function closeZoom() {
+    if (!zoomOverlay) return;
+
+    zoom.open = false;
+    zoomOverlay.classList.remove("open");
+
+    setTimeout(function () {
+      zoomOverlay.hidden = true;
+      if (zoomPages) zoomPages.innerHTML = "";
+    }, 180);
+  }
+
+  function zoomBy(factor, clientX, clientY) {
+    if (!zoomStage) return;
+
+    var rect = zoomStage.getBoundingClientRect();
+    var px = (clientX == null ? rect.width / 2 : clientX - rect.left) - rect.width / 2;
+    var py = (clientY == null ? rect.height / 2 : clientY - rect.top) - rect.height / 2;
+
+    var oldScale = zoom.scale;
+    var nextScale = clampNum(oldScale * factor, zoom.minScale, zoom.maxScale);
+    if (nextScale === oldScale) return;
+
+    var ratio = nextScale / oldScale;
+
+    zoom.tx = px - (px - zoom.tx) * ratio;
+    zoom.ty = py - (py - zoom.ty) * ratio;
+    zoom.scale = nextScale;
+
+    applyZoomTransform();
+  }
+
+  function getTwoPointerInfo() {
+    var pts = Array.from(zoom.pointers.values());
+    if (pts.length < 2) return null;
+
+    return {
+      dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y),
+      midX: (pts[0].x + pts[1].x) / 2,
+      midY: (pts[0].y + pts[1].y) / 2
+    };
+  }
+
+  if (zoomStage) {
+    zoomStage.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      try { zoomStage.setPointerCapture(e.pointerId); } catch (err) {}
+      zoom.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (zoom.pointers.size === 1) {
+        zoom.dragging = true;
+        zoom.moved = false;
+        zoom.downX = e.clientX;
+        zoom.downY = e.clientY;
+        zoom.lastX = e.clientX;
+        zoom.lastY = e.clientY;
+        zoomStage.classList.add("dragging");
+      } else if (zoom.pointers.size === 2) {
+        zoom.dragging = false;
+        var info = getTwoPointerInfo();
+        if (info) {
+          zoom.lastDist = info.dist;
+          zoom.lastMidX = info.midX;
+          zoom.lastMidY = info.midY;
+        }
+      }
+    });
+
+    zoomStage.addEventListener("pointermove", function (e) {
+      if (!zoom.pointers.has(e.pointerId)) return;
+
+      zoom.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (zoom.pointers.size === 1 && zoom.dragging) {
+        var dx = e.clientX - zoom.lastX;
+        var dy = e.clientY - zoom.lastY;
+
+        if (Math.abs(e.clientX - zoom.downX) > 6 || Math.abs(e.clientY - zoom.downY) > 6) {
+          zoom.moved = true;
+        }
+
+        zoom.lastX = e.clientX;
+        zoom.lastY = e.clientY;
+        zoom.tx += dx;
+        zoom.ty += dy;
+        applyZoomTransform();
+      } else if (zoom.pointers.size === 2) {
+        zoom.moved = true;
+        var info = getTwoPointerInfo();
+        if (!info) return;
+
+        var midDX = info.midX - zoom.lastMidX;
+        var midDY = info.midY - zoom.lastMidY;
+
+        zoom.tx += midDX;
+        zoom.ty += midDY;
+
+        if (zoom.lastDist > 0) {
+          var factor = info.dist / zoom.lastDist;
+          zoomBy(factor, info.midX, info.midY);
+        }
+
+        zoom.lastDist = info.dist;
+        zoom.lastMidX = info.midX;
+        zoom.lastMidY = info.midY;
+
+        applyZoomTransform();
+      }
+    });
+
+    function endZoomPointer(e) {
+      zoom.pointers.delete(e.pointerId);
+
+      try {
+        zoomStage.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      if (zoom.pointers.size === 1) {
+        var p = Array.from(zoom.pointers.values())[0];
+        zoom.dragging = true;
+        zoom.lastX = p.x;
+        zoom.lastY = p.y;
+        zoom.lastDist = 0;
+      } else if (zoom.pointers.size === 0) {
+        zoom.dragging = false;
+        zoom.lastDist = 0;
+        zoomStage.classList.remove("dragging");
+
+        var now = Date.now();
+        if (!zoom.moved && now - zoom.lastTapTime < 300 &&
+            Math.abs(e.clientX - zoom.lastTapX) < 24 &&
+            Math.abs(e.clientY - zoom.lastTapY) < 24) {
+          if (zoom.scale > zoom.fitScale * 1.08) {
+            zoom.scale = zoom.fitScale;
+            zoom.tx = 0;
+            zoom.ty = 0;
+            applyZoomTransform();
+          } else {
+            zoomBy(2.2, e.clientX, e.clientY);
+          }
+          zoom.lastTapTime = 0;
+        } else {
+          zoom.lastTapTime = now;
+          zoom.lastTapX = e.clientX;
+          zoom.lastTapY = e.clientY;
+        }
+      } else {
+        zoom.lastDist = 0;
+      }
+    }
+
+    zoomStage.addEventListener("pointerup", endZoomPointer);
+    zoomStage.addEventListener("pointercancel", endZoomPointer);
+
+    zoomStage.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      var factor = e.deltaY < 0 ? 1.16 : 1 / 1.16;
+      zoomBy(factor, e.clientX, e.clientY);
+    }, { passive: false });
+
+    zoomStage.addEventListener("dblclick", function (e) {
+      if (zoom.scale > zoom.fitScale * 1.08) {
+        zoom.scale = zoom.fitScale;
+        zoom.tx = 0;
+        zoom.ty = 0;
+        applyZoomTransform();
+      } else {
+        zoomBy(2.2, e.clientX, e.clientY);
+      }
+    });
+  }
+
+  if (rZoom) rZoom.addEventListener("click", openZoom);
+  if (zoomInBtn) zoomInBtn.addEventListener("click", function () { zoomBy(1.25); });
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", function () { zoomBy(1 / 1.25); });
+  if (zoomResetBtn) zoomResetBtn.addEventListener("click", fitZoom);
+  if (zoomCloseBtn) zoomCloseBtn.addEventListener("click", closeZoom);
+
   function openReader(card) {
     ensureAudio();
     stopHeld();
     hideSparks();
+    if (zoom.open) closeZoom();
     destroyFlipbook();
 
     pagesUrl = card.dataset.pagesUrl;
@@ -2280,6 +2818,7 @@ body {
     hideEnd();
     hideTip();
     clearTimeout(idleTimer);
+    if (zoom.open) closeZoom();
     clearCoverView();
     destroyFlipbook();
 
@@ -2354,7 +2893,7 @@ body {
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (currentIdx <= 0 || currentIdx >= contentLastIdx) {
+      if (isPortrait || currentIdx <= 0 || currentIdx >= contentLastIdx) {
         hideTip();
         var m0 = hoverMarkerFor(container);
         if (m0) m0.style.opacity = "0";
@@ -2383,7 +2922,7 @@ body {
     });
 
     container.addEventListener("click", function (e) {
-      if (currentIdx <= 0 || currentIdx >= contentLastIdx || isJumping) return;
+      if (isPortrait || currentIdx <= 0 || currentIdx >= contentLastIdx || isJumping) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -2407,11 +2946,20 @@ body {
   edgeL.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (maxSpread < 1 || isJumping) return;
+    if (isJumping) return;
+
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
-    jumpToSpread(target, true);
+
+    if (isPortrait) {
+      var targetIdx = Math.round(frac * contentLastIdx);
+      targetIdx = Math.max(0, Math.min(contentLastIdx, targetIdx));
+      jumpToIndex(targetIdx, true);
+    } else {
+      if (maxSpread < 1) return;
+      var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
+      jumpToSpread(target, true);
+    }
   });
 
   dPages.addEventListener("click", function () {
@@ -2480,10 +3028,42 @@ body {
   });
 
   document.addEventListener("keydown", function (e) {
+    if (zoomOverlay && !zoomOverlay.hidden) {
+      if (e.key === "Escape") {
+        closeZoom();
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "+" || e.key === "=") {
+        zoomBy(1.25);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "-" || e.key === "_") {
+        zoomBy(1 / 1.25);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "0") {
+        fitZoom();
+        e.preventDefault();
+        return;
+      }
+      return;
+    }
+
     if (reader.hidden) return;
     if (e.target && (e.target.tagName === "INPUT" || e.target.isContentEditable)) return;
 
-    if (e.key === "Escape") { closeReader(); return; }
+    if (e.key === "Escape") {
+      closeReader();
+      return;
+    }
+
+    if (e.key === "z" || e.key === "Z") {
+      openZoom();
+      return;
+    }
 
     var dir = 0;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") dir = 1;
@@ -2516,15 +3096,24 @@ body {
 
     var oldW = pageW;
     var oldH = pageH;
+    var oldPortrait = isPortrait;
+
     computeLayout();
 
-    if (Math.abs(oldW - pageW) < 2 && Math.abs(oldH - pageH) < 2) {
+    if (
+      oldPortrait !== isPortrait ||
+      Math.abs(oldW - pageW) >= 2 ||
+      Math.abs(oldH - pageH) >= 2
+    ) {
+      var start = getCurrentIndex();
+      createFlipbook(start, true);
+    } else {
       updateStacks();
-      return;
+      updateDock();
+      updateCoverView();
     }
 
-    var start = getCurrentIndex();
-    createFlipbook(start, true);
+    if (zoom.open) fitZoom();
   }
 
   window.addEventListener("resize", function () {
