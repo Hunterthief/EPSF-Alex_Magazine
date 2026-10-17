@@ -12,175 +12,799 @@ title: Home
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --ink: #0A192F; --ink-deep: #050B16; --paper: #F6F7F9; --white: #FFFFFF;
-  --primary: #1E3A8A; --accent: #D4AF37; --accent-soft: #E8C86A; --muted: #6B7A90; --border: #E3E8EF;
+  --ink: #0A192F;
+  --ink-deep: #050B16;
+  --paper: #F6F7F9;
+  --white: #FFFFFF;
+  --primary: #1E3A8A;
+  --accent: #D4AF37;
+  --accent-soft: #E8C86A;
+  --muted: #6B7A90;
+  --border: #E3E8EF;
   --display: "Playfair Display", Georgia, serif;
   --body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-book: cubic-bezier(0.645, 0.045, 0.355, 1);
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body {
+  font-family: var(--body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
 
-.site-header { position: sticky; top: 0; z-index: 200; background: rgba(255,255,255,0.82); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); border-bottom: 1px solid rgba(10,25,47,0.07); }
-.site-header .inner { max-width: 1240px; margin: 0 auto; padding: 14px 28px; display: flex; align-items: center; gap: 16px; }
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  border-bottom: 1px solid rgba(10,25,47,0.07);
+}
+.site-header .inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .logo-mark { flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(30,58,138,0.25)); }
 .logo-text-group { display: flex; flex-direction: column; line-height: 1; }
 .logo-text { font-family: var(--display); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.01em; }
-.logo-sub { font-size: 0.62rem; font-weight: 700; color: var(--primary); letter-spacing: 0.28em; text-transform: uppercase; margin-top: 6px; }
+.logo-sub {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
 
-.hero { position: relative; padding: 110px 28px 90px; text-align: center; overflow: hidden; background: radial-gradient(ellipse 800px 400px at 20% 0%, rgba(30,58,138,0.09), transparent 60%), radial-gradient(ellipse 700px 380px at 85% 20%, rgba(212,175,55,0.11), transparent 60%), linear-gradient(180deg, #FFFFFF 0%, var(--paper) 100%); }
-.hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.55), transparent); }
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--primary); margin-bottom: 26px; opacity: 0; animation: fadeUp 0.8s var(--ease-out) 0.1s forwards; }
-.hero-eyebrow::before, .hero-eyebrow::after { content: ""; width: 34px; height: 1px; background: var(--accent); }
-.hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(2.6rem, 7.2vw, 5.4rem); line-height: 1.02; letter-spacing: -0.03em; max-width: 15ch; margin: 0 auto 22px; opacity: 0; animation: fadeUp 0.9s var(--ease-out) 0.22s forwards; }
-.hero h1 em { font-style: italic; font-weight: 600; background: linear-gradient(100deg, var(--primary), var(--accent) 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero p { max-width: 46ch; margin: 0 auto; color: var(--muted); font-size: 1.06rem; opacity: 0; animation: fadeUp 0.9s var(--ease-out) 0.34s forwards; }
-.hero-stats { display: flex; justify-content: center; gap: 46px; margin-top: 52px; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s var(--ease-out) 0.46s forwards; }
+.hero {
+  position: relative;
+  padding: 110px 28px 90px;
+  text-align: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 800px 400px at 20% 0%, rgba(30,58,138,0.09), transparent 60%),
+    radial-gradient(ellipse 700px 380px at 85% 20%, rgba(212,175,55,0.11), transparent 60%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--paper) 100%);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.55), transparent);
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 26px;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.1s forwards;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: var(--accent);
+}
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 7.2vw, 5.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+  margin: 0 auto 22px;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.22s forwards;
+}
+.hero h1 em {
+  font-style: italic;
+  font-weight: 600;
+  background: linear-gradient(100deg, var(--primary), var(--accent) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero p {
+  max-width: 46ch;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 1.06rem;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.34s forwards;
+}
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 46px;
+  margin-top: 52px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.46s forwards;
+}
 .hero-stat { text-align: center; }
-.hero-stat b { display: block; font-family: var(--display); font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1; }
-.hero-stat span { display: block; margin-top: 8px; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+.hero-stat b {
+  display: block;
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+.hero-stat span {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 .section { padding: 84px 0 10px; }
-.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
-.section-head h2 { font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 700; letter-spacing: -0.02em; position: relative; padding-bottom: 14px; }
-.section-head h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 46px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); border-radius: 2px; }
-.section-head .note { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+.section-head h2 {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  position: relative;
+  padding-bottom: 14px;
+}
+.section-head h2::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 46px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+  border-radius: 2px;
+}
+.section-head .note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 500;
+}
 
 .featured-slot { margin-bottom: 92px; }
-.card-featured { position: relative; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 4px rgba(10,25,47,0.04), 0 24px 60px -18px rgba(10,25,47,0.22); text-decoration: none; color: inherit; cursor: pointer; transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out); transform-style: preserve-3d; }
-.card-featured:hover { transform: translateY(-8px); box-shadow: 0 2px 4px rgba(10,25,47,0.04), 0 40px 80px -20px rgba(10,25,47,0.34); }
-.card-featured .cover { position: relative; aspect-ratio: 3/4; overflow: hidden; background: linear-gradient(150deg, var(--ink) 0%, var(--primary) 100%); }
-.card-featured .cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.9s var(--ease-out); }
+.card-featured {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(10,25,47,0.04), 0 24px 60px -18px rgba(10,25,47,0.22);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+  transform-style: preserve-3d;
+}
+.card-featured:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 2px 4px rgba(10,25,47,0.04), 0 40px 80px -20px rgba(10,25,47,0.34);
+}
+.card-featured .cover {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: linear-gradient(150deg, var(--ink) 0%, var(--primary) 100%);
+}
+.card-featured .cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.9s var(--ease-out);
+}
 .card-featured:hover .cover img { transform: scale(1.055); }
-.card-featured .cover .fallback { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; padding: 34px; text-align: center; color: #fff; }
-.card-featured .body { padding: 56px 52px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
-.badge { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 7px 15px; border-radius: 100px; background: linear-gradient(100deg, var(--accent), var(--accent-soft)); color: #2A2205; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(212,175,55,0.4); }
-.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #2A2205; animation: pulseDot 2s ease-in-out infinite; }
-@keyframes pulseDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
-.issue-title { font-family: var(--display); font-size: clamp(1.7rem, 3vw, 2.5rem); font-weight: 700; line-height: 1.14; letter-spacing: -0.02em; }
-.issue-meta { display: flex; align-items: center; gap: 12px; font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
-.issue-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-.issue-desc { color: var(--muted); font-size: 0.97rem; max-width: 46ch; line-height: 1.7; }
-.cta { display: inline-flex; align-items: center; gap: 12px; align-self: flex-start; margin-top: 12px; padding: 15px 30px; border-radius: 100px; background: var(--ink); color: #fff; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; transition: background 0.35s var(--ease-out), gap 0.35s var(--ease-out); }
-.card-featured:hover .cta, .card:hover .cta { background: var(--primary); gap: 18px; }
+.card-featured .cover .fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  padding: 34px;
+  text-align: center;
+  color: #fff;
+}
+.card-featured .body {
+  padding: 56px 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 34px; padding-bottom: 90px; }
-.card { position: relative; display: block; background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(10,25,47,0.05), 0 12px 28px -14px rgba(10,25,47,0.2); text-decoration: none; color: inherit; cursor: pointer; transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out); opacity: 0; transform: translateY(30px); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 7px 15px;
+  border-radius: 100px;
+  background: linear-gradient(100deg, var(--accent), var(--accent-soft));
+  color: #2A2205;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.4);
+}
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2A2205;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+.issue-title {
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+.issue-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.issue-meta .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.issue-desc {
+  color: var(--muted);
+  font-size: 0.97rem;
+  max-width: 46ch;
+  line-height: 1.7;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 15px 30px;
+  border-radius: 100px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background 0.35s var(--ease-out), gap 0.35s var(--ease-out);
+}
+.card-featured:hover .cta, .card:hover .cta {
+  background: var(--primary);
+  gap: 18px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 34px;
+  padding-bottom: 90px;
+}
+.card {
+  position: relative;
+  display: block;
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(10,25,47,0.05), 0 12px 28px -14px rgba(10,25,47,0.2);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out);
+  opacity: 0;
+  transform: translateY(30px);
+}
 .card.is-visible { opacity: 1; transform: translateY(0); }
 .card:hover { box-shadow: 0 2px 6px rgba(10,25,47,0.06), 0 34px 60px -20px rgba(10,25,47,0.34); }
-.card .cover { position: relative; aspect-ratio: 3/4; overflow: hidden; background: linear-gradient(150deg, var(--ink) 0%, var(--primary) 100%); }
-.card .cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.8s var(--ease-out); }
+.card .cover {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: linear-gradient(150deg, var(--ink) 0%, var(--primary) 100%);
+}
+.card .cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s var(--ease-out);
+}
 .card:hover .cover img { transform: scale(1.06); }
-.card .cover .fallback { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; padding: 26px; text-align: center; color: #fff; }
-.card .cover::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 45%, rgba(5,11,22,0.72) 100%); opacity: 0; transition: opacity 0.45s var(--ease-out); }
+.card .cover .fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 26px;
+  text-align: center;
+  color: #fff;
+}
+.card .cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 45%, rgba(5,11,22,0.72) 100%);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-out);
+}
 .card:hover .cover::after { opacity: 1; }
-.cover-cta { position: absolute; left: 50%; bottom: 22px; transform: translate(-50%, 14px); display: inline-flex; align-items: center; gap: 9px; padding: 11px 22px; border-radius: 100px; background: rgba(255,255,255,0.96); color: var(--ink); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0; transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out); z-index: 3; white-space: nowrap; }
+.cover-cta {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translate(-50%, 14px);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 22px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.96);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  z-index: 3;
+  white-space: nowrap;
+}
 .card:hover .cover-cta { opacity: 1; transform: translate(-50%, 0); }
 .card .body { padding: 20px 22px 24px; }
 .card .issue-title { font-size: 1.18rem; margin-bottom: 6px; }
 .card .issue-meta { font-size: 0.68rem; gap: 8px; }
-.fallback-brand { font-family: var(--display); font-size: 0.82rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); }
-.fallback-title { font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
-.empty-state { text-align: center; padding: 90px 20px; color: var(--muted); border: 1px dashed var(--border); border-radius: 20px; background: rgba(255,255,255,0.5); }
-.empty-state h3 { font-family: var(--display); font-size: 1.5rem; color: var(--ink); margin-bottom: 8px; }
+.fallback-brand {
+  font-family: var(--display);
+  font-size: 0.82rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.fallback-title {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.empty-state {
+  text-align: center;
+  padding: 90px 20px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.5);
+}
+.empty-state h3 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
 
-.site-footer { background: var(--ink); color: rgba(255,255,255,0.62); padding: 54px 28px; margin-top: 40px; text-align: center; position: relative; }
-.site-footer::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-.site-footer .f-logo { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.site-footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.62);
+  padding: 54px 28px;
+  margin-top: 40px;
+  text-align: center;
+  position: relative;
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.site-footer .f-logo {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
 .site-footer p { font-size: 0.8rem; }
 
 /* ============ READER ============ */
-.reader { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(ellipse 120% 90% at 50% 32%, #1B2C4A 0%, #0C1729 42%, #04070D 100%); }
+.reader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 90% at 50% 32%, #1B2C4A 0%, #0C1729 42%, #04070D 100%);
+}
 .reader[hidden] { display: none; }
-.reader::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); opacity: 0.045; mix-blend-mode: overlay; }
-.reader::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(ellipse 90% 75% at 50% 50%, transparent 40%, rgba(0,0,0,0.62) 100%); }
-.reader-fade { position: absolute; inset: 0; background: #04070D; opacity: 1; transition: opacity 0.5s ease; pointer-events: none; z-index: 3; }
+.reader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+}
+.reader::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(ellipse 90% 75% at 50% 50%, transparent 40%, rgba(0,0,0,0.62) 100%);
+}
+.reader-fade {
+  position: absolute;
+  inset: 0;
+  background: #04070D;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 3;
+}
 .reader.is-open .reader-fade { opacity: 0; }
 .reader.is-closing .reader-fade { opacity: 1; }
 
-.r-top { position: absolute; top: 0; left: 0; right: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 28px; background: linear-gradient(180deg, rgba(4,7,13,0.82) 0%, rgba(4,7,13,0.35) 55%, transparent 100%); transition: opacity 0.4s ease, transform 0.4s var(--ease-out); }
+.r-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 28px;
+  background: linear-gradient(180deg, rgba(4,7,13,0.82) 0%, rgba(4,7,13,0.35) 55%, transparent 100%);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
+}
 .r-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.r-brand { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: var(--accent); letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; }
+.r-brand {
+  font-family: var(--display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .r-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
-.r-title { font-family: var(--display); font-size: 1.05rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.94; }
+.r-title {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.94;
+}
 .r-top-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.r-btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border: 1px solid rgba(255,255,255,0.16); border-radius: 100px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.86); font-family: var(--body); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; cursor: pointer; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
-.r-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(212,175,55,0.65); color: #fff; transform: translateY(-1px); }
+.r-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 100px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.86);
+  font-family: var(--body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s var(--ease-out);
+}
+.r-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(212,175,55,0.65);
+  color: #fff;
+  transform: translateY(-1px);
+}
 .r-btn.icon { width: 38px; padding: 0; justify-content: center; }
 .r-btn.close:hover { background: rgba(220,60,60,0.28); border-color: rgba(255,110,110,0.6); }
 
-.r-stage { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 2600px; perspective-origin: 50% 46%; }
-.book-pos { position: relative; transform-style: preserve-3d; transition: transform 1s var(--ease-book); }
+.r-stage {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2600px;
+  perspective-origin: 50% 46%;
+}
+.book-pos {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s var(--ease-book);
+}
 .book-pos.closed { transform: translateX(-25%); }
 .book-pos.closed-back { transform: translateX(25%); }
-.book { position: relative; transform-style: preserve-3d; opacity: 0; transition: opacity 0.5s ease; }
+.book {
+  position: relative;
+  transform-style: preserve-3d;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
 .book.visible { opacity: 1; }
-.book-shadow { position: absolute; left: 50%; top: 100%; margin-top: 14px; transform: translateX(-50%); width: 78%; height: 34px; pointer-events: none; background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%); filter: blur(14px); opacity: 0; transition: opacity 0.6s ease; }
+.book-shadow {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 14px;
+  transform: translateX(-50%);
+  width: 78%;
+  height: 34px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
+  filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
 .book.visible ~ .book-shadow { opacity: 1; }
 
-.half { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; background: #FAFAF7; z-index: 2; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45); }
+.half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  background: #FAFAF7;
+  z-index: 2;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45);
+}
 .half--l { left: 0; transition: opacity 0.55s ease; }
 .half--r { right: 0; }
 .book-pos.closed .half--l,
-.book-pos.closed-back .half--r,
-.book-pos.closed .spine,
-.book-pos.closed-back .spine,
-.book-pos.closed .page-stack,
-.book-pos.closed-back .page-stack { opacity: 0; pointer-events: none; }
+.book-pos.closed .spine { opacity: 0; }
+.book-pos.closed-back .half,
+.book-pos.closed-back .spine { opacity: 0; }
 .half img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.half .inner-cover { position: absolute; inset: 0; display: none; background: radial-gradient(ellipse 130% 90% at 100% 50%, rgba(212,175,55,0.14), transparent 62%), linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%); }
+.half .inner-cover {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background:
+    radial-gradient(ellipse 130% 90% at 100% 50%, rgba(212,175,55,0.14), transparent 62%),
+    linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%);
+}
 .half.is-empty .inner-cover { display: block; }
 .half.is-empty img { display: none; }
 .half.is-blank { background: #fff; }
-.half.is-blank img,
-.half.is-blank .inner-cover { display: none; }
-.half--l::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%); }
-.half--r::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to left, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%); }
-.half--l::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px; z-index: 4; background: linear-gradient(to right, rgba(0,0,0,0.16), transparent); }
-.half--r::before { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 3px; z-index: 4; background: linear-gradient(to left, rgba(0,0,0,0.16), transparent); }
-.page-edge { position: absolute; top: 0; bottom: 0; width: 5px; z-index: 5; background: linear-gradient(to bottom, #E8E4DC 0%, #D4D0C8 50%, #E8E4DC 100%); box-shadow: inset 0 0 3px rgba(0,0,0,0.2); }
+.half.is-blank img { display: none; }
+.half--l::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%);
+}
+.half--r::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%);
+}
+.half--l::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 3px;
+  z-index: 4;
+  background: linear-gradient(to right, rgba(0,0,0,0.16), transparent);
+}
+.half--r::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 3px;
+  z-index: 4;
+  background: linear-gradient(to left, rgba(0,0,0,0.16), transparent);
+}
+.page-edge {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 5px;
+  z-index: 5;
+  background: linear-gradient(to bottom, #E8E4DC 0%, #D4D0C8 50%, #E8E4DC 100%);
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.2);
+}
 .half--l .page-edge { right: -2px; }
 .half--r .page-edge { left: -2px; }
 
-.spine { position: absolute; top: 0; bottom: 0; left: 50%; width: 74px; transform: translateX(-50%); z-index: 6; pointer-events: none; transition: opacity 0.5s ease; background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.1) 26%, rgba(0,0,0,0.4) 47%, rgba(0,0,0,0.46) 50%, rgba(0,0,0,0.4) 53%, rgba(0,0,0,0.1) 74%, transparent 100%); }
-
-/* Internet Archive style clickable page sheets */
-.page-stack {
-  position: absolute; top: 1.5%; bottom: 1.5%; z-index: 1; cursor: pointer;
-  opacity: 0; pointer-events: none;
-  transition: width 0.45s var(--ease-out), opacity 0.35s ease, filter 0.2s;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.45), inset 0 0 3px rgba(0,0,0,0.15);
-  display: flex; flex-direction: column; overflow: hidden;
+.spine {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 74px;
+  transform: translateX(-50%);
+  z-index: 6;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  background: linear-gradient(to right,
+    transparent 0%,
+    rgba(0,0,0,0.1) 26%,
+    rgba(0,0,0,0.4) 47%,
+    rgba(0,0,0,0.46) 50%,
+    rgba(0,0,0,0.4) 53%,
+    rgba(0,0,0,0.1) 74%,
+    transparent 100%
+  );
 }
-.page-stack:hover { filter: brightness(1.08); }
-.page-stack--r { left: 100%; border-radius: 2px 4px 4px 2px; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.16) 0 1px, rgba(0,0,0,0) 1px 4px), linear-gradient(to right, #B8B2A2, #EDE9DC 55%, #F7F4EA); }
-.page-stack--l { right: 100%; border-radius: 4px 2px 2px 4px; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.16) 0 1px, rgba(0,0,0,0) 1px 4px), linear-gradient(to left, #B8B2A2, #EDE9DC 55%, #F7F4EA); }
-.sheet { flex: 1 1 0; min-height: 2px; border-bottom: 1px solid rgba(0,0,0,0.16); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
-.sheet:last-child { border-bottom: none; }
-.sheet:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.55); }
-.stack-tip { position: absolute; z-index: 70; pointer-events: none; padding: 7px 11px; border-radius: 9px; background: rgba(9,16,29,0.94); color: #fff; font-family: var(--body); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 12px 28px rgba(0,0,0,0.45); border: 1px solid rgba(212,175,55,0.35); opacity: 0; transform: translateY(-50%); transition: opacity 0.12s ease; }
-.stack-tip.show { opacity: 1; }
 
-.leaf { position: absolute; top: 0; width: 50%; height: 100%; transform-style: preserve-3d; display: none; z-index: 20; will-change: transform; --flip-dur: 1000ms; pointer-events: none; }
+/* Internet Archive style page sheets */
+.page-stack {
+  position: absolute;
+  top: 1.5%;
+  bottom: 1.5%;
+  z-index: 7;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.45s var(--ease-out), opacity 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+}
+.page-stack--r { left: 100%; border-radius: 0 4px 4px 0; }
+.page-stack--l { right: 100%; border-radius: 4px 0 0 4px; }
+.sheet {
+  flex: 1 1 0;
+  min-height: 1px;
+  border-bottom: 1px solid rgba(0,0,0,0.16);
+  background: linear-gradient(to right, #C7C1B2 0%, #EFEADC 55%, #FAF7EE 100%);
+  transition: filter 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+.page-stack--l .sheet {
+  background: linear-gradient(to left, #C7C1B2 0%, #EFEADC 55%, #FAF7EE 100%);
+}
+.sheet:hover {
+  filter: brightness(1.12);
+  background: linear-gradient(to right, #D7CFA8 0%, #FFF4CF 55%, #FFFBEF 100%);
+  transform: scaleX(1.08);
+}
+.page-stack--l .sheet:hover {
+  background: linear-gradient(to left, #D7CFA8 0%, #FFF4CF 55%, #FFFBEF 100%);
+  transform: scaleX(1.08);
+}
+.sheet:last-child { border-bottom: none; }
+
+.sheet-tip {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  background: rgba(9,16,29,0.94);
+  border: 1px solid rgba(212,175,55,0.55);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-family: var(--body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+.sheet-tip.show { opacity: 1; transform: translateY(0); }
+
+.leaf {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transform-style: preserve-3d;
+  display: none;
+  z-index: 20;
+  will-change: transform;
+  --flip-dur: 1000ms;
+  pointer-events: none;
+}
 .leaf.pos-r { left: 50%; transform-origin: left center; }
 .leaf.pos-l { left: 0; transform-origin: right center; }
-.face { position: absolute; inset: 0; overflow: hidden; background: #FAFAF7; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); pointer-events: none; }
+.face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #FAFAF7;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
 .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .face--b { transform: rotateY(180deg); }
-.face .inner-cover { position: absolute; inset: 0; display: none; background: linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%); }
+.face .inner-cover {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%);
+}
 .face.is-empty .inner-cover { display: block; }
 .face.is-empty img { display: none; }
 .face.is-blank { background: #fff; }
 .face.is-blank img,
-.face.is-blank .inner-cover,
-.face.is-blank .backcover-design { display: none; }
-.face.is-backcover img, .face.is-backcover .inner-cover { display: none; }
+.face.is-blank .inner-cover { display: none; }
+.face.is-backcover img,
+.face.is-backcover .inner-cover { display: none; }
 
-.face::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
 .face--f::after { background: linear-gradient(to left, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
 .face--b::after { background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.18) 34%, transparent 72%); }
 .leaf.is-flipping .face--f::after { animation: shadeA var(--flip-dur) cubic-bezier(0.55,0.085,0.68,0.53) forwards; }
@@ -188,7 +812,21 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 @keyframes shadeA { 0% { opacity: 0; } 48% { opacity: 0.9; } 100% { opacity: 0; } }
 @keyframes shadeB { 0% { opacity: 0.75; } 52% { opacity: 0.2; } 100% { opacity: 0; } }
 
-.backcover-design { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 15px; padding: 30px; text-align: center; color: #fff; background: radial-gradient(ellipse 130% 90% at 50% 0%, rgba(212,175,55,0.14), transparent 55%), linear-gradient(150deg, #0A192F 0%, #12233F 60%, #1E3A8A 100%); }
+.backcover-design {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 30px;
+  text-align: center;
+  color: #fff;
+  background:
+    radial-gradient(ellipse 130% 90% at 50% 0%, rgba(212,175,55,0.14), transparent 55%),
+    linear-gradient(150deg, #0A192F 0%, #12233F 60%, #1E3A8A 100%);
+}
 .face.is-backcover .backcover-design { display: flex; }
 .bc-logo { width: 58px; height: 58px; opacity: 0.95; }
 .bc-brand { font-family: var(--display); font-size: 1.45rem; font-weight: 700; letter-spacing: 0.04em; }
@@ -196,87 +834,335 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .bc-rule { width: 44px; height: 2px; background: var(--accent); border-radius: 2px; }
 .bc-thanks { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.78); margin-top: 6px; }
 
-.shine { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
-.shine i { position: absolute; top: -30%; bottom: -30%; width: 42%; background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.1) 34%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 66%, transparent 100%); transform: translateX(-260%) skewX(-14deg); filter: blur(3px); }
+.shine {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  overflow: hidden;
+}
+.shine i {
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  width: 42%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.1) 34%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 66%, transparent 100%);
+  transform: translateX(-260%) skewX(-14deg);
+  filter: blur(3px);
+}
 .shine.go i { animation: sweep 1.5s var(--ease-out) forwards; }
 @keyframes sweep { to { transform: translateX(320%) skewX(-14deg); } }
 
-.zone { position: absolute; top: 0; bottom: 0; z-index: 15; cursor: pointer; }
+.zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 15;
+  cursor: pointer;
+}
 .zone--l { left: 0; width: 50%; }
 .zone--r { right: 0; width: 50%; }
 .reader.state-closed .zone--l { display: none; }
 
-/* electric sparks on page edges */
-.sparks { position: absolute; inset: -40px; z-index: 30; pointer-events: none; }
-.spark { position: absolute; width: 2px; border-radius: 2px; opacity: 0; background: linear-gradient(to bottom, transparent, #FFFBE6 20%, #FFD75E 50%, #FFFBE6 80%, transparent); box-shadow: 0 0 8px 1px rgba(255,220,110,0.85), 0 0 18px 2px rgba(255,190,60,0.4); animation: sparkFly 0.5s ease-out forwards; }
+/* electric sparks on the EDGES + flash */
+.sparks {
+  position: absolute;
+  inset: -40px;
+  z-index: 30;
+  pointer-events: none;
+}
+.spark {
+  position: absolute;
+  width: 2px;
+  border-radius: 2px;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent, #FFFBE6 20%, #FFD75E 50%, #FFFBE6 80%, transparent);
+  box-shadow: 0 0 8px 1px rgba(255,220,110,0.85), 0 0 18px 2px rgba(255,190,60,0.4);
+  animation: sparkFly 0.5s ease-out forwards;
+}
 @keyframes sparkFly {
   0% { opacity: 0; transform: translateX(0) rotate(var(--rot, 0deg)) scaleY(0.4); }
   15% { opacity: 1; transform: translateX(calc(var(--drift, 0px) * 0.3)) rotate(var(--rot, 0deg)) scaleY(1); }
   100% { opacity: 0; transform: translateX(var(--drift, 0px)) rotate(var(--rot, 0deg)) scaleY(1.15); }
 }
-.spark-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; opacity: 0; background: #FFF6D0; box-shadow: 0 0 10px 3px rgba(255,235,160,0.9), 0 0 24px 6px rgba(255,200,80,0.45); animation: dotFly 0.45s ease-out forwards; }
+.spark-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  opacity: 0;
+  background: #FFF6D0;
+  box-shadow: 0 0 10px 3px rgba(255,235,160,0.9), 0 0 24px 6px rgba(255,200,80,0.45);
+  animation: dotFly 0.45s ease-out forwards;
+}
 @keyframes dotFly {
   0% { opacity: 0; transform: translate(0,0) scale(0.3); }
   25% { opacity: 1; transform: translate(calc(var(--drift, 0px) * 0.4), 0) scale(1.3); }
   100% { opacity: 0; transform: translate(var(--drift, 0px), var(--fall, 8px)) scale(0.4); }
 }
-.rapid-flash { position: absolute; inset: 0; z-index: 29; pointer-events: none; opacity: 0; mix-blend-mode: screen; }
+.rapid-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 29;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
 .rapid-flash.active { animation: flashPulse 0.16s ease-in-out infinite alternate; }
 .rapid-flash.side-l { background: radial-gradient(ellipse 24% 92% at 6% 50%, rgba(255,246,205,0.6), rgba(255,215,94,0.18) 45%, transparent 72%); }
 .rapid-flash.side-r { background: radial-gradient(ellipse 24% 92% at 94% 50%, rgba(255,246,205,0.6), rgba(255,215,94,0.18) 45%, transparent 72%); }
 .rapid-flash.side-b { background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,246,205,0.4), rgba(255,215,94,0.12) 45%, transparent 72%); }
 @keyframes flashPulse { from { opacity: 0.35; } to { opacity: 0.9; } }
 
-.edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 42; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.14); background: rgba(10,18,32,0.55); color: rgba(255,255,255,0.9); font-size: 1.5rem; line-height: 1; cursor: pointer; user-select: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: background 0.25s, border-color 0.25s, transform 0.3s var(--ease-out), opacity 0.3s; }
-.edge:hover { background: rgba(212,175,55,0.24); border-color: rgba(212,175,55,0.75); transform: translateY(-50%) scale(1.09); }
+.edge {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 42;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(10,18,32,0.55);
+  color: rgba(255,255,255,0.9);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: background 0.25s, border-color 0.25s, transform 0.3s var(--ease-out), opacity 0.3s;
+}
+.edge:hover {
+  background: rgba(212,175,55,0.24);
+  border-color: rgba(212,175,55,0.75);
+  transform: translateY(-50%) scale(1.09);
+}
 .edge--l { left: 22px; }
 .edge--r { right: 22px; }
 .edge.off { opacity: 0; pointer-events: none; }
 
-.dock { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 45; display: flex; align-items: center; gap: 20px; padding: 12px 20px; border-radius: 100px; background: rgba(9,16,29,0.72); border: 1px solid rgba(255,255,255,0.11); backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%); box-shadow: 0 18px 44px rgba(0,0,0,0.5); transition: opacity 0.4s ease, transform 0.45s var(--ease-out); }
-.dock-btn { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; background: rgba(255,255,255,0.09); color: #fff; font-size: 1.35rem; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.25s, transform 0.25s var(--ease-out); }
+.dock {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  border-radius: 100px;
+  background: rgba(9,16,29,0.72);
+  border: 1px solid rgba(255,255,255,0.11);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+  transition: opacity 0.4s ease, transform 0.45s var(--ease-out);
+}
+.dock-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.09);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s, transform 0.25s var(--ease-out);
+}
 .dock-btn:hover:not(:disabled) { background: var(--accent); color: #1A1403; transform: scale(1.08); }
 .dock-btn:disabled { opacity: 0.24; cursor: default; }
 .dock-mid { display: flex; flex-direction: column; align-items: center; gap: 9px; min-width: 172px; }
-.dock-pages { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.72); font-variant-numeric: tabular-nums; cursor: pointer; transition: color 0.2s; }
+.dock-pages {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 0.2s;
+}
 .dock-pages:hover { color: var(--accent-soft); }
-.page-input { width: 64px; height: 26px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.65); background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-family: var(--body); font-size: 0.8rem; font-weight: 700; outline: none; -moz-appearance: textfield; }
-.page-input::-webkit-inner-spin-button, .page-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.dock-track { width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; cursor: pointer; position: relative; }
-.dock-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); border-radius: 3px; transition: width 0.3s var(--ease-out); pointer-events: none; }
+.page-input {
+  width: 64px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(212,175,55,0.65);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  text-align: center;
+  font-family: var(--body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.page-input::-webkit-inner-spin-button,
+.page-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.dock-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+.dock-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+  border-radius: 3px;
+  transition: width 0.3s var(--ease-out);
+  pointer-events: none;
+}
 
-.reader.idle .r-top, .reader.idle .dock, .reader.idle .edge { opacity: 0; pointer-events: none; }
+.reader.idle .r-top,
+.reader.idle .dock,
+.reader.idle .edge {
+  opacity: 0;
+  pointer-events: none;
+}
 .reader.idle .r-top { transform: translateY(-14px); }
 .reader.idle .dock { transform: translateX(-50%) translateY(18px); }
 .reader.idle .edge { transform: translateY(-50%) scale(0.9); }
 .reader.idle { cursor: none; }
 
-.hint { position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%); z-index: 44; display: none; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 100px; background: rgba(212,175,55,0.14); border: 1px solid rgba(212,175,55,0.5); color: var(--accent-soft); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: hintPulse 2.1s ease-in-out infinite; }
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 108px;
+  transform: translateX(-50%);
+  z-index: 44;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-radius: 100px;
+  background: rgba(212,175,55,0.14);
+  border: 1px solid rgba(212,175,55,0.5);
+  color: var(--accent-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: hintPulse 2.1s ease-in-out infinite;
+}
 .hint.show { display: inline-flex; }
-@keyframes hintPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.42); transform: translateX(-50%) translateY(0); } 50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); } }
+@keyframes hintPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.42); transform: translateX(-50%) translateY(0); }
+  50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); }
+}
 
-/* Moved end card to top-right so it does not cover back cover text */
-.end-card { position: absolute; top: 86px; right: 28px; bottom: auto; left: auto; transform: none; z-index: 46; display: none; flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px 20px; border-radius: 16px; background: rgba(9,16,29,0.84); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 18px 44px rgba(0,0,0,0.5); animation: endIn 0.55s var(--ease-out); max-width: 260px; text-align: left; }
+/* Moved to top so it does NOT cover the back cover thank-you text */
+.end-card {
+  position: absolute;
+  left: 50%;
+  top: 86px;
+  bottom: auto;
+  transform: translateX(-50%);
+  z-index: 46;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 22px;
+  border-radius: 16px;
+  background: rgba(9,16,29,0.78);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+  animation: endIn 0.6s var(--ease-out);
+  text-align: center;
+}
 .end-card.show { display: flex; }
-@keyframes endIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.end-card .end-label { font-family: var(--display); font-size: 1.18rem; font-weight: 700; color: #fff; }
-.end-card .end-sub { font-size: 0.76rem; color: rgba(255,255,255,0.65); }
-.end-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
-.end-actions button { height: 34px; padding: 0 16px; border-radius: 100px; cursor: pointer; font-family: var(--body); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
+@keyframes endIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.end-card .end-label { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: #fff; }
+.end-card .end-sub { font-size: 0.74rem; color: rgba(255,255,255,0.65); }
+.end-actions { display: flex; gap: 10px; margin-top: 2px; }
+.end-actions button {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: var(--body);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out);
+}
 .end-again { background: var(--accent); border: none; color: #1A1403; }
 .end-again:hover { background: var(--accent-soft); transform: translateY(-1px); }
 .end-close { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #fff; }
 .end-close:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 
-.loader { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(ellipse at 50% 45%, #16233C 0%, #080E1A 70%); transition: opacity 0.45s ease; }
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: radial-gradient(ellipse at 50% 45%, #16233C 0%, #080E1A 70%);
+  transition: opacity 0.45s ease;
+}
 .loader.gone { opacity: 0; pointer-events: none; }
-.loader-ring { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(212,175,55,0.18); border-top-color: var(--accent); animation: spin 0.85s linear infinite; }
+.loader-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.18);
+  border-top-color: var(--accent);
+  animation: spin 0.85s linear infinite;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
-.loader-txt { font-family: var(--display); font-size: 0.86rem; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.loader-txt {
+  font-family: var(--display);
+  font-size: 0.86rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
 .loader.err .loader-ring { display: none; }
-.loader.err .loader-txt { color: #FF9A9A; letter-spacing: 0.06em; text-transform: none; font-family: var(--body); font-size: 0.9rem; max-width: 34ch; text-align: center; line-height: 1.6; }
+.loader.err .loader-txt {
+  color: #FF9A9A;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-family: var(--body);
+  font-size: 0.9rem;
+  max-width: 34ch;
+  text-align: center;
+  line-height: 1.6;
+}
 
-.fly { position: fixed; z-index: 9500; pointer-events: none; object-fit: cover; transform-origin: top left; will-change: transform; box-shadow: 0 30px 70px rgba(0,0,0,0.6); border-radius: 4px; }
+.fly {
+  position: fixed;
+  z-index: 9500;
+  pointer-events: none;
+  object-fit: cover;
+  transform-origin: top left;
+  will-change: transform;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+  border-radius: 4px;
+}
 
 @media (max-width: 900px) {
   .card-featured { grid-template-columns: 1fr; }
@@ -298,11 +1184,15 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   .dock { bottom: 18px; gap: 12px; padding: 9px 14px; width: calc(100% - 32px); max-width: 380px; justify-content: space-between; }
   .dock-mid { min-width: 0; flex: 1; }
   .hint { bottom: 92px; font-size: 0.62rem; padding: 10px 18px; }
-  .end-card { top: 66px; right: 12px; left: 12px; max-width: none; }
+  .end-card { top: 72px; padding: 12px 16px; }
   .page-stack { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
   .card { opacity: 1; transform: none; }
   .hero-eyebrow, .hero h1, .hero p, .hero-stats { opacity: 1; }
 }
@@ -316,7 +1206,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
       <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#1E3A8A"/>
     </svg>
-    <div class="logo-text-group"><span class="logo-text">EPSF Alex</span><span class="logo-sub">PE Magazine</span></div>
+    <div class="logo-text-group">
+      <span class="logo-text">EPSF Alex</span>
+      <span class="logo-sub">PE Magazine</span>
+    </div>
   </div>
 </header>
 
@@ -339,7 +1232,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   {% if count > 0 %}
   <div class="wrap">
     <section class="section featured-slot">
-      <div class="section-head"><h2>Latest Issue</h2><span class="note">Just published</span></div>
+      <div class="section-head">
+        <h2>Latest Issue</h2>
+        <span class="note">Just published</span>
+      </div>
       {% for file in pdfs %}
         {% if file.path contains '/magazines/' %}
           {% unless has_issues %}
@@ -349,12 +1245,19 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
             <div class="card-featured tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
               <div class="cover">
                 <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
-                <div class="fallback"><span class="fallback-brand">EPSF Alex</span><span class="fallback-title js-cover-title">{{ file.name }}</span></div>
+                <div class="fallback">
+                  <span class="fallback-brand">EPSF Alex</span>
+                  <span class="fallback-title js-cover-title">{{ file.name }}</span>
+                </div>
               </div>
               <div class="body">
                 <span class="badge">Latest Issue</span>
                 <h3 class="issue-title js-issue-title">{{ file.name }}</h3>
-                <div class="issue-meta"><span class="js-issue-date">—</span><span class="dot"></span><span>Digital Edition</span></div>
+                <div class="issue-meta">
+                  <span class="js-issue-date">—</span>
+                  <span class="dot"></span>
+                  <span>Digital Edition</span>
+                </div>
                 <p class="issue-desc">Open the full issue in our interactive reader and turn the pages just like a real magazine.</p>
                 <span class="cta">Read Now
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -368,7 +1271,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     </section>
 
     <section class="section">
-      <div class="section-head"><h2>The Archive</h2><span class="note">{{ count }} issue{% if count != 1 %}s{% endif %} published</span></div>
+      <div class="section-head">
+        <h2>The Archive</h2>
+        <span class="note">{{ count }} issue{% if count != 1 %}s{% endif %} published</span>
+      </div>
       <div class="grid">
         {% for file in pdfs %}
           {% if file.path contains '/magazines/' %}
@@ -378,7 +1284,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
             <div class="card tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
               <div class="cover">
                 <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
-                <div class="fallback"><span class="fallback-brand">EPSF Alex</span><span class="fallback-title js-cover-title">{{ file.name }}</span></div>
+                <div class="fallback">
+                  <span class="fallback-brand">EPSF Alex</span>
+                  <span class="fallback-title js-cover-title">{{ file.name }}</span>
+                </div>
                 <span class="cover-cta">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                   Read Issue
@@ -397,7 +1306,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   {% else %}
   <div class="wrap">
     <section class="section">
-      <div class="empty-state"><h3>No issues yet</h3><p>Upload your first PDF to the <code>magazines/</code> folder and it will appear here automatically.</p></div>
+      <div class="empty-state">
+        <h3>No issues yet</h3>
+        <p>Upload your first PDF to the <code>magazines/</code> folder and it will appear here automatically.</p>
+      </div>
     </section>
   </div>
   {% endif %}
@@ -409,11 +1321,15 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 </footer>
 
 <!-- ================= READER ================= -->
-<div class="reader" id="reader" hidden data-baseurl="{{ site.baseurl }}">
+<div class="reader" id="reader" hidden data-sounds-base="{{ '/assets/sounds' | relative_url }}">
   <div class="reader-fade"></div>
 
   <div class="r-top">
-    <div class="r-top-left"><span class="r-brand">EPSF Alex</span><span class="r-sep"></span><span class="r-title" id="r-title">—</span></div>
+    <div class="r-top-left">
+      <span class="r-brand">EPSF Alex</span>
+      <span class="r-sep"></span>
+      <span class="r-title" id="r-title">—</span>
+    </div>
     <div class="r-top-right">
       <a class="r-btn" id="r-dl" href="#" target="_blank" rel="noopener" download>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -433,28 +1349,45 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       <div class="book" id="book">
         <div class="page-stack page-stack--l" id="stack-l"></div>
         <div class="page-stack page-stack--r" id="stack-r"></div>
-        <div class="half half--l" id="half-l"><img id="img-l" alt=""><div class="inner-cover"></div><div class="page-edge"></div></div>
+
+        <div class="half half--l" id="half-l">
+          <img id="img-l" alt="">
+          <div class="inner-cover"></div>
+          <div class="page-edge"></div>
+        </div>
+
         <div class="half half--r" id="half-r">
-          <img id="img-r" alt=""><div class="inner-cover"></div><div class="page-edge"></div>
+          <img id="img-r" alt="">
+          <div class="inner-cover"></div>
+          <div class="page-edge"></div>
           <div class="shine" id="shine"><i></i></div>
         </div>
+
         <div class="spine"></div>
+
         <div class="leaf pos-r" id="leaf">
           <div class="face face--f" id="face-f">
-            <img id="img-f" alt=""><div class="inner-cover"></div>
+            <img id="img-f" alt="">
+            <div class="inner-cover"></div>
             <div class="backcover-design">
-              <svg class="bc-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/><path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/></svg>
+              <svg class="bc-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>
+              </svg>
               <span class="bc-brand">EPSF Alex</span>
               <span class="bc-sub">PE Magazine</span>
               <span class="bc-rule"></span>
               <span class="bc-thanks">Thank you for reading</span>
             </div>
           </div>
-          <div class="face face--b" id="face-b"><img id="img-b" alt=""><div class="inner-cover"></div></div>
+          <div class="face face--b" id="face-b">
+            <img id="img-b" alt="">
+            <div class="inner-cover"></div>
+          </div>
         </div>
+
         <div class="rapid-flash" id="rapid-flash"></div>
         <div class="sparks" id="sparks"></div>
-        <div class="stack-tip" id="stack-tip"></div>
         <div class="zone zone--l" id="zone-l"></div>
         <div class="zone zone--r" id="zone-r"></div>
       </div>
@@ -494,14 +1427,16 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   </div>
 </div>
 
+<div class="sheet-tip" id="sheet-tip"></div>
+
 <script>
 (function () {
   "use strict";
 
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var NORMAL_DUR = 620;
-  var RAPID_DUR = 120;
-  var JUMP_DUR = 80;
+  var NORMAL_DUR = 560;
+  var RAPID_DUR = 110;
+  var JUMP_DUR = 70;
   var BOOK_DUR = 950;
 
   function parseIssueName(fileName) {
@@ -565,9 +1500,214 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     });
   }
 
-  /* ===================== ELEMENTS ===================== */
+  /* ===================== AUDIO ===================== */
+  var audioCtx = null;
+  var soundsInitialized = false;
+  var soundBuffers = { flip: null, flipFast: null, spark: null };
+  var lastFlipSound = 0;
+  var lastSparkSound = 0;
+
+  function ensureAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      initSounds();
+      return audioCtx;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function loadBufferFromUrls(urls) {
+    return new Promise(function (resolve, reject) {
+      var i = 0;
+      function tryNext() {
+        if (i >= urls.length) return reject(new Error("no source"));
+        var url = urls[i++];
+        fetch(url, { cache: "force-cache" })
+          .then(function (r) {
+            if (!r.ok) throw new Error("bad response");
+            return r.arrayBuffer();
+          })
+          .then(function (buf) {
+            return audioCtx.decodeAudioData(buf);
+          })
+          .then(resolve)
+          .catch(tryNext);
+      }
+      tryNext();
+    });
+  }
+
+  function initSounds() {
+    if (soundsInitialized || !audioCtx) return;
+    soundsInitialized = true;
+    var base = (reader && reader.dataset && reader.dataset.soundsBase) ? reader.dataset.soundsBase.replace(/\/$/, "") : "";
+    if (!base) return;
+
+    loadBufferFromUrls([base + "/page-flip.mp3", base + "/page-flip.ogg"])
+      .then(function (b) { soundBuffers.flip = b; })
+      .catch(function () {});
+
+    loadBufferFromUrls([base + "/page-flip-fast.mp3", base + "/page-flip-fast.ogg"])
+      .then(function (b) { soundBuffers.flipFast = b; })
+      .catch(function () {});
+
+    loadBufferFromUrls([base + "/spark.mp3", base + "/spark.ogg", base + "/electric.mp3", base + "/electric.ogg"])
+      .then(function (b) { soundBuffers.spark = b; })
+      .catch(function () {});
+  }
+
+  function playBuffer(name, volume, rate) {
+    if (!audioCtx || !soundBuffers[name]) return false;
+    try {
+      var src = audioCtx.createBufferSource();
+      src.buffer = soundBuffers[name];
+      src.playbackRate.value = rate * (0.94 + Math.random() * 0.12);
+      var g = audioCtx.createGain();
+      g.gain.value = volume;
+      src.connect(g);
+      g.connect(audioCtx.destination);
+      src.start();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function synthFlip(rapid) {
+    try {
+      var ctx = ensureAudio();
+      if (!ctx) return;
+      var t = ctx.currentTime;
+      var dur = rapid ? 0.10 : 0.28;
+      var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var d = buf.getChannelData(0);
+
+      for (var i = 0; i < len; i++) {
+        var p = i / len;
+        var env = Math.pow(1 - p, rapid ? 2.2 : 1.55);
+        var rustle = (Math.random() * 2 - 1) * env;
+        var body = Math.sin(i * (rapid ? 0.18 : 0.08)) * 0.18 * env;
+        d[i] = rustle * 0.85 + body;
+      }
+
+      var src = ctx.createBufferSource();
+      src.buffer = buf;
+
+      var bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.setValueAtTime(rapid ? 2800 : 1700, t);
+      bp.frequency.exponentialRampToValueAtTime(rapid ? 1200 : 520, t + dur);
+      bp.Q.value = rapid ? 1.1 : 0.75;
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = rapid ? 6500 : 4200;
+
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(rapid ? 0.13 : 0.30, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      src.connect(bp);
+      bp.connect(lp);
+      lp.connect(g);
+      g.connect(ctx.destination);
+      src.start(t);
+      src.stop(t + dur);
+
+      if (!rapid) {
+        var osc = ctx.createOscillator();
+        var og = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(120, t);
+        osc.frequency.exponentialRampToValueAtTime(55, t + 0.16);
+        og.gain.setValueAtTime(0.10, t);
+        og.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+        osc.connect(og);
+        og.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      }
+    } catch (e) {}
+  }
+
+  function synthSpark() {
+    try {
+      var ctx = ensureAudio();
+      if (!ctx) return;
+      var t = ctx.currentTime;
+      var bursts = 3 + Math.floor(Math.random() * 3);
+
+      for (var b = 0; b < bursts; b++) {
+        var bt = t + b * 0.025 + Math.random() * 0.018;
+        var dur = 0.022 + Math.random() * 0.035;
+        var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        var d = buf.getChannelData(0);
+
+        for (var i = 0; i < len; i++) {
+          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.1);
+        }
+
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+
+        var hp = ctx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 3600 + Math.random() * 2600;
+
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(0.055, bt);
+        g.gain.exponentialRampToValueAtTime(0.0001, bt + dur);
+
+        src.connect(hp);
+        hp.connect(g);
+        g.connect(ctx.destination);
+        src.start(bt);
+        src.stop(bt + dur);
+      }
+
+      var zap = ctx.createOscillator();
+      var zg = ctx.createGain();
+      zap.type = "sawtooth";
+      zap.frequency.setValueAtTime(2200, t);
+      zap.frequency.exponentialRampToValueAtTime(380, t + 0.09);
+      zg.gain.setValueAtTime(0.035, t);
+      zg.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+      zap.connect(zg);
+      zg.connect(ctx.destination);
+      zap.start(t);
+      zap.stop(t + 0.12);
+    } catch (e) {}
+  }
+
+  function playFlipSound(rapid) {
+    var now = performance.now();
+    if (now - lastFlipSound < (rapid ? 35 : 70)) return;
+    lastFlipSound = now;
+
+    if (rapid) {
+      if (playBuffer("flipFast", 0.24, 1.0)) return;
+      if (playBuffer("flip", 0.18, 1.85)) return;
+      synthFlip(true);
+    } else {
+      if (playBuffer("flip", 0.42, 1.0)) return;
+      synthFlip(false);
+    }
+  }
+
+  function playSparkSound() {
+    var now = performance.now();
+    if (now - lastSparkSound < 80) return;
+    lastSparkSound = now;
+    if (playBuffer("spark", 0.20, 0.9 + Math.random() * 0.25)) return;
+    synthSpark();
+  }
+
+  /* ===================== READER ===================== */
   var reader    = document.getElementById("reader");
-  var BASE      = reader.dataset.baseurl || "";
   var stage     = document.getElementById("r-stage");
   var bookPos   = document.getElementById("book-pos");
   var book      = document.getElementById("book");
@@ -594,227 +1734,22 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   var zoneR     = document.getElementById("zone-r");
   var stackL    = document.getElementById("stack-l");
   var stackR    = document.getElementById("stack-r");
-  var stackTip  = document.getElementById("stack-tip");
   var sparksEl  = document.getElementById("sparks");
   var flashEl   = document.getElementById("rapid-flash");
+  var sheetTip  = document.getElementById("sheet-tip");
   var dPrev     = document.getElementById("d-prev");
   var dNext     = document.getElementById("d-next");
   var dPages    = document.getElementById("d-pages");
   var dTrack    = document.getElementById("d-track");
   var dFill     = document.getElementById("d-fill");
 
-  /* ===================== AUDIO ===================== */
-  var audioCtx = null;
-  var masterGain = null;
-  var noiseBuffer = null;
-  var soundBuffers = { flip: null, spark: null };
-  var soundsRequested = false;
-
-  var SOUND_URLS = {
-    flip: BASE + "/assets/sounds/page-flip.mp3",
-    spark: BASE + "/assets/sounds/electric-spark.mp3"
-  };
-
-  function makeNoiseBuffer(ctx) {
-    var len = Math.floor(ctx.sampleRate * 1);
-    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    var data = buf.getChannelData(0);
-    for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    return buf;
-  }
-
-  function ensureAudio() {
-    try {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.85;
-        masterGain.connect(audioCtx.destination);
-        noiseBuffer = makeNoiseBuffer(audioCtx);
-      }
-      if (audioCtx.state === "suspended") audioCtx.resume();
-      if (!soundsRequested) loadSoundFiles();
-      return audioCtx;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function decodeAudio(arrayBuffer) {
-    return new Promise(function (resolve, reject) {
-      audioCtx.decodeAudioData(arrayBuffer, resolve, reject);
-    });
-  }
-
-  function loadSoundFiles() {
-    if (!audioCtx) return;
-    soundsRequested = true;
-    Object.keys(SOUND_URLS).forEach(function (key) {
-      fetch(SOUND_URLS[key], { cache: "no-store" })
-        .then(function (r) {
-          if (!r.ok) throw new Error("missing");
-          return r.arrayBuffer();
-        })
-        .then(decodeAudio)
-        .then(function (buf) { soundBuffers[key] = buf; })
-        .catch(function () { soundBuffers[key] = null; });
-    });
-  }
-
-  function playSample(key, rate, gainValue) {
-    if (!audioCtx || !soundBuffers[key]) return false;
-    try {
-      var src = audioCtx.createBufferSource();
-      src.buffer = soundBuffers[key];
-      src.playbackRate.value = rate;
-      var g = audioCtx.createGain();
-      g.gain.value = gainValue;
-      src.connect(g);
-      g.connect(masterGain);
-      src.start();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function synthFlip(rapid) {
-    if (!audioCtx) return;
-    var t = audioCtx.currentTime;
-    var dur = rapid ? 0.12 : 0.28;
-
-    var src = audioCtx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.loop = true;
-    src.playbackRate.value = rapid ? 1.45 : 1.0;
-
-    var bp = audioCtx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.Q.value = 0.75;
-    bp.frequency.setValueAtTime(rapid ? 3200 : 2000, t);
-    bp.frequency.exponentialRampToValueAtTime(rapid ? 900 : 450, t + dur);
-
-    var g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(rapid ? 0.12 : 0.26, t + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-    src.connect(bp);
-    bp.connect(g);
-    g.connect(masterGain);
-    src.start(t);
-    src.stop(t + dur + 0.03);
-
-    var osc = audioCtx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(rapid ? 160 : 120, t);
-    osc.frequency.exponentialRampToValueAtTime(55, t + dur * 0.75);
-
-    var og = audioCtx.createGain();
-    og.gain.setValueAtTime(rapid ? 0.035 : 0.08, t);
-    og.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.85);
-
-    osc.connect(og);
-    og.connect(masterGain);
-    osc.start(t);
-    osc.stop(t + dur);
-
-    var src2 = audioCtx.createBufferSource();
-    src2.buffer = noiseBuffer;
-    src2.loop = true;
-    src2.playbackRate.value = 1.8;
-
-    var hp = audioCtx.createBiquadFilter();
-    hp.type = "highpass";
-    hp.frequency.value = 4500;
-
-    var g2 = audioCtx.createGain();
-    g2.gain.setValueAtTime(0.0001, t);
-    g2.gain.exponentialRampToValueAtTime(rapid ? 0.03 : 0.065, t + 0.008);
-    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.45);
-
-    src2.connect(hp);
-    hp.connect(g2);
-    g2.connect(masterGain);
-    src2.start(t);
-    src2.stop(t + dur * 0.55);
-  }
-
-  function synthSpark() {
-    if (!audioCtx) return;
-    var t = audioCtx.currentTime;
-
-    var osc = audioCtx.createOscillator();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(2600 + Math.random() * 1200, t);
-    osc.frequency.exponentialRampToValueAtTime(180, t + 0.12);
-
-    var filt = audioCtx.createBiquadFilter();
-    filt.type = "bandpass";
-    filt.Q.value = 6;
-    filt.frequency.setValueAtTime(2400, t);
-    filt.frequency.exponentialRampToValueAtTime(500, t + 0.12);
-
-    var g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.07, t + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-
-    osc.connect(filt);
-    filt.connect(g);
-    g.connect(masterGain);
-    osc.start(t);
-    osc.stop(t + 0.16);
-
-    var bursts = 3 + Math.floor(Math.random() * 3);
-    for (var b = 0; b < bursts; b++) {
-      var bt = t + b * 0.026 + Math.random() * 0.018;
-      var dur = 0.025 + Math.random() * 0.035;
-      var src = audioCtx.createBufferSource();
-      src.buffer = noiseBuffer;
-      src.loop = true;
-      src.playbackRate.value = 1.2 + Math.random();
-
-      var hp = audioCtx.createBiquadFilter();
-      hp.type = "highpass";
-      hp.frequency.value = 5200 + Math.random() * 2800;
-
-      var ng = audioCtx.createGain();
-      ng.gain.setValueAtTime(0.0001, bt);
-      ng.gain.exponentialRampToValueAtTime(0.05, bt + 0.003);
-      ng.gain.exponentialRampToValueAtTime(0.0001, bt + dur);
-
-      src.connect(hp);
-      hp.connect(ng);
-      ng.connect(masterGain);
-      src.start(bt);
-      src.stop(bt + dur + 0.01);
-    }
-  }
-
-  function playFlipSound(rapid) {
-    if (!ensureAudio()) return;
-    var rate = rapid ? (1.18 + Math.random() * 0.16) : (0.94 + Math.random() * 0.12);
-    var gain = rapid ? 0.20 : 0.42;
-    if (playSample("flip", rate, gain)) return;
-    synthFlip(rapid);
-  }
-
-  function playSparkSound() {
-    if (!ensureAudio()) return;
-    var rate = 0.85 + Math.random() * 0.4;
-    if (playSample("spark", rate, 0.16)) return;
-    synthSpark();
-  }
-
-  /* ===================== STATE ===================== */
   var pagesUrl = "";
   var total = 1;
   var maxSpread = 0;
   var spread = 1;
   var aspect = 0.72;
   var busy = false;
-  var bookState = "closed-front";
+  var bookState = "closed-front"; // closed-front | open | closed-back
   var idleTimer = null;
   var cache = Object.create(null);
   var inflight = Object.create(null);
@@ -825,10 +1760,16 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   var sparkTick = 0;
   var bgTimer = null;
   var bgIndex = 1;
-  var jumping = false;
+  var stackRSheets = [];
+  var stackLSheets = [];
 
-  function rapidMode() { return jumping || heldLoopRunning; }
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
+
+  function isLoaded(n) {
+    var u = url(n);
+    var im = cache[u];
+    return !!(im && im.complete && im.naturalWidth);
+  }
 
   function preload(list) {
     var jobs = (list || []).map(function (n) {
@@ -837,7 +1778,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       if (inflight[u]) return inflight[u];
       var im = cache[u] || new Image();
       cache[u] = im;
-      if (im.complete && im.naturalWidth) { inflight[u] = Promise.resolve(im); return inflight[u]; }
+      if (im.complete && im.naturalWidth) {
+        inflight[u] = Promise.resolve(im);
+        return inflight[u];
+      }
       inflight[u] = new Promise(function (res) {
         im.onload = function () { res(im); };
         im.onerror = function () { res(null); };
@@ -846,6 +1790,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       return inflight[u];
     });
     return Promise.all(jobs);
+  }
+
+  function whenLoaded(n, cb) {
+    preload([n]).then(function (arr) { cb(arr[0]); });
   }
 
   function preloadAhead(s) {
@@ -857,71 +1805,96 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     preload(pages);
   }
 
-  function loadMissingRange(a, b) {
-    var start = Math.max(1, Math.min(a, b));
-    var end = Math.min(maxSpread, Math.max(a, b));
-    var pages = [];
-    for (var t = start; t <= end; t++) {
-      pages.push(t * 2, t * 2 + 1);
-    }
-    preload(pages);
-  }
-
   function startBgPreload() {
     stopBgPreload();
     bgIndex = 1;
     bgTimer = setInterval(function () {
       if (bgIndex > total) { stopBgPreload(); return; }
-      preload([bgIndex, bgIndex + 1, bgIndex + 2]);
-      bgIndex += 3;
-    }, 220);
-  }
-  function stopBgPreload() { if (bgTimer) { clearInterval(bgTimer); bgTimer = null; } }
-
-  function pageLoaded(n) {
-    var u = url(n);
-    var im = cache[u];
-    return !!(im && im.complete && im.naturalWidth);
+      preload([bgIndex, bgIndex + 1, bgIndex + 2, bgIndex + 3]);
+      bgIndex += 4;
+    }, 180);
   }
 
-  function setHalfOrBlank(imgEl, halfEl, n, blank) {
-    halfEl.classList.remove("is-empty", "is-blank");
+  function stopBgPreload() {
+    if (bgTimer) { clearInterval(bgTimer); bgTimer = null; }
+  }
+
+  function setHalf(imgEl, halfEl, n, blankIfMissing) {
+    imgEl.dataset.page = String(n || "");
     if (n === null || n === undefined || n < 1 || n > total) {
       halfEl.classList.add("is-empty");
+      halfEl.classList.remove("is-blank");
       imgEl.removeAttribute("src");
       return;
     }
-    if (blank && !pageLoaded(n)) {
+
+    halfEl.classList.remove("is-empty");
+
+    if (isLoaded(n)) {
+      halfEl.classList.remove("is-blank");
+      imgEl.src = url(n);
+      return;
+    }
+
+    if (blankIfMissing) {
       halfEl.classList.add("is-blank");
       imgEl.removeAttribute("src");
-      return;
+      whenLoaded(n, function (im) {
+        if (imgEl.dataset.page === String(n) && im && im.naturalWidth) {
+          imgEl.src = url(n);
+          halfEl.classList.remove("is-blank");
+        }
+      });
+    } else {
+      halfEl.classList.remove("is-blank");
+      imgEl.src = url(n);
     }
-    imgEl.src = url(n);
   }
 
-  function setFaceOrBlank(faceEl, imgEl, n, blank) {
-    faceEl.classList.remove("is-backcover", "is-empty", "is-blank");
+  function setFaceImg(faceEl, imgEl, n, blankIfMissing) {
+    faceEl.classList.remove("is-backcover");
+    imgEl.dataset.page = String(n || "");
+
     if (n === null || n === undefined || n < 1 || n > total) {
       faceEl.classList.add("is-empty");
+      faceEl.classList.remove("is-blank");
       imgEl.removeAttribute("src");
       return;
     }
-    if (blank && !pageLoaded(n)) {
+
+    faceEl.classList.remove("is-empty");
+
+    if (isLoaded(n)) {
+      faceEl.classList.remove("is-blank");
+      imgEl.src = url(n);
+      return;
+    }
+
+    if (blankIfMissing) {
       faceEl.classList.add("is-blank");
       imgEl.removeAttribute("src");
-      return;
+      whenLoaded(n, function (im) {
+        if (imgEl.dataset.page === String(n) && im && im.naturalWidth) {
+          imgEl.src = url(n);
+          faceEl.classList.remove("is-blank");
+        }
+      });
+    } else {
+      faceEl.classList.remove("is-blank");
+      imgEl.src = url(n);
     }
-    imgEl.src = url(n);
   }
 
   function setFaceBackcover(faceEl, imgEl) {
-    faceEl.classList.remove("is-empty", "is-blank");
+    faceEl.classList.remove("is-empty");
+    faceEl.classList.remove("is-blank");
     faceEl.classList.add("is-backcover");
+    imgEl.dataset.page = "backcover";
     imgEl.removeAttribute("src");
   }
 
   function layout() {
-    var pad = 245;
+    var pad = 260;
     var availW = Math.max(120, stage.clientWidth - pad);
     var availH = Math.max(160, stage.clientHeight - 150);
     var a = aspect * 2;
@@ -931,95 +1904,71 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     book.style.height = Math.round(h) + "px";
   }
 
-  function spreadLabel(t) {
-    var f = t * 2;
-    var l = Math.min(total, t * 2 + 1);
-    return f === l ? "Page " + f : "Pages " + f + "–" + l;
+  function spreadLabel(s) {
+    var left = s * 2;
+    var right = s * 2 + 1;
+    if (right > total) return "Page " + left;
+    return "Pages " + left + "–" + right;
   }
 
-  function hideTip() { stackTip.classList.remove("show"); }
-
-  function moveTip(label, e, side) {
-    var br = book.getBoundingClientRect();
-    var tipW = stackTip.offsetWidth || 120;
-    var x = e.clientX - br.left;
-    var y = e.clientY - br.top;
-    x = side === "r" ? x - tipW - 18 : x + 18;
-    x = Math.max(4, Math.min(br.width - tipW - 4, x));
-    y = Math.max(12, Math.min(br.height - 18, y));
-    stackTip.textContent = label;
-    stackTip.style.left = x + "px";
-    stackTip.style.top = y + "px";
-    stackTip.classList.add("show");
+  function paint() {
+    setHalf(imgL, halfL, spread * 2, true);
+    setHalf(imgR, halfR, spread * 2 + 1, true);
+    updateUI();
   }
 
-  function makeSheet(label, action, side) {
-    var d = document.createElement("div");
-    d.className = "sheet";
-    d.setAttribute("role", "button");
-    d.setAttribute("tabindex", "0");
-    d.setAttribute("aria-label", label);
-    d.addEventListener("mouseenter", function (e) { moveTip(label, e, side); });
-    d.addEventListener("mousemove", function (e) { moveTip(label, e, side); });
-    d.addEventListener("mouseleave", hideTip);
-    d.addEventListener("click", function (e) {
-      e.stopPropagation();
-      if (busy || rapidMode() || bookState !== "open") return;
-      hideTip();
-      action();
-    });
-    d.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!busy && !rapidMode() && bookState === "open") action();
-      }
-    });
-    return d;
-  }
+  function buildStacks() {
+    stackR.innerHTML = "";
+    stackL.innerHTML = "";
+    stackRSheets = [];
+    stackLSheets = [];
 
-  function clearStack(el) { while (el.firstChild) el.removeChild(el.firstChild); }
-
-  function buildStackSheets() {
-    clearStack(stackR);
-    clearStack(stackL);
-    if (bookState !== "open") return;
-
-    for (var r = spread + 1; r <= maxSpread; r++) {
-      (function (target) {
-        stackR.appendChild(makeSheet(spreadLabel(target), function () { flipToSpread(target, true); }, "r"));
-      })(r);
+    for (var s = 1; s <= maxSpread; s++) {
+      var rSheet = document.createElement("div");
+      rSheet.className = "sheet";
+      rSheet.dataset.spread = String(s);
+      rSheet.dataset.label = spreadLabel(s);
+      stackR.appendChild(rSheet);
+      stackRSheets.push(rSheet);
     }
 
-    for (var l = spread - 1; l >= 1; l--) {
-      (function (target) {
-        stackL.appendChild(makeSheet(spreadLabel(target), function () { flipToSpread(target, true); }, "l"));
-      })(l);
+    for (var l = maxSpread; l >= 1; l--) {
+      var lSheet = document.createElement("div");
+      lSheet.className = "sheet";
+      lSheet.dataset.spread = String(l);
+      lSheet.dataset.label = spreadLabel(l);
+      stackL.appendChild(lSheet);
+      stackLSheets.push(lSheet);
     }
+
+    updateStacks();
   }
 
   function updateStacks() {
-    var unread = maxSpread - spread;
-    var read = spread - 1;
+    var unread = Math.max(0, maxSpread - spread);
+    var read = Math.max(0, spread - 1);
+    var open = bookState === "open";
 
-    stackR.style.width = (unread > 0 ? Math.max(8, Math.min(34, 6 + unread * 1.45)) : 0) + "px";
-    stackL.style.width = (read > 0 ? Math.max(8, Math.min(34, 6 + read * 1.45)) : 0) + "px";
-    stackR.style.opacity = unread > 0 && !rapidMode() ? "1" : "0";
-    stackL.style.opacity = read > 0 && !rapidMode() ? "1" : "0";
-    stackR.style.pointerEvents = unread > 0 && !rapidMode() ? "auto" : "none";
-    stackL.style.pointerEvents = read > 0 && !rapidMode() ? "auto" : "none";
+    stackR.style.width = (open && unread > 0) ? Math.min(34, 8 + unread * 1.15) + "px" : "0px";
+    stackL.style.width = (open && read > 0) ? Math.min(34, 8 + read * 1.15) + "px" : "0px";
+    stackR.style.opacity = (open && unread > 0) ? "1" : "0";
+    stackL.style.opacity = (open && read > 0) ? "1" : "0";
+    stackR.style.pointerEvents = (open && unread > 0) ? "auto" : "none";
+    stackL.style.pointerEvents = (open && read > 0) ? "auto" : "none";
 
-    if (!rapidMode()) buildStackSheets();
+    stackRSheets.forEach(function (sheet) {
+      var s = parseInt(sheet.dataset.spread, 10);
+      sheet.style.display = (open && s > spread) ? "" : "none";
+    });
+
+    stackLSheets.forEach(function (sheet) {
+      var s = parseInt(sheet.dataset.spread, 10);
+      sheet.style.display = (open && s < spread) ? "" : "none";
+    });
   }
 
-  function updateUI(skipStacks) {
-    if (!skipStacks) updateStacks();
-    else {
-      stackR.style.opacity = "0";
-      stackL.style.opacity = "0";
-      stackR.style.pointerEvents = "none";
-      stackL.style.pointerEvents = "none";
-    }
+  function updateUI() {
+    updateStacks();
 
     if (bookState === "closed-front") {
       dPages.textContent = "Cover";
@@ -1045,6 +1994,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     var l = Math.min(total, spread * 2 + 1);
     dPages.textContent = (f === l ? f : f + "–" + l) + " / " + total;
     dFill.style.width = Math.round((l / total) * 100) + "%";
+
     var atStart = spread <= 1;
     dPrev.disabled = atStart;
     dNext.disabled = false;
@@ -1052,17 +2002,19 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     edgeR.classList.remove("off");
   }
 
-  function paint(skipStacks) {
-    setHalfOrBlank(imgL, halfL, spread * 2, false);
-    setHalfOrBlank(imgR, halfR, spread * 2 + 1, false);
-    updateUI(!!skipStacks);
-  }
-
   function waitFlip(ms) {
     return new Promise(function (res) {
       var done = false;
-      var finish = function () { if (done) return; done = true; leaf.removeEventListener("transitionend", onEnd); clearTimeout(to); res(); };
-      var onEnd = function (e) { if (e.propertyName === "transform") finish(); };
+      function finish() {
+        if (done) return;
+        done = true;
+        leaf.removeEventListener("transitionend", onEnd);
+        clearTimeout(to);
+        res();
+      }
+      function onEnd(e) {
+        if (e.propertyName === "transform") finish();
+      }
       leaf.addEventListener("transitionend", onEnd);
       var to = setTimeout(finish, ms + 240);
     });
@@ -1074,6 +2026,8 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.style.transition = "none";
     leaf.style.transform = "rotateY(0deg)";
     faceF.classList.remove("is-backcover");
+    faceF.classList.remove("is-blank");
+    faceB.classList.remove("is-blank");
   }
 
   function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
@@ -1081,17 +2035,30 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function showEnd() { endCard.classList.add("show"); }
   function hideEnd() { endCard.classList.remove("show"); }
 
-  function scheduleStackRefresh() {
-    setTimeout(function () {
-      if (!busy && bookState === "open") paint(false);
-    }, 90);
+  function showTip(text) {
+    sheetTip.textContent = text;
+    sheetTip.classList.add("show");
+  }
+  function hideTip() {
+    sheetTip.classList.remove("show");
+  }
+  function moveTip(e) {
+    var x = e.clientX + 16;
+    var y = e.clientY + 16;
+    var w = sheetTip.offsetWidth || 140;
+    var h = sheetTip.offsetHeight || 34;
+    if (x + w > window.innerWidth - 10) x = e.clientX - w - 16;
+    if (y + h > window.innerHeight - 10) y = e.clientY - h - 16;
+    sheetTip.style.left = x + "px";
+    sheetTip.style.top = y + "px";
   }
 
-  /* ---------- sparks on edges ---------- */
+  /* ---------- sparks on the page EDGES ---------- */
   function showSparks(dir) {
     flashEl.classList.remove("side-l", "side-r", "side-b");
     flashEl.classList.add(dir < 0 ? "side-l" : (dir > 0 ? "side-r" : "side-b"));
     flashEl.classList.add("active");
+
     if (sparkTimer) return;
     sparkTick = 0;
     sparkTimer = setInterval(function () {
@@ -1099,25 +2066,29 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       spawnSpark();
       sparkTick++;
       if (sparkTick % 2 === 0) playSparkSound();
-    }, 75);
+    }, 70);
+
     spawnSpark();
     spawnSpark();
   }
 
   function hideSparks() {
     flashEl.classList.remove("active");
-    if (sparkTimer) { clearInterval(sparkTimer); sparkTimer = null; }
+    if (sparkTimer) {
+      clearInterval(sparkTimer);
+      sparkTimer = null;
+    }
   }
 
   function spawnSpark() {
     var side = Math.random() > 0.5 ? 1 : -1;
     var xPct = side > 0 ? (93 + Math.random() * 7) : (Math.random() * 7);
-    var drift = side * (24 + Math.random() * 34);
-    var rot = -50 + Math.random() * 100;
+    var drift = side * (24 + Math.random() * 40);
+    var rot = -55 + Math.random() * 110;
 
     var line = document.createElement("div");
     line.className = "spark";
-    line.style.height = (14 + Math.random() * 46) + "px";
+    line.style.height = (14 + Math.random() * 48) + "px";
     line.style.left = xPct + "%";
     line.style.top = (4 + Math.random() * 88) + "%";
     line.style.setProperty("--rot", rot + "deg");
@@ -1125,13 +2096,13 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     sparksEl.appendChild(line);
     setTimeout(function () { if (line.parentNode) line.parentNode.removeChild(line); }, 520);
 
-    if (Math.random() > 0.45) {
+    if (Math.random() > 0.42) {
       var dot = document.createElement("div");
       dot.className = "spark-dot";
       dot.style.left = xPct + "%";
       dot.style.top = (8 + Math.random() * 84) + "%";
       dot.style.setProperty("--drift", drift + "px");
-      dot.style.setProperty("--fall", (-6 + Math.random() * 18) + "px");
+      dot.style.setProperty("--fall", (-8 + Math.random() * 20) + "px");
       sparksEl.appendChild(dot);
       setTimeout(function () { if (dot.parentNode) dot.parentNode.removeChild(dot); }, 470);
     }
@@ -1145,10 +2116,11 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     hideEnd();
     ensureAudio();
 
-    setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
-    setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
-    setFaceOrBlank(faceF, imgF, 1, false);
-    setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
+    setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
+    setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
+
+    setFaceImg(faceF, imgF, 1, false);
+    setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
 
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
@@ -1161,33 +2133,35 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
     leaf.style.transform = "rotateY(-180deg)";
 
-    bookPos.classList.remove("closed", "closed-back");
+    bookPos.classList.remove("closed");
+    bookPos.classList.remove("closed-back");
     reader.classList.remove("state-closed");
+
     playFlipSound(false);
     preloadAhead(1);
 
     waitFlip(BOOK_DUR).then(function () {
-      setHalfOrBlank(imgL, halfL, 2, false);
+      setHalf(imgL, halfL, 2, true);
       resetLeaf();
       spread = 1;
       bookState = "open";
       busy = false;
-      paint(false);
+      paint();
       startBgPreload();
     });
   }
 
-  /* ---------- CLOSE front magazine ---------- */
+  /* ---------- CLOSE magazine ---------- */
   function closeMagazine() {
     if (busy || bookState !== "open") return;
     busy = true;
     hideHint();
     hideEnd();
 
-    setHalfOrBlank(imgL, halfL, 2, false);
-    setHalfOrBlank(imgR, halfR, 3, false);
-    setFaceOrBlank(faceF, imgF, 1, false);
-    setFaceOrBlank(faceB, imgB, 2, false);
+    setHalf(imgL, halfL, 2, false);
+    setHalf(imgR, halfR, 3, false);
+    setFaceImg(faceF, imgF, 1, false);
+    setFaceImg(faceB, imgB, 2, false);
 
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
@@ -1206,30 +2180,30 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 
     waitFlip(BOOK_DUR).then(function () {
       resetLeaf();
-      setHalfOrBlank(imgR, halfR, 1, false);
+      setHalf(imgR, halfR, 1, false);
       bookState = "closed-front";
       busy = false;
       reader.classList.add("state-closed");
-      updateUI(true);
+      updateUI();
       showHint("Click to open");
     });
   }
 
-  /* ---------- FINISH: back cover flips LEFT ---------- */
+  /* ---------- FINISH: back cover closes to the LEFT ---------- */
   function finishMagazine() {
-    if (busy || bookState !== "open") return;
+    if (busy) return;
     busy = true;
     hideHint();
-    hideEnd();
 
-    var currentLeft = spread * 2;
-    var currentRight = spread * 2 + 1;
+    var leftPage = spread * 2;
+    var rightPage = spread * 2 + 1;
 
-    setHalfOrBlank(imgL, halfL, currentLeft, false);
-    setHalfOrBlank(imgR, halfR, currentRight, false);
+    setHalf(imgL, halfL, leftPage, true);
+    setHalf(imgR, halfR, rightPage, true);
 
-    // Front face is the last visible page. Back face is the back cover.
-    setFaceOrBlank(faceF, imgF, currentRight, false);
+    // Front of flipping leaf = current right page (or blank/inner if even page count)
+    setFaceImg(faceF, imgF, rightPage, true);
+    // Back of flipping leaf = branded back cover
     setFaceBackcover(faceB, imgB);
 
     leaf.className = "leaf pos-r";
@@ -1243,35 +2217,35 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
     leaf.style.transform = "rotateY(-180deg)";
 
+    bookPos.classList.remove("closed");
+    bookPos.classList.add("closed-back");
+    reader.classList.remove("state-closed");
     playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
-      // Do not reset leaf. Keep the back cover visible on the left leaf.
+      // Do NOT reset leaf. Keep it parked at -180 so the back cover remains visible.
       leaf.classList.remove("is-flipping");
       bookState = "closed-back";
       busy = false;
-      bookPos.classList.remove("closed");
-      bookPos.classList.add("closed-back");
-      reader.classList.remove("state-closed");
-      updateUI(true);
+      updateUI();
       showEnd();
     });
   }
 
-  /* ---------- REOPEN from back cover ---------- */
+  /* ---------- GO BACK from back cover ---------- */
   function reopenFromBack() {
     if (busy || bookState !== "closed-back") return;
     busy = true;
     hideEnd();
     hideHint();
-    ensureAudio();
 
-    var lastLeft = maxSpread * 2;
-    var lastRight = maxSpread * 2 + 1;
+    var leftPage = maxSpread * 2;
+    var rightPage = maxSpread * 2 + 1;
 
-    setHalfOrBlank(imgL, halfL, lastLeft, false);
-    setHalfOrBlank(imgR, halfR, lastRight, false);
-    setFaceOrBlank(faceF, imgF, lastRight, false);
+    setHalf(imgL, halfL, leftPage, true);
+    setHalf(imgR, halfR, rightPage, true);
+
+    setFaceImg(faceF, imgF, rightPage, true);
     setFaceBackcover(faceB, imgB);
 
     leaf.className = "leaf pos-r";
@@ -1286,6 +2260,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.style.transform = "rotateY(0deg)";
 
     bookPos.classList.remove("closed-back");
+    reader.classList.remove("state-closed");
     playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
@@ -1293,18 +2268,13 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       spread = maxSpread;
       bookState = "open";
       busy = false;
-      reader.classList.remove("state-closed");
-      paint(false);
+      paint();
       preloadAhead(spread);
     });
   }
 
-  /* ---------- flip one spread ---------- */
-  function doFlip(dir, duration, opts) {
-    opts = opts || {};
-    var blank = !!opts.blank;
-    var skipStacks = !!opts.skipStacks;
-
+  /* ---------- single spread flip ---------- */
+  function doFlip(dir, duration, instant) {
     if (busy || bookState !== "open") return Promise.resolve();
     if (dir > 0 && spread >= maxSpread) return Promise.resolve();
     if (dir < 0 && spread <= 1) return Promise.resolve();
@@ -1329,15 +2299,15 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 
     function runAnim() {
       if (dir > 0) {
-        setHalfOrBlank(imgR, halfR, staticPage, blank);
+        setHalf(imgR, halfR, staticPage, true);
         leaf.className = "leaf pos-r";
       } else {
-        setHalfOrBlank(imgL, halfL, staticPage, blank);
+        setHalf(imgL, halfL, staticPage, true);
         leaf.className = "leaf pos-l";
       }
 
-      setFaceOrBlank(faceF, imgF, front, blank);
-      setFaceOrBlank(faceB, imgB, back, blank);
+      setFaceImg(faceF, imgF, front, true);
+      setFaceImg(faceB, imgB, back, true);
 
       leaf.style.setProperty("--flip-dur", duration + "ms");
       leaf.style.display = "block";
@@ -1350,70 +2320,67 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       leaf.style.transform = dir > 0 ? "rotateY(-180deg)" : "rotateY(180deg)";
 
       playFlipSound(duration < 350);
-
-      var loadPages = [front, back, staticPage, nextSpread * 2, nextSpread * 2 + 1];
-      preload(loadPages);
-      if (!skipStacks) preloadAhead(nextSpread);
+      preloadAhead(nextSpread);
 
       return waitFlip(duration).then(function () {
-        if (dir > 0) setHalfOrBlank(imgL, halfL, back, blank);
-        else setHalfOrBlank(imgR, halfR, back, blank);
+        if (dir > 0) setHalf(imgL, halfL, back, true);
+        else setHalf(imgR, halfR, back, true);
 
         resetLeaf();
         spread = nextSpread;
         busy = false;
-        paint(skipStacks);
+        paint();
       });
     }
 
-    if (blank) {
-      return runAnim().catch(function () { resetLeaf(); busy = false; paint(skipStacks); });
+    if (instant) {
+      preload([front, back, staticPage]); // fire and forget
+      return runAnim().catch(function () {
+        resetLeaf();
+        busy = false;
+        paint();
+      });
     }
 
-    return preload([front, back, staticPage]).then(runAnim).catch(function () { resetLeaf(); busy = false; paint(skipStacks); });
-  }
-
-  /* ---------- jump to target spread ---------- */
-  function flipToSpread(target, sparks) {
-    if (bookState !== "open" || busy || rapidMode()) return;
-    target = Math.max(1, Math.min(maxSpread, target));
-    if (target === spread) return;
-
-    var from = spread;
-    var dir = target > spread ? 1 : -1;
-    jumping = true;
-    if (sparks) showSparks(dir);
-
-    // Load only the destination first. Middle pages can appear white during the riffle.
-    preload([target * 2, target * 2 + 1]).then(function () {
-      stepToSpread(target, dir, sparks, from);
+    return preload([front, back, staticPage]).then(runAnim).catch(function () {
+      resetLeaf();
+      busy = false;
+      paint();
     });
   }
 
-  function stepToSpread(target, dir, sparks, from) {
+  /* ---------- jump to a spread with uninterrupted riffle ---------- */
+  function flipToSpread(target, sparks) {
+    if (bookState !== "open" || busy) return;
+    target = Math.max(1, Math.min(maxSpread, target));
+    if (target === spread) return;
+
+    var dir = target > spread ? 1 : -1;
+
+    // Immediately request target pages so final landing is not blank for long.
+    preload([target * 2, target * 2 + 1]);
+
+    if (sparks) showSparks(dir);
+    stepToSpread(target, dir, sparks);
+  }
+
+  function stepToSpread(target, dir, sparks) {
     if (bookState !== "open") {
-      jumping = false;
-      hideSparks();
+      if (sparks) hideSparks();
       return;
     }
-
     if (spread === target) {
-      jumping = false;
-      hideSparks();
-      paint(false);
-      loadMissingRange(from, target);
+      if (sparks) hideSparks();
       return;
     }
 
     var before = spread;
-    doFlip(dir, JUMP_DUR, { blank: true, skipStacks: true }).then(function () {
+    doFlip(dir, JUMP_DUR, true).then(function () {
       if (spread === before) {
-        jumping = false;
-        hideSparks();
-        paint(false);
+        if (sparks) hideSparks();
         return;
       }
-      stepToSpread(target, dir, sparks, from);
+      stepToSpread(target, dir, sparks);
     });
   }
 
@@ -1430,17 +2397,19 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       if (dir > 0) openMagazine();
       return;
     }
+
     if (bookState === "closed-back") {
       if (dir < 0) reopenFromBack();
       return;
     }
+
     if (bookState === "open") {
       if (dir > 0) {
         if (spread >= maxSpread) finishMagazine();
-        else doFlip(1, NORMAL_DUR, { blank: false, skipStacks: false });
+        else doFlip(1, NORMAL_DUR, false);
       } else {
         if (spread <= 1) closeMagazine();
-        else doFlip(-1, NORMAL_DUR, { blank: false, skipStacks: false });
+        else doFlip(-1, NORMAL_DUR, false);
       }
     }
   }
@@ -1460,35 +2429,56 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     heldDir = 0;
     heldLoopRunning = false;
     hideSparks();
-    scheduleStackRefresh();
   }
 
   function heldLoop() {
     if (!heldLoopRunning || heldDir === 0) return;
-    if (busy) { setTimeout(heldLoop, 25); return; }
+    if (busy) {
+      setTimeout(heldLoop, 20);
+      return;
+    }
 
     if (bookState === "closed-front") {
-      if (heldDir > 0) { openMagazine(); setTimeout(heldLoop, 55); }
-      else stopHeld();
+      if (heldDir > 0) {
+        openMagazine();
+        setTimeout(heldLoop, 50);
+      } else {
+        stopHeld();
+      }
       return;
     }
 
     if (bookState === "closed-back") {
-      if (heldDir < 0) { reopenFromBack(); setTimeout(heldLoop, 55); }
-      else stopHeld();
+      if (heldDir < 0) {
+        reopenFromBack();
+        setTimeout(heldLoop, 50);
+      } else {
+        stopHeld();
+      }
       return;
     }
 
-    if (bookState !== "open") { stopHeld(); return; }
+    if (bookState !== "open") {
+      stopHeld();
+      return;
+    }
 
     if (heldDir > 0) {
-      if (spread >= maxSpread) { finishMagazine(); stopHeld(); return; }
-      doFlip(1, RAPID_DUR, { blank: true, skipStacks: true }).then(function () {
+      if (spread >= maxSpread) {
+        finishMagazine();
+        stopHeld();
+        return;
+      }
+      doFlip(1, RAPID_DUR, true).then(function () {
         if (heldLoopRunning) heldLoop();
       });
     } else {
-      if (spread <= 1) { closeMagazine(); stopHeld(); return; }
-      doFlip(-1, RAPID_DUR, { blank: true, skipStacks: true }).then(function () {
+      if (spread <= 1) {
+        closeMagazine();
+        stopHeld();
+        return;
+      }
+      doFlip(-1, RAPID_DUR, true).then(function () {
         if (heldLoopRunning) heldLoop();
       });
     }
@@ -1497,9 +2487,14 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function wake() {
     reader.classList.remove("idle");
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(function () { if (!busy) reader.classList.add("idle"); }, 2800);
+    idleTimer = setTimeout(function () {
+      if (!busy) reader.classList.add("idle");
+    }, 2800);
   }
-  ["mousemove", "touchstart", "keydown"].forEach(function (ev) { reader.addEventListener(ev, wake, { passive: true }); });
+
+  ["mousemove", "touchstart", "keydown"].forEach(function (ev) {
+    reader.addEventListener(ev, wake, { passive: true });
+  });
 
   function failLoad(msg) {
     loader.classList.remove("gone");
@@ -1529,6 +2524,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     reader.classList.remove("is-open", "is-closing", "idle");
     reader.classList.add("state-closed");
     document.body.style.overflow = "hidden";
+
     hideHint();
     hideEnd();
     resetLeaf();
@@ -1552,22 +2548,27 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       });
     }).then(function () {
       maxSpread = Math.floor(total / 2);
+
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-      setFaceOrBlank(faceF, imgF, 1, false);
-      setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
+      buildStacks();
+
+      setFaceImg(faceF, imgF, 1, false);
+      setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
       leaf.className = "leaf pos-r";
       leaf.style.display = "block";
       leaf.style.transition = "none";
       leaf.style.transform = "rotateY(0deg)";
-      setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
-      setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
+
+      setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
+      setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
 
       layout();
-      updateUI(true);
+      updateUI();
       loader.classList.add("gone");
-      return preload(total >= 3 ? [1, 2, 3, 4, 5, 6, 7] : [1, 2]);
+
+      return preload(total >= 3 ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2]);
     }).then(function () {
       revealBook(card, ev);
       wake();
@@ -1607,8 +2608,13 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     if (!dst.width || !dst.height) { done(); return; }
 
     var clone;
-    if (useImg) { clone = new Image(); clone.src = srcEl.src; }
-    else { clone = document.createElement("div"); clone.style.background = "linear-gradient(150deg,#0A192F,#1E3A8A)"; }
+    if (useImg) {
+      clone = new Image();
+      clone.src = srcEl.src;
+    } else {
+      clone = document.createElement("div");
+      clone.style.background = "linear-gradient(150deg,#0A192F,#1E3A8A)";
+    }
 
     clone.className = "fly";
     clone.style.left = dst.left + "px";
@@ -1642,8 +2648,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     hideEnd();
     hideTip();
     clearTimeout(idleTimer);
+
     reader.classList.add("is-closing");
     reader.classList.remove("idle");
+
     book.style.transition = "transform 0.42s cubic-bezier(0.4,0,1,1), opacity 0.42s ease";
     book.style.transform = "scale(0.9) translateY(24px)";
     book.classList.remove("visible");
@@ -1659,18 +2667,21 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     }, 430);
   }
 
-  /* ===================== EVENTS ===================== */
+  /* ---------- events ---------- */
   cards.forEach(function (card) {
     card.addEventListener("click", function (ev) { openReader(card, ev); });
     card.addEventListener("keydown", function (ev) {
-      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openReader(card, ev); }
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        openReader(card, ev);
+      }
     });
   });
 
   zoneR.addEventListener("click", function () {
     if (busy) return;
     if (bookState === "closed-front") openMagazine();
-    else if (bookState === "closed-back") reopenFromBack();
+    else if (bookState === "closed-back") return;
     else navigateOnce(1);
   });
 
@@ -1680,8 +2691,35 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     else navigateOnce(-1);
   });
 
-  stackR.addEventListener("mouseleave", hideTip);
-  stackL.addEventListener("mouseleave", hideTip);
+  function bindStack(container) {
+    container.addEventListener("mouseover", function (e) {
+      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
+      if (!sheet) return;
+      showTip(sheet.dataset.label || "");
+    });
+
+    container.addEventListener("mousemove", function (e) {
+      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
+      if (!sheet) { hideTip(); return; }
+      moveTip(e);
+    });
+
+    container.addEventListener("mouseout", function (e) {
+      var related = e.relatedTarget;
+      if (related && related.closest && related.closest(".sheet")) return;
+      hideTip();
+    });
+
+    container.addEventListener("click", function (e) {
+      var sheet = e.target && e.target.closest ? e.target.closest(".sheet") : null;
+      if (!sheet) return;
+      var target = parseInt(sheet.dataset.spread, 10);
+      if (!isNaN(target)) flipToSpread(target, true);
+    });
+  }
+
+  bindStack(stackR);
+  bindStack(stackL);
 
   document.getElementById("r-close").addEventListener("click", closeReader);
   dNext.addEventListener("click", function () { navigateOnce(1); });
@@ -1690,7 +2728,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   edgeL.addEventListener("click", function () { navigateOnce(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy || rapidMode()) return;
+    if (bookState !== "open" || busy) return;
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
@@ -1698,7 +2736,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   });
 
   dPages.addEventListener("click", function () {
-    if (bookState !== "open" || busy || rapidMode()) return;
+    if (bookState !== "open" || busy) return;
 
     var input = document.createElement("input");
     input.type = "number";
@@ -1716,44 +2754,58 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     function cleanup(jump) {
       if (finished) return;
       finished = true;
+
       var val = parseInt(input.value, 10);
       if (input.parentNode) input.parentNode.removeChild(input);
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        if (val <= 1) closeMagazine();
-        else flipToSpread(pageToSpread(val), true);
+        if (val <= 1) {
+          closeMagazine();
+        } else {
+          var targetSpread = pageToSpread(val);
+          preload([targetSpread * 2, targetSpread * 2 + 1]);
+          flipToSpread(targetSpread, true);
+        }
       }
-      updateUI(false);
+
+      updateUI();
     }
 
     input.addEventListener("keydown", function (e) {
       e.stopPropagation();
-      if (e.key === "Enter") { e.preventDefault(); cleanup(true); }
-      else if (e.key === "Escape") cleanup(false);
+      if (e.key === "Enter") {
+        e.preventDefault();
+        cleanup(true);
+      } else if (e.key === "Escape") {
+        cleanup(false);
+      }
     });
+
     input.addEventListener("blur", function () { cleanup(true); });
   });
 
   document.getElementById("end-again").addEventListener("click", function () {
     if (busy) return;
     hideEnd();
+
+    resetLeaf();
     bookState = "closed-front";
     bookPos.classList.remove("closed-back");
     bookPos.classList.add("closed");
     reader.classList.add("state-closed");
-    resetLeaf();
 
-    setFaceOrBlank(faceF, imgF, 1, false);
-    setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
+    setFaceImg(faceF, imgF, 1, false);
+    setFaceImg(faceB, imgB, total >= 2 ? 2 : null, false);
     leaf.className = "leaf pos-r";
     leaf.style.display = "block";
     leaf.style.transition = "none";
     leaf.style.transform = "rotateY(0deg)";
-    setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
-    setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
 
-    updateUI(true);
+    setHalf(imgL, halfL, total >= 2 ? 2 : null, false);
+    setHalf(imgR, halfR, total >= 3 ? 3 : null, false);
+
+    updateUI();
     setTimeout(openMagazine, 320);
   });
 
@@ -1783,7 +2835,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     } else {
       navigateOnce(dir);
       clearTimeout(holdTimeout);
-      holdTimeout = setTimeout(function () { startHeld(dir); }, 340);
+      holdTimeout = setTimeout(function () { startHeld(dir); }, 320);
     }
   });
 
@@ -1806,10 +2858,12 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   reader.addEventListener("touchend", function (e) {
     if (!tracking) return;
     tracking = false;
+
     var t = e.changedTouches[0];
     var dx = t.clientX - tx0;
     var dy = t.clientY - ty0;
     var dt = Date.now() - tt0;
+
     if (Math.abs(dx) < 46 || Math.abs(dx) < Math.abs(dy) * 1.25 || dt > 900) return;
     if (dx < 0) navigateOnce(1);
     else navigateOnce(-1);
