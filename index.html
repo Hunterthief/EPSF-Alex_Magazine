@@ -716,27 +716,39 @@ body {
 .page-stack--r {
   left: 100%;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(to right, #AFA796 0%, #D8D2C4 18%, #F2EEE2 60%, #FBF8EF 100%);
+  background: transparent;
 }
 .page-stack--l {
   right: 100%;
   border-radius: 4px 0 0 4px;
-  background: linear-gradient(to left, #AFA796 0%, #D8D2C4 18%, #F2EEE2 60%, #FBF8EF 100%);
+  background: transparent;
 }
 .sheet {
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
   height: 100%;
-  background: transparent;
+  background: #F7F4EA;
   border: none;
   cursor: pointer;
-  transition: background 0.14s ease, filter 0.14s ease;
+  transition: background 0.14s ease;
 }
-.sheet:hover {
-  background: rgba(255, 220, 120, 0.30);
+.sheet.sheet-gray {
+  background: #D7D1C4;
 }
-.sheet:active {
-  background: rgba(255, 220, 120, 0.45);
+.sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.12s ease;
+  pointer-events: none;
+}
+.sheet:hover::after {
+  background: rgba(0,0,0,0.28);
+}
+.sheet:active::after {
+  background: rgba(0,0,0,0.44);
 }
 
 .sheet-tip {
@@ -1854,15 +1866,17 @@ body {
     stackLSheets = [];
 
     for (var s = 1; s <= maxSpread; s++) {
+      var sheetClass = "sheet" + (s % 2 === 0 ? " sheet-gray" : "");
+
       var rSheet = document.createElement("div");
-      rSheet.className = "sheet";
+      rSheet.className = sheetClass;
       rSheet.dataset.spread = String(s);
       rSheet.dataset.label = spreadLabel(s);
       stackR.appendChild(rSheet);
       stackRSheets.push(rSheet);
 
       var lSheet = document.createElement("div");
-      lSheet.className = "sheet";
+      lSheet.className = sheetClass;
       lSheet.dataset.spread = String(s);
       lSheet.dataset.label = spreadLabel(s);
       stackL.appendChild(lSheet);
