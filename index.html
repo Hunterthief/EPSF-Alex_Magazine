@@ -116,6 +116,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .r-stage { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 2600px; perspective-origin: 50% 46%; }
 .book-pos { position: relative; transform-style: preserve-3d; transition: transform 1s var(--ease-book); }
 .book-pos.closed { transform: translateX(-25%); }
+.book-pos.closed-back { transform: translateX(25%); }
 .book { position: relative; transform-style: preserve-3d; opacity: 0; transition: opacity 0.5s ease; }
 .book.visible { opacity: 1; }
 .book-shadow { position: absolute; left: 50%; top: 100%; margin-top: 14px; transform: translateX(-50%); width: 78%; height: 34px; pointer-events: none; background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%); filter: blur(14px); opacity: 0; transition: opacity 0.6s ease; }
@@ -124,12 +125,19 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .half { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; background: #FAFAF7; z-index: 2; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.45); }
 .half--l { left: 0; transition: opacity 0.55s ease; }
 .half--r { right: 0; }
-.book-pos.closed .half--l { opacity: 0; }
-.book-pos.closed .spine { opacity: 0; }
+.book-pos.closed .half--l,
+.book-pos.closed-back .half--r,
+.book-pos.closed .spine,
+.book-pos.closed-back .spine,
+.book-pos.closed .page-stack,
+.book-pos.closed-back .page-stack { opacity: 0; pointer-events: none; }
 .half img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .half .inner-cover { position: absolute; inset: 0; display: none; background: radial-gradient(ellipse 130% 90% at 100% 50%, rgba(212,175,55,0.14), transparent 62%), linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%); }
 .half.is-empty .inner-cover { display: block; }
 .half.is-empty img { display: none; }
+.half.is-blank { background: #fff; }
+.half.is-blank img,
+.half.is-blank .inner-cover { display: none; }
 .half--l::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%); }
 .half--r::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to left, rgba(0,0,0,0.05) 0%, transparent 9%, transparent 74%, rgba(0,0,0,0.3) 100%); }
 .half--l::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px; z-index: 4; background: linear-gradient(to right, rgba(0,0,0,0.16), transparent); }
@@ -140,16 +148,22 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 
 .spine { position: absolute; top: 0; bottom: 0; left: 50%; width: 74px; transform: translateX(-50%); z-index: 6; pointer-events: none; transition: opacity 0.5s ease; background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.1) 26%, rgba(0,0,0,0.4) 47%, rgba(0,0,0,0.46) 50%, rgba(0,0,0,0.4) 53%, rgba(0,0,0,0.1) 74%, transparent 100%); }
 
-/* clickable unread/read page stacks (Internet Archive style) */
+/* Internet Archive style clickable page sheets */
 .page-stack {
   position: absolute; top: 1.5%; bottom: 1.5%; z-index: 1; cursor: pointer;
   opacity: 0; pointer-events: none;
-  transition: width 0.5s var(--ease-out), opacity 0.4s ease, filter 0.2s;
+  transition: width 0.45s var(--ease-out), opacity 0.35s ease, filter 0.2s;
   box-shadow: 0 10px 22px rgba(0,0,0,0.45), inset 0 0 3px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column; overflow: hidden;
 }
-.page-stack:hover { filter: brightness(1.15); }
+.page-stack:hover { filter: brightness(1.08); }
 .page-stack--r { left: 100%; border-radius: 2px 4px 4px 2px; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.16) 0 1px, rgba(0,0,0,0) 1px 4px), linear-gradient(to right, #B8B2A2, #EDE9DC 55%, #F7F4EA); }
 .page-stack--l { right: 100%; border-radius: 4px 2px 2px 4px; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.16) 0 1px, rgba(0,0,0,0) 1px 4px), linear-gradient(to left, #B8B2A2, #EDE9DC 55%, #F7F4EA); }
+.sheet { flex: 1 1 0; min-height: 2px; border-bottom: 1px solid rgba(0,0,0,0.16); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
+.sheet:last-child { border-bottom: none; }
+.sheet:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.55); }
+.stack-tip { position: absolute; z-index: 70; pointer-events: none; padding: 7px 11px; border-radius: 9px; background: rgba(9,16,29,0.94); color: #fff; font-family: var(--body); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 12px 28px rgba(0,0,0,0.45); border: 1px solid rgba(212,175,55,0.35); opacity: 0; transform: translateY(-50%); transition: opacity 0.12s ease; }
+.stack-tip.show { opacity: 1; }
 
 .leaf { position: absolute; top: 0; width: 50%; height: 100%; transform-style: preserve-3d; display: none; z-index: 20; will-change: transform; --flip-dur: 1000ms; pointer-events: none; }
 .leaf.pos-r { left: 50%; transform-origin: left center; }
@@ -160,6 +174,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .face .inner-cover { position: absolute; inset: 0; display: none; background: linear-gradient(105deg, #16233C 0%, #0E1A2E 48%, #0A1424 100%); }
 .face.is-empty .inner-cover { display: block; }
 .face.is-empty img { display: none; }
+.face.is-blank { background: #fff; }
+.face.is-blank img,
+.face.is-blank .inner-cover,
+.face.is-blank .backcover-design { display: none; }
 .face.is-backcover img, .face.is-backcover .inner-cover { display: none; }
 
 .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
@@ -188,7 +206,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .zone--r { right: 0; width: 50%; }
 .reader.state-closed .zone--l { display: none; }
 
-/* electric sparks on the EDGES + flash */
+/* electric sparks on page edges */
 .sparks { position: absolute; inset: -40px; z-index: 30; pointer-events: none; }
 .spark { position: absolute; width: 2px; border-radius: 2px; opacity: 0; background: linear-gradient(to bottom, transparent, #FFFBE6 20%, #FFD75E 50%, #FFFBE6 80%, transparent); box-shadow: 0 0 8px 1px rgba(255,220,110,0.85), 0 0 18px 2px rgba(255,190,60,0.4); animation: sparkFly 0.5s ease-out forwards; }
 @keyframes sparkFly {
@@ -237,13 +255,14 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 .hint.show { display: inline-flex; }
 @keyframes hintPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.42); transform: translateX(-50%) translateY(0); } 50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); } }
 
-.end-card { position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%); z-index: 46; display: none; flex-direction: column; align-items: center; gap: 14px; padding: 22px 30px; border-radius: 18px; background: rgba(9,16,29,0.82); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 18px 44px rgba(0,0,0,0.5); animation: endIn 0.6s var(--ease-out); }
+/* Moved end card to top-right so it does not cover back cover text */
+.end-card { position: absolute; top: 86px; right: 28px; bottom: auto; left: auto; transform: none; z-index: 46; display: none; flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px 20px; border-radius: 16px; background: rgba(9,16,29,0.84); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 18px 44px rgba(0,0,0,0.5); animation: endIn 0.55s var(--ease-out); max-width: 260px; text-align: left; }
 .end-card.show { display: flex; }
-@keyframes endIn { from { opacity: 0; transform: translateX(-50%) translateY(16px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-.end-card .end-label { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: #fff; }
-.end-card .end-sub { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
-.end-actions { display: flex; gap: 10px; margin-top: 4px; }
-.end-actions button { height: 38px; padding: 0 20px; border-radius: 100px; cursor: pointer; font-family: var(--body); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
+@keyframes endIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.end-card .end-label { font-family: var(--display); font-size: 1.18rem; font-weight: 700; color: #fff; }
+.end-card .end-sub { font-size: 0.76rem; color: rgba(255,255,255,0.65); }
+.end-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
+.end-actions button { height: 34px; padding: 0 16px; border-radius: 100px; cursor: pointer; font-family: var(--body); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
 .end-again { background: var(--accent); border: none; color: #1A1403; }
 .end-again:hover { background: var(--accent-soft); transform: translateY(-1px); }
 .end-close { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #fff; }
@@ -279,7 +298,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   .dock { bottom: 18px; gap: 12px; padding: 9px 14px; width: calc(100% - 32px); max-width: 380px; justify-content: space-between; }
   .dock-mid { min-width: 0; flex: 1; }
   .hint { bottom: 92px; font-size: 0.62rem; padding: 10px 18px; }
-  .end-card { bottom: 92px; }
+  .end-card { top: 66px; right: 12px; left: 12px; max-width: none; }
   .page-stack { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -390,7 +409,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
 </footer>
 
 <!-- ================= READER ================= -->
-<div class="reader" id="reader" hidden>
+<div class="reader" id="reader" hidden data-baseurl="{{ site.baseurl }}">
   <div class="reader-fade"></div>
 
   <div class="r-top">
@@ -412,8 +431,8 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   <div class="r-stage" id="r-stage">
     <div class="book-pos closed" id="book-pos">
       <div class="book" id="book">
-        <div class="page-stack page-stack--l" id="stack-l" title="Click to jump back"></div>
-        <div class="page-stack page-stack--r" id="stack-r" title="Click to jump ahead"></div>
+        <div class="page-stack page-stack--l" id="stack-l"></div>
+        <div class="page-stack page-stack--r" id="stack-r"></div>
         <div class="half half--l" id="half-l"><img id="img-l" alt=""><div class="inner-cover"></div><div class="page-edge"></div></div>
         <div class="half half--r" id="half-r">
           <img id="img-r" alt=""><div class="inner-cover"></div><div class="page-edge"></div>
@@ -435,6 +454,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
         </div>
         <div class="rapid-flash" id="rapid-flash"></div>
         <div class="sparks" id="sparks"></div>
+        <div class="stack-tip" id="stack-tip"></div>
         <div class="zone zone--l" id="zone-l"></div>
         <div class="zone zone--r" id="zone-r"></div>
       </div>
@@ -479,10 +499,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   "use strict";
 
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var NORMAL_DUR = 650;
-  var RAPID_DUR = 140;
-  var JUMP_DUR = 90;
-  var BOOK_DUR = 1000;
+  var NORMAL_DUR = 620;
+  var RAPID_DUR = 120;
+  var JUMP_DUR = 80;
+  var BOOK_DUR = 950;
 
   function parseIssueName(fileName) {
     var name = String(fileName || "").replace(/\.pdf$/i, "");
@@ -545,95 +565,249 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     });
   }
 
-  /* ===================== AUDIO (synthesized) ===================== */
+  /* ===================== ELEMENTS ===================== */
+  var reader    = document.getElementById("reader");
+  var BASE      = reader.dataset.baseurl || "";
+  var stage     = document.getElementById("r-stage");
+  var bookPos   = document.getElementById("book-pos");
+  var book      = document.getElementById("book");
+  var halfL     = document.getElementById("half-l");
+  var halfR     = document.getElementById("half-r");
+  var imgL      = document.getElementById("img-l");
+  var imgR      = document.getElementById("img-r");
+  var leaf      = document.getElementById("leaf");
+  var faceF     = document.getElementById("face-f");
+  var faceB     = document.getElementById("face-b");
+  var imgF      = document.getElementById("img-f");
+  var imgB      = document.getElementById("img-b");
+  var shine     = document.getElementById("shine");
+  var hint      = document.getElementById("hint");
+  var hintTxt   = document.getElementById("hint-txt");
+  var endCard   = document.getElementById("end-card");
+  var loader    = document.getElementById("loader");
+  var loaderTxt = document.getElementById("loader-txt");
+  var rTitle    = document.getElementById("r-title");
+  var rDl       = document.getElementById("r-dl");
+  var edgeL     = document.getElementById("edge-l");
+  var edgeR     = document.getElementById("edge-r");
+  var zoneL     = document.getElementById("zone-l");
+  var zoneR     = document.getElementById("zone-r");
+  var stackL    = document.getElementById("stack-l");
+  var stackR    = document.getElementById("stack-r");
+  var stackTip  = document.getElementById("stack-tip");
+  var sparksEl  = document.getElementById("sparks");
+  var flashEl   = document.getElementById("rapid-flash");
+  var dPrev     = document.getElementById("d-prev");
+  var dNext     = document.getElementById("d-next");
+  var dPages    = document.getElementById("d-pages");
+  var dTrack    = document.getElementById("d-track");
+  var dFill     = document.getElementById("d-fill");
+
+  /* ===================== AUDIO ===================== */
   var audioCtx = null;
+  var masterGain = null;
+  var noiseBuffer = null;
+  var soundBuffers = { flip: null, spark: null };
+  var soundsRequested = false;
+
+  var SOUND_URLS = {
+    flip: BASE + "/assets/sounds/page-flip.mp3",
+    spark: BASE + "/assets/sounds/electric-spark.mp3"
+  };
+
+  function makeNoiseBuffer(ctx) {
+    var len = Math.floor(ctx.sampleRate * 1);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+
   function ensureAudio() {
     try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-      return audioCtx;
-    } catch (e) { return null; }
-  }
-  function playFlipSound(rapid) {
-    try {
-      var ctx = ensureAudio(); if (!ctx) return;
-      var t = ctx.currentTime;
-      var dur = rapid ? 0.09 : 0.24;
-      var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
-      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
-      var d = buf.getChannelData(0);
-      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.7);
-      var src = ctx.createBufferSource(); src.buffer = buf;
-      var bp = ctx.createBiquadFilter(); bp.type = "bandpass";
-      bp.frequency.setValueAtTime(rapid ? 2600 : 1500, t);
-      bp.frequency.exponentialRampToValueAtTime(rapid ? 1100 : 650, t + dur);
-      bp.Q.value = 0.8;
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(rapid ? 0.1 : 0.26, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-      src.start(t); src.stop(t + dur);
-    } catch (e) {}
-  }
-  function playSparkSound() {
-    try {
-      var ctx = ensureAudio(); if (!ctx) return;
-      var t = ctx.currentTime;
-      var bursts = 2 + Math.floor(Math.random() * 2);
-      for (var b = 0; b < bursts; b++) {
-        var bt = t + b * 0.028 + Math.random() * 0.02;
-        var dur = 0.028 + Math.random() * 0.03;
-        var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
-        var buf = ctx.createBuffer(1, len, ctx.sampleRate);
-        var d = buf.getChannelData(0);
-        for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.2);
-        var src = ctx.createBufferSource(); src.buffer = buf;
-        var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 3400 + Math.random() * 2400;
-        var g = ctx.createGain();
-        g.gain.setValueAtTime(0.06, bt);
-        g.gain.exponentialRampToValueAtTime(0.0001, bt + dur);
-        src.connect(hp); hp.connect(g); g.connect(ctx.destination);
-        src.start(bt); src.stop(bt + dur);
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.85;
+        masterGain.connect(audioCtx.destination);
+        noiseBuffer = makeNoiseBuffer(audioCtx);
       }
-    } catch (e) {}
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      if (!soundsRequested) loadSoundFiles();
+      return audioCtx;
+    } catch (e) {
+      return null;
+    }
   }
 
-  /* ===================== READER ===================== */
-  var reader   = document.getElementById("reader");
-  var stage    = document.getElementById("r-stage");
-  var bookPos  = document.getElementById("book-pos");
-  var book     = document.getElementById("book");
-  var halfL    = document.getElementById("half-l");
-  var halfR    = document.getElementById("half-r");
-  var imgL     = document.getElementById("img-l");
-  var imgR     = document.getElementById("img-r");
-  var leaf     = document.getElementById("leaf");
-  var faceF    = document.getElementById("face-f");
-  var faceB    = document.getElementById("face-b");
-  var imgF     = document.getElementById("img-f");
-  var imgB     = document.getElementById("img-b");
-  var shine    = document.getElementById("shine");
-  var hint     = document.getElementById("hint");
-  var hintTxt  = document.getElementById("hint-txt");
-  var endCard  = document.getElementById("end-card");
-  var loader   = document.getElementById("loader");
-  var loaderTxt= document.getElementById("loader-txt");
-  var rTitle   = document.getElementById("r-title");
-  var rDl      = document.getElementById("r-dl");
-  var edgeL    = document.getElementById("edge-l");
-  var edgeR    = document.getElementById("edge-r");
-  var zoneL    = document.getElementById("zone-l");
-  var zoneR    = document.getElementById("zone-r");
-  var stackL   = document.getElementById("stack-l");
-  var stackR   = document.getElementById("stack-r");
-  var sparksEl = document.getElementById("sparks");
-  var flashEl  = document.getElementById("rapid-flash");
-  var dPrev    = document.getElementById("d-prev");
-  var dNext    = document.getElementById("d-next");
-  var dPages   = document.getElementById("d-pages");
-  var dTrack   = document.getElementById("d-track");
-  var dFill    = document.getElementById("d-fill");
+  function decodeAudio(arrayBuffer) {
+    return new Promise(function (resolve, reject) {
+      audioCtx.decodeAudioData(arrayBuffer, resolve, reject);
+    });
+  }
 
+  function loadSoundFiles() {
+    if (!audioCtx) return;
+    soundsRequested = true;
+    Object.keys(SOUND_URLS).forEach(function (key) {
+      fetch(SOUND_URLS[key], { cache: "no-store" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("missing");
+          return r.arrayBuffer();
+        })
+        .then(decodeAudio)
+        .then(function (buf) { soundBuffers[key] = buf; })
+        .catch(function () { soundBuffers[key] = null; });
+    });
+  }
+
+  function playSample(key, rate, gainValue) {
+    if (!audioCtx || !soundBuffers[key]) return false;
+    try {
+      var src = audioCtx.createBufferSource();
+      src.buffer = soundBuffers[key];
+      src.playbackRate.value = rate;
+      var g = audioCtx.createGain();
+      g.gain.value = gainValue;
+      src.connect(g);
+      g.connect(masterGain);
+      src.start();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function synthFlip(rapid) {
+    if (!audioCtx) return;
+    var t = audioCtx.currentTime;
+    var dur = rapid ? 0.12 : 0.28;
+
+    var src = audioCtx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.loop = true;
+    src.playbackRate.value = rapid ? 1.45 : 1.0;
+
+    var bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 0.75;
+    bp.frequency.setValueAtTime(rapid ? 3200 : 2000, t);
+    bp.frequency.exponentialRampToValueAtTime(rapid ? 900 : 450, t + dur);
+
+    var g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(rapid ? 0.12 : 0.26, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(masterGain);
+    src.start(t);
+    src.stop(t + dur + 0.03);
+
+    var osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(rapid ? 160 : 120, t);
+    osc.frequency.exponentialRampToValueAtTime(55, t + dur * 0.75);
+
+    var og = audioCtx.createGain();
+    og.gain.setValueAtTime(rapid ? 0.035 : 0.08, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.85);
+
+    osc.connect(og);
+    og.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + dur);
+
+    var src2 = audioCtx.createBufferSource();
+    src2.buffer = noiseBuffer;
+    src2.loop = true;
+    src2.playbackRate.value = 1.8;
+
+    var hp = audioCtx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 4500;
+
+    var g2 = audioCtx.createGain();
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(rapid ? 0.03 : 0.065, t + 0.008);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.45);
+
+    src2.connect(hp);
+    hp.connect(g2);
+    g2.connect(masterGain);
+    src2.start(t);
+    src2.stop(t + dur * 0.55);
+  }
+
+  function synthSpark() {
+    if (!audioCtx) return;
+    var t = audioCtx.currentTime;
+
+    var osc = audioCtx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(2600 + Math.random() * 1200, t);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.12);
+
+    var filt = audioCtx.createBiquadFilter();
+    filt.type = "bandpass";
+    filt.Q.value = 6;
+    filt.frequency.setValueAtTime(2400, t);
+    filt.frequency.exponentialRampToValueAtTime(500, t + 0.12);
+
+    var g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.07, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+
+    osc.connect(filt);
+    filt.connect(g);
+    g.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + 0.16);
+
+    var bursts = 3 + Math.floor(Math.random() * 3);
+    for (var b = 0; b < bursts; b++) {
+      var bt = t + b * 0.026 + Math.random() * 0.018;
+      var dur = 0.025 + Math.random() * 0.035;
+      var src = audioCtx.createBufferSource();
+      src.buffer = noiseBuffer;
+      src.loop = true;
+      src.playbackRate.value = 1.2 + Math.random();
+
+      var hp = audioCtx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.value = 5200 + Math.random() * 2800;
+
+      var ng = audioCtx.createGain();
+      ng.gain.setValueAtTime(0.0001, bt);
+      ng.gain.exponentialRampToValueAtTime(0.05, bt + 0.003);
+      ng.gain.exponentialRampToValueAtTime(0.0001, bt + dur);
+
+      src.connect(hp);
+      hp.connect(ng);
+      ng.connect(masterGain);
+      src.start(bt);
+      src.stop(bt + dur + 0.01);
+    }
+  }
+
+  function playFlipSound(rapid) {
+    if (!ensureAudio()) return;
+    var rate = rapid ? (1.18 + Math.random() * 0.16) : (0.94 + Math.random() * 0.12);
+    var gain = rapid ? 0.20 : 0.42;
+    if (playSample("flip", rate, gain)) return;
+    synthFlip(rapid);
+  }
+
+  function playSparkSound() {
+    if (!ensureAudio()) return;
+    var rate = 0.85 + Math.random() * 0.4;
+    if (playSample("spark", rate, 0.16)) return;
+    synthSpark();
+  }
+
+  /* ===================== STATE ===================== */
   var pagesUrl = "";
   var total = 1;
   var maxSpread = 0;
@@ -651,7 +825,9 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   var sparkTick = 0;
   var bgTimer = null;
   var bgIndex = 1;
+  var jumping = false;
 
+  function rapidMode() { return jumping || heldLoopRunning; }
   function url(n) { return pagesUrl + "/" + n + ".jpg"; }
 
   function preload(list) {
@@ -675,13 +851,22 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function preloadAhead(s) {
     var rightPage = s * 2 + 1;
     var pages = [];
-    for (var i = 1; i <= 10; i++) pages.push(rightPage + i);
+    for (var i = 1; i <= 12; i++) pages.push(rightPage + i);
     pages.push(s * 2 - 1);
     pages.push(s * 2 - 2);
     preload(pages);
   }
 
-  /* slow background preload of the whole magazine */
+  function loadMissingRange(a, b) {
+    var start = Math.max(1, Math.min(a, b));
+    var end = Math.min(maxSpread, Math.max(a, b));
+    var pages = [];
+    for (var t = start; t <= end; t++) {
+      pages.push(t * 2, t * 2 + 1);
+    }
+    preload(pages);
+  }
+
   function startBgPreload() {
     stopBgPreload();
     bgIndex = 1;
@@ -689,27 +874,54 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       if (bgIndex > total) { stopBgPreload(); return; }
       preload([bgIndex, bgIndex + 1, bgIndex + 2]);
       bgIndex += 3;
-    }, 260);
+    }, 220);
   }
   function stopBgPreload() { if (bgTimer) { clearInterval(bgTimer); bgTimer = null; } }
 
-  function setHalf(imgEl, halfEl, n) {
-    if (n === null || n === undefined || n < 1 || n > total) { halfEl.classList.add("is-empty"); imgEl.removeAttribute("src"); }
-    else { halfEl.classList.remove("is-empty"); imgEl.src = url(n); }
+  function pageLoaded(n) {
+    var u = url(n);
+    var im = cache[u];
+    return !!(im && im.complete && im.naturalWidth);
   }
-  function setFaceImg(faceEl, imgEl, n) {
-    faceEl.classList.remove("is-backcover");
-    if (n === null || n === undefined || n < 1 || n > total) { faceEl.classList.add("is-empty"); imgEl.removeAttribute("src"); }
-    else { faceEl.classList.remove("is-empty"); imgEl.src = url(n); }
+
+  function setHalfOrBlank(imgEl, halfEl, n, blank) {
+    halfEl.classList.remove("is-empty", "is-blank");
+    if (n === null || n === undefined || n < 1 || n > total) {
+      halfEl.classList.add("is-empty");
+      imgEl.removeAttribute("src");
+      return;
+    }
+    if (blank && !pageLoaded(n)) {
+      halfEl.classList.add("is-blank");
+      imgEl.removeAttribute("src");
+      return;
+    }
+    imgEl.src = url(n);
   }
+
+  function setFaceOrBlank(faceEl, imgEl, n, blank) {
+    faceEl.classList.remove("is-backcover", "is-empty", "is-blank");
+    if (n === null || n === undefined || n < 1 || n > total) {
+      faceEl.classList.add("is-empty");
+      imgEl.removeAttribute("src");
+      return;
+    }
+    if (blank && !pageLoaded(n)) {
+      faceEl.classList.add("is-blank");
+      imgEl.removeAttribute("src");
+      return;
+    }
+    imgEl.src = url(n);
+  }
+
   function setFaceBackcover(faceEl, imgEl) {
-    faceEl.classList.remove("is-empty");
+    faceEl.classList.remove("is-empty", "is-blank");
     faceEl.classList.add("is-backcover");
     imgEl.removeAttribute("src");
   }
 
   function layout() {
-    var pad = 230;
+    var pad = 245;
     var availW = Math.max(120, stage.clientWidth - pad);
     var availH = Math.max(160, stage.clientHeight - 150);
     var a = aspect * 2;
@@ -719,50 +931,131 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     book.style.height = Math.round(h) + "px";
   }
 
-  function paint() {
-    setHalf(imgL, halfL, spread * 2);
-    setHalf(imgR, halfR, spread * 2 + 1);
-    updateUI();
+  function spreadLabel(t) {
+    var f = t * 2;
+    var l = Math.min(total, t * 2 + 1);
+    return f === l ? "Page " + f : "Pages " + f + "–" + l;
+  }
+
+  function hideTip() { stackTip.classList.remove("show"); }
+
+  function moveTip(label, e, side) {
+    var br = book.getBoundingClientRect();
+    var tipW = stackTip.offsetWidth || 120;
+    var x = e.clientX - br.left;
+    var y = e.clientY - br.top;
+    x = side === "r" ? x - tipW - 18 : x + 18;
+    x = Math.max(4, Math.min(br.width - tipW - 4, x));
+    y = Math.max(12, Math.min(br.height - 18, y));
+    stackTip.textContent = label;
+    stackTip.style.left = x + "px";
+    stackTip.style.top = y + "px";
+    stackTip.classList.add("show");
+  }
+
+  function makeSheet(label, action, side) {
+    var d = document.createElement("div");
+    d.className = "sheet";
+    d.setAttribute("role", "button");
+    d.setAttribute("tabindex", "0");
+    d.setAttribute("aria-label", label);
+    d.addEventListener("mouseenter", function (e) { moveTip(label, e, side); });
+    d.addEventListener("mousemove", function (e) { moveTip(label, e, side); });
+    d.addEventListener("mouseleave", hideTip);
+    d.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (busy || rapidMode() || bookState !== "open") return;
+      hideTip();
+      action();
+    });
+    d.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!busy && !rapidMode() && bookState === "open") action();
+      }
+    });
+    return d;
+  }
+
+  function clearStack(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function buildStackSheets() {
+    clearStack(stackR);
+    clearStack(stackL);
+    if (bookState !== "open") return;
+
+    for (var r = spread + 1; r <= maxSpread; r++) {
+      (function (target) {
+        stackR.appendChild(makeSheet(spreadLabel(target), function () { flipToSpread(target, true); }, "r"));
+      })(r);
+    }
+
+    for (var l = spread - 1; l >= 1; l--) {
+      (function (target) {
+        stackL.appendChild(makeSheet(spreadLabel(target), function () { flipToSpread(target, true); }, "l"));
+      })(l);
+    }
   }
 
   function updateStacks() {
-    if (bookState !== "open") {
-      stackR.style.opacity = "0"; stackL.style.opacity = "0";
-      stackR.style.pointerEvents = "none"; stackL.style.pointerEvents = "none";
-      return;
-    }
     var unread = maxSpread - spread;
     var read = spread - 1;
-    stackR.style.width = (unread > 0 ? Math.max(6, Math.min(30, 5 + unread * 1.5)) : 0) + "px";
-    stackL.style.width = (read > 0 ? Math.max(6, Math.min(30, 5 + read * 1.5)) : 0) + "px";
-    stackR.style.opacity = unread > 0 ? "1" : "0";
-    stackL.style.opacity = read > 0 ? "1" : "0";
-    stackR.style.pointerEvents = unread > 0 ? "auto" : "none";
-    stackL.style.pointerEvents = read > 0 ? "auto" : "none";
+
+    stackR.style.width = (unread > 0 ? Math.max(8, Math.min(34, 6 + unread * 1.45)) : 0) + "px";
+    stackL.style.width = (read > 0 ? Math.max(8, Math.min(34, 6 + read * 1.45)) : 0) + "px";
+    stackR.style.opacity = unread > 0 && !rapidMode() ? "1" : "0";
+    stackL.style.opacity = read > 0 && !rapidMode() ? "1" : "0";
+    stackR.style.pointerEvents = unread > 0 && !rapidMode() ? "auto" : "none";
+    stackL.style.pointerEvents = read > 0 && !rapidMode() ? "auto" : "none";
+
+    if (!rapidMode()) buildStackSheets();
   }
 
-  function updateUI() {
-    updateStacks();
+  function updateUI(skipStacks) {
+    if (!skipStacks) updateStacks();
+    else {
+      stackR.style.opacity = "0";
+      stackL.style.opacity = "0";
+      stackR.style.pointerEvents = "none";
+      stackL.style.pointerEvents = "none";
+    }
+
     if (bookState === "closed-front") {
       dPages.textContent = "Cover";
-      dFill.style.width = Math.round((1 / Math.max(total,1)) * 100) + "%";
-      dPrev.disabled = true; dNext.disabled = total < 2;
-      edgeL.classList.add("off"); edgeR.classList.toggle("off", total < 2);
+      dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
+      dPrev.disabled = true;
+      dNext.disabled = total < 2;
+      edgeL.classList.add("off");
+      edgeR.classList.toggle("off", total < 2);
       return;
     }
+
     if (bookState === "closed-back") {
       dPages.textContent = "Back Cover";
       dFill.style.width = "100%";
-      dPrev.disabled = false; dNext.disabled = true;
-      edgeL.classList.remove("off"); edgeR.classList.add("off");
+      dPrev.disabled = false;
+      dNext.disabled = true;
+      edgeL.classList.remove("off");
+      edgeR.classList.add("off");
       return;
     }
-    var f = spread * 2, l = Math.min(total, spread * 2 + 1);
+
+    var f = spread * 2;
+    var l = Math.min(total, spread * 2 + 1);
     dPages.textContent = (f === l ? f : f + "–" + l) + " / " + total;
     dFill.style.width = Math.round((l / total) * 100) + "%";
     var atStart = spread <= 1;
-    dPrev.disabled = atStart; dNext.disabled = false;
-    edgeL.classList.toggle("off", atStart); edgeR.classList.remove("off");
+    dPrev.disabled = atStart;
+    dNext.disabled = false;
+    edgeL.classList.toggle("off", atStart);
+    edgeR.classList.remove("off");
+  }
+
+  function paint(skipStacks) {
+    setHalfOrBlank(imgL, halfL, spread * 2, false);
+    setHalfOrBlank(imgR, halfR, spread * 2 + 1, false);
+    updateUI(!!skipStacks);
   }
 
   function waitFlip(ms) {
@@ -788,7 +1081,13 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function showEnd() { endCard.classList.add("show"); }
   function hideEnd() { endCard.classList.remove("show"); }
 
-  /* ---------- sparks on the page EDGES ---------- */
+  function scheduleStackRefresh() {
+    setTimeout(function () {
+      if (!busy && bookState === "open") paint(false);
+    }, 90);
+  }
+
+  /* ---------- sparks on edges ---------- */
   function showSparks(dir) {
     flashEl.classList.remove("side-l", "side-r", "side-b");
     flashEl.classList.add(dir < 0 ? "side-l" : (dir > 0 ? "side-r" : "side-b"));
@@ -796,16 +1095,20 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     if (sparkTimer) return;
     sparkTick = 0;
     sparkTimer = setInterval(function () {
-      spawnSpark(); spawnSpark();
+      spawnSpark();
+      spawnSpark();
       sparkTick++;
       if (sparkTick % 2 === 0) playSparkSound();
-    }, 85);
-    spawnSpark(); spawnSpark();
+    }, 75);
+    spawnSpark();
+    spawnSpark();
   }
+
   function hideSparks() {
     flashEl.classList.remove("active");
     if (sparkTimer) { clearInterval(sparkTimer); sparkTimer = null; }
   }
+
   function spawnSpark() {
     var side = Math.random() > 0.5 ? 1 : -1;
     var xPct = side > 0 ? (93 + Math.random() * 7) : (Math.random() * 7);
@@ -838,13 +1141,15 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function openMagazine() {
     if (busy || bookState !== "closed-front") return;
     busy = true;
-    hideHint(); hideEnd();
+    hideHint();
+    hideEnd();
     ensureAudio();
 
-    setHalf(imgL, halfL, total >= 2 ? 2 : null);
-    setHalf(imgR, halfR, total >= 3 ? 3 : null);
-    setFaceImg(faceF, imgF, 1);
-    setFaceImg(faceB, imgB, total >= 2 ? 2 : null);
+    setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
+    setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
+    setFaceOrBlank(faceF, imgF, 1, false);
+    setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
+
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
     leaf.style.display = "block";
@@ -855,32 +1160,35 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.classList.add("is-flipping");
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
     leaf.style.transform = "rotateY(-180deg)";
-    bookPos.classList.remove("closed");
+
+    bookPos.classList.remove("closed", "closed-back");
     reader.classList.remove("state-closed");
     playFlipSound(false);
     preloadAhead(1);
 
     waitFlip(BOOK_DUR).then(function () {
-      setHalf(imgL, halfL, 2);
+      setHalfOrBlank(imgL, halfL, 2, false);
       resetLeaf();
       spread = 1;
       bookState = "open";
       busy = false;
-      paint();
+      paint(false);
       startBgPreload();
     });
   }
 
-  /* ---------- CLOSE magazine ---------- */
+  /* ---------- CLOSE front magazine ---------- */
   function closeMagazine() {
     if (busy || bookState !== "open") return;
     busy = true;
-    hideHint(); hideEnd();
+    hideHint();
+    hideEnd();
 
-    setHalf(imgL, halfL, 2);
-    setHalf(imgR, halfR, 3);
-    setFaceImg(faceF, imgF, 1);
-    setFaceImg(faceB, imgB, 2);
+    setHalfOrBlank(imgL, halfL, 2, false);
+    setHalfOrBlank(imgR, halfR, 3, false);
+    setFaceOrBlank(faceF, imgF, 1, false);
+    setFaceOrBlank(faceB, imgB, 2, false);
+
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
     leaf.style.display = "block";
@@ -891,74 +1199,93 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     leaf.classList.add("is-flipping");
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
     leaf.style.transform = "rotateY(0deg)";
+
+    bookPos.classList.remove("closed-back");
     bookPos.classList.add("closed");
     playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
       resetLeaf();
-      setHalf(imgR, halfR, 1);
+      setHalfOrBlank(imgR, halfR, 1, false);
       bookState = "closed-front";
       busy = false;
       reader.classList.add("state-closed");
-      updateUI();
+      updateUI(true);
       showHint("Click to open");
     });
   }
 
-  /* ---------- FINISH (back cover stays rendered) ---------- */
+  /* ---------- FINISH: back cover flips LEFT ---------- */
   function finishMagazine() {
-    if (busy) return;
+    if (busy || bookState !== "open") return;
     busy = true;
     hideHint();
+    hideEnd();
 
-    setHalf(imgL, halfL, spread * 2);
-    setHalf(imgR, halfR, spread * 2 + 1);
-    setFaceBackcover(faceF, imgF);
-    setFaceImg(faceB, imgB, spread * 2);
+    var currentLeft = spread * 2;
+    var currentRight = spread * 2 + 1;
+
+    setHalfOrBlank(imgL, halfL, currentLeft, false);
+    setHalfOrBlank(imgR, halfR, currentRight, false);
+
+    // Front face is the last visible page. Back face is the back cover.
+    setFaceOrBlank(faceF, imgF, currentRight, false);
+    setFaceBackcover(faceB, imgB);
+
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
     leaf.style.display = "block";
     leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(-180deg)";
+    leaf.style.transform = "rotateY(0deg)";
     void leaf.offsetWidth;
 
     leaf.classList.add("is-flipping");
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(0deg)";
-    bookPos.classList.add("closed");
+    leaf.style.transform = "rotateY(-180deg)";
+
     playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
-      leaf.classList.remove("is-flipping");   // keep the leaf showing the back cover
+      // Do not reset leaf. Keep the back cover visible on the left leaf.
+      leaf.classList.remove("is-flipping");
       bookState = "closed-back";
       busy = false;
-      updateUI();
+      bookPos.classList.remove("closed");
+      bookPos.classList.add("closed-back");
+      reader.classList.remove("state-closed");
+      updateUI(true);
       showEnd();
     });
   }
 
-  /* ---------- GO BACK from back cover ---------- */
+  /* ---------- REOPEN from back cover ---------- */
   function reopenFromBack() {
     if (busy || bookState !== "closed-back") return;
     busy = true;
-    hideEnd(); hideHint();
+    hideEnd();
+    hideHint();
+    ensureAudio();
 
-    setHalf(imgL, halfL, maxSpread * 2);
-    setHalf(imgR, halfR, maxSpread * 2 + 1);
-    setFaceBackcover(faceF, imgF);
-    setFaceImg(faceB, imgB, maxSpread * 2);
+    var lastLeft = maxSpread * 2;
+    var lastRight = maxSpread * 2 + 1;
+
+    setHalfOrBlank(imgL, halfL, lastLeft, false);
+    setHalfOrBlank(imgR, halfR, lastRight, false);
+    setFaceOrBlank(faceF, imgF, lastRight, false);
+    setFaceBackcover(faceB, imgB);
+
     leaf.className = "leaf pos-r";
     leaf.style.setProperty("--flip-dur", BOOK_DUR + "ms");
     leaf.style.display = "block";
     leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(0deg)";
+    leaf.style.transform = "rotateY(-180deg)";
     void leaf.offsetWidth;
 
     leaf.classList.add("is-flipping");
     leaf.style.transition = "transform " + BOOK_DUR + "ms cubic-bezier(0.645,0.045,0.355,1)";
-    leaf.style.transform = "rotateY(-180deg)";
-    bookPos.classList.remove("closed");
-    reader.classList.remove("state-closed");
+    leaf.style.transform = "rotateY(0deg)";
+
+    bookPos.classList.remove("closed-back");
     playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
@@ -966,29 +1293,51 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       spread = maxSpread;
       bookState = "open";
       busy = false;
-      paint();
+      reader.classList.remove("state-closed");
+      paint(false);
       preloadAhead(spread);
     });
   }
 
-  /* ---------- single spread flip ---------- */
-  function doFlip(dir, duration, instant) {
+  /* ---------- flip one spread ---------- */
+  function doFlip(dir, duration, opts) {
+    opts = opts || {};
+    var blank = !!opts.blank;
+    var skipStacks = !!opts.skipStacks;
+
     if (busy || bookState !== "open") return Promise.resolve();
     if (dir > 0 && spread >= maxSpread) return Promise.resolve();
     if (dir < 0 && spread <= 1) return Promise.resolve();
+
     busy = true;
     hideHint();
 
     var s = spread;
     var front, back, staticPage, nextSpread;
-    if (dir > 0) { front = 2*s+1; back = 2*s+2; nextSpread = s+1; staticPage = 2*nextSpread+1; }
-    else { front = 2*s; back = 2*s-1; nextSpread = s-1; staticPage = nextSpread*2; }
 
-    var runAnim = function () {
-      if (dir > 0) { setHalf(imgR, halfR, staticPage); leaf.className = "leaf pos-r"; }
-      else { setHalf(imgL, halfL, staticPage); leaf.className = "leaf pos-l"; }
-      setFaceImg(faceF, imgF, front);
-      setFaceImg(faceB, imgB, back);
+    if (dir > 0) {
+      front = 2 * s + 1;
+      back = 2 * s + 2;
+      nextSpread = s + 1;
+      staticPage = 2 * nextSpread + 1;
+    } else {
+      front = 2 * s;
+      back = 2 * s - 1;
+      nextSpread = s - 1;
+      staticPage = nextSpread * 2;
+    }
+
+    function runAnim() {
+      if (dir > 0) {
+        setHalfOrBlank(imgR, halfR, staticPage, blank);
+        leaf.className = "leaf pos-r";
+      } else {
+        setHalfOrBlank(imgL, halfL, staticPage, blank);
+        leaf.className = "leaf pos-l";
+      }
+
+      setFaceOrBlank(faceF, imgF, front, blank);
+      setFaceOrBlank(faceB, imgB, back, blank);
 
       leaf.style.setProperty("--flip-dur", duration + "ms");
       leaf.style.display = "block";
@@ -999,42 +1348,72 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       leaf.classList.add("is-flipping");
       leaf.style.transition = "transform " + duration + "ms cubic-bezier(0.55,0.085,0.68,0.53)";
       leaf.style.transform = dir > 0 ? "rotateY(-180deg)" : "rotateY(180deg)";
-      playFlipSound(duration < 400);
-      preloadAhead(nextSpread);
+
+      playFlipSound(duration < 350);
+
+      var loadPages = [front, back, staticPage, nextSpread * 2, nextSpread * 2 + 1];
+      preload(loadPages);
+      if (!skipStacks) preloadAhead(nextSpread);
 
       return waitFlip(duration).then(function () {
-        if (dir > 0) setHalf(imgL, halfL, back);
-        else setHalf(imgR, halfR, back);
+        if (dir > 0) setHalfOrBlank(imgL, halfL, back, blank);
+        else setHalfOrBlank(imgR, halfR, back, blank);
+
         resetLeaf();
         spread = nextSpread;
         busy = false;
-        paint();
+        paint(skipStacks);
       });
-    };
-
-    if (instant) {
-      preload([front, back, staticPage]); // fire and forget
-      return runAnim().catch(function () { resetLeaf(); busy = false; paint(); });
     }
-    return preload([front, back, staticPage]).then(runAnim).catch(function () { resetLeaf(); busy = false; paint(); });
+
+    if (blank) {
+      return runAnim().catch(function () { resetLeaf(); busy = false; paint(skipStacks); });
+    }
+
+    return preload([front, back, staticPage]).then(runAnim).catch(function () { resetLeaf(); busy = false; paint(skipStacks); });
   }
 
-  /* ---------- jump to a spread with a rapid flip-through ---------- */
+  /* ---------- jump to target spread ---------- */
   function flipToSpread(target, sparks) {
-    if (bookState !== "open" || busy) return;
+    if (bookState !== "open" || busy || rapidMode()) return;
     target = Math.max(1, Math.min(maxSpread, target));
     if (target === spread) return;
+
+    var from = spread;
     var dir = target > spread ? 1 : -1;
+    jumping = true;
     if (sparks) showSparks(dir);
-    stepToSpread(target, dir, sparks);
+
+    // Load only the destination first. Middle pages can appear white during the riffle.
+    preload([target * 2, target * 2 + 1]).then(function () {
+      stepToSpread(target, dir, sparks, from);
+    });
   }
-  function stepToSpread(target, dir, sparks) {
-    if (bookState !== "open") { if (sparks) hideSparks(); return; }
-    if (spread === target) { if (sparks) hideSparks(); return; }
+
+  function stepToSpread(target, dir, sparks, from) {
+    if (bookState !== "open") {
+      jumping = false;
+      hideSparks();
+      return;
+    }
+
+    if (spread === target) {
+      jumping = false;
+      hideSparks();
+      paint(false);
+      loadMissingRange(from, target);
+      return;
+    }
+
     var before = spread;
-    doFlip(dir, JUMP_DUR, true).then(function () {
-      if (spread === before) { if (sparks) hideSparks(); return; }
-      stepToSpread(target, dir, sparks);
+    doFlip(dir, JUMP_DUR, { blank: true, skipStacks: true }).then(function () {
+      if (spread === before) {
+        jumping = false;
+        hideSparks();
+        paint(false);
+        return;
+      }
+      stepToSpread(target, dir, sparks, from);
     });
   }
 
@@ -1046,11 +1425,23 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   function navigateOnce(dir) {
     if (busy) return;
     ensureAudio();
-    if (bookState === "closed-front") { if (dir > 0) openMagazine(); return; }
-    if (bookState === "closed-back")  { if (dir < 0) reopenFromBack(); return; }
+
+    if (bookState === "closed-front") {
+      if (dir > 0) openMagazine();
+      return;
+    }
+    if (bookState === "closed-back") {
+      if (dir < 0) reopenFromBack();
+      return;
+    }
     if (bookState === "open") {
-      if (dir > 0) { if (spread >= maxSpread) finishMagazine(); else doFlip(1, NORMAL_DUR, false); }
-      else { if (spread <= 1) closeMagazine(); else doFlip(-1, NORMAL_DUR, false); }
+      if (dir > 0) {
+        if (spread >= maxSpread) finishMagazine();
+        else doFlip(1, NORMAL_DUR, { blank: false, skipStacks: false });
+      } else {
+        if (spread <= 1) closeMagazine();
+        else doFlip(-1, NORMAL_DUR, { blank: false, skipStacks: false });
+      }
     }
   }
 
@@ -1064,31 +1455,42 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       heldLoop();
     }
   }
+
   function stopHeld() {
     heldDir = 0;
     heldLoopRunning = false;
     hideSparks();
+    scheduleStackRefresh();
   }
+
   function heldLoop() {
     if (!heldLoopRunning || heldDir === 0) return;
-    if (busy) { setTimeout(heldLoop, 30); return; }
+    if (busy) { setTimeout(heldLoop, 25); return; }
 
     if (bookState === "closed-front") {
-      if (heldDir > 0) { openMagazine(); setTimeout(heldLoop, 60); } else stopHeld();
+      if (heldDir > 0) { openMagazine(); setTimeout(heldLoop, 55); }
+      else stopHeld();
       return;
     }
+
     if (bookState === "closed-back") {
-      if (heldDir < 0) { reopenFromBack(); setTimeout(heldLoop, 60); } else stopHeld();
+      if (heldDir < 0) { reopenFromBack(); setTimeout(heldLoop, 55); }
+      else stopHeld();
       return;
     }
+
     if (bookState !== "open") { stopHeld(); return; }
 
     if (heldDir > 0) {
       if (spread >= maxSpread) { finishMagazine(); stopHeld(); return; }
-      doFlip(1, RAPID_DUR, true).then(function () { if (heldLoopRunning) heldLoop(); });
+      doFlip(1, RAPID_DUR, { blank: true, skipStacks: true }).then(function () {
+        if (heldLoopRunning) heldLoop();
+      });
     } else {
       if (spread <= 1) { closeMagazine(); stopHeld(); return; }
-      doFlip(-1, RAPID_DUR, true).then(function () { if (heldLoopRunning) heldLoop(); });
+      doFlip(-1, RAPID_DUR, { blank: true, skipStacks: true }).then(function () {
+        if (heldLoopRunning) heldLoop();
+      });
     }
   }
 
@@ -1112,49 +1514,58 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     rTitle.textContent = parsed.title;
     rDl.href = card.dataset.pdfUrl;
 
-    total = 1; maxSpread = 0; spread = 1; busy = false;
+    total = 1;
+    maxSpread = 0;
+    spread = 1;
+    busy = false;
     bookState = "closed-front";
     cache = Object.create(null);
     inflight = Object.create(null);
     stopBgPreload();
+
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
     reader.hidden = false;
     reader.classList.remove("is-open", "is-closing", "idle");
     reader.classList.add("state-closed");
     document.body.style.overflow = "hidden";
-    hideHint(); hideEnd();
+    hideHint();
+    hideEnd();
     resetLeaf();
     book.classList.remove("visible");
+    bookPos.classList.remove("closed-back");
     bookPos.classList.add("closed");
 
     preload([1]).then(function (imgs) {
       var p1 = imgs[0];
       if (!p1 || !p1.naturalWidth || !p1.naturalHeight) throw new Error("load");
       aspect = p1.naturalWidth / p1.naturalHeight;
+
       var mUrl = pagesUrl + "/manifest.json";
       return fetch(mUrl, { cache: "no-store" }).then(function (r) {
         if (!r.ok) throw new Error("manifest " + r.status);
         return r.json();
       }).then(function (m) {
         total = Math.max(1, parseInt(m.pages, 10) || 1);
-      }).catch(function () { return probe(); });
+      }).catch(function () {
+        return probe();
+      });
     }).then(function () {
       maxSpread = Math.floor(total / 2);
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-      setFaceImg(faceF, imgF, 1);
-      setFaceImg(faceB, imgB, total >= 2 ? 2 : null);
+      setFaceOrBlank(faceF, imgF, 1, false);
+      setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
       leaf.className = "leaf pos-r";
       leaf.style.display = "block";
       leaf.style.transition = "none";
       leaf.style.transform = "rotateY(0deg)";
-      setHalf(imgL, halfL, total >= 2 ? 2 : null);
-      setHalf(imgR, halfR, total >= 3 ? 3 : null);
+      setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
+      setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
 
       layout();
-      updateUI();
+      updateUI(true);
       loader.classList.add("gone");
       return preload(total >= 3 ? [1, 2, 3, 4, 5, 6, 7] : [1, 2]);
     }).then(function () {
@@ -1186,15 +1597,19 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       shine.classList.add("go");
       if (total >= 2) showHint("Click to open");
     };
+
     if (RM || !ev) { done(); return; }
+
     var srcEl = card.querySelector(".cover img");
     var useImg = srcEl && srcEl.complete && srcEl.naturalWidth > 0;
     var src = (useImg ? srcEl : card.querySelector(".cover")).getBoundingClientRect();
     var dst = halfR.getBoundingClientRect();
     if (!dst.width || !dst.height) { done(); return; }
+
     var clone;
     if (useImg) { clone = new Image(); clone.src = srcEl.src; }
     else { clone = document.createElement("div"); clone.style.background = "linear-gradient(150deg,#0A192F,#1E3A8A)"; }
+
     clone.className = "fly";
     clone.style.left = dst.left + "px";
     clone.style.top = dst.top + "px";
@@ -1202,28 +1617,37 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     clone.style.height = dst.height + "px";
     clone.style.transformOrigin = "top left";
     document.body.appendChild(clone);
+
     var sx = src.width / dst.width;
     var sy = src.height / dst.height;
     var tx = src.left - dst.left;
     var ty = src.top - dst.top;
+
     var anim = clone.animate([
       { transform: "translate(" + tx + "px," + ty + "px) scale(" + sx + "," + sy + ")", borderRadius: "16px", opacity: 1 },
       { transform: "translate(0px,0px) scale(1,1)", borderRadius: "4px", opacity: 1 }
     ], { duration: 620, easing: "cubic-bezier(0.22,1,0.36,1)" });
-    anim.onfinish = function () { if (clone.parentNode) clone.parentNode.removeChild(clone); done(); };
+
+    anim.onfinish = function () {
+      if (clone.parentNode) clone.parentNode.removeChild(clone);
+      done();
+    };
     anim.oncancel = anim.onfinish;
   }
 
   function closeReader() {
     stopHeld();
     stopBgPreload();
-    hideHint(); hideEnd();
+    hideHint();
+    hideEnd();
+    hideTip();
     clearTimeout(idleTimer);
     reader.classList.add("is-closing");
     reader.classList.remove("idle");
     book.style.transition = "transform 0.42s cubic-bezier(0.4,0,1,1), opacity 0.42s ease";
     book.style.transform = "scale(0.9) translateY(24px)";
     book.classList.remove("visible");
+
     setTimeout(function () {
       reader.hidden = true;
       reader.classList.remove("is-open", "is-closing", "state-closed");
@@ -1235,7 +1659,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     }, 430);
   }
 
-  /* ---------- events ---------- */
+  /* ===================== EVENTS ===================== */
   cards.forEach(function (card) {
     card.addEventListener("click", function (ev) { openReader(card, ev); });
     card.addEventListener("keydown", function (ev) {
@@ -1249,31 +1673,15 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     else if (bookState === "closed-back") reopenFromBack();
     else navigateOnce(1);
   });
+
   zoneL.addEventListener("click", function () {
     if (busy) return;
     if (bookState === "closed-back") reopenFromBack();
     else navigateOnce(-1);
   });
 
-  /* page stacks: click to jump (Internet Archive style) */
-  stackR.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy) return;
-    var rect = stackR.getBoundingClientRect();
-    var frac = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    var remaining = maxSpread - spread;
-    if (remaining <= 0) return;
-    var target = spread + 1 + Math.round(frac * (remaining - 1));
-    flipToSpread(Math.min(maxSpread, target), true);
-  });
-  stackL.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy) return;
-    var rect = stackL.getBoundingClientRect();
-    var frac = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    var behind = spread - 1;
-    if (behind <= 0) return;
-    var target = 1 + Math.round(frac * (behind - 1));
-    flipToSpread(Math.max(1, target), true);
-  });
+  stackR.addEventListener("mouseleave", hideTip);
+  stackL.addEventListener("mouseleave", hideTip);
 
   document.getElementById("r-close").addEventListener("click", closeReader);
   dNext.addEventListener("click", function () { navigateOnce(1); });
@@ -1282,7 +1690,7 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   edgeL.addEventListener("click", function () { navigateOnce(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (bookState !== "open" || busy) return;
+    if (bookState !== "open" || busy || rapidMode()) return;
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
@@ -1290,17 +1698,20 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   });
 
   dPages.addEventListener("click", function () {
-    if (bookState !== "open" || busy) return;
+    if (bookState !== "open" || busy || rapidMode()) return;
+
     var input = document.createElement("input");
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
     input.max = String(total);
     input.value = String(spread * 2);
+
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
     input.focus();
     input.select();
+
     var finished = false;
     function cleanup(jump) {
       if (finished) return;
@@ -1308,12 +1719,14 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
       var val = parseInt(input.value, 10);
       if (input.parentNode) input.parentNode.removeChild(input);
       dPages.style.display = "";
+
       if (jump && !isNaN(val)) {
         if (val <= 1) closeMagazine();
         else flipToSpread(pageToSpread(val), true);
       }
-      updateUI();
+      updateUI(false);
     }
+
     input.addEventListener("keydown", function (e) {
       e.stopPropagation();
       if (e.key === "Enter") { e.preventDefault(); cleanup(true); }
@@ -1326,42 +1739,54 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     if (busy) return;
     hideEnd();
     bookState = "closed-front";
+    bookPos.classList.remove("closed-back");
     bookPos.classList.add("closed");
     reader.classList.add("state-closed");
     resetLeaf();
-    setFaceImg(faceF, imgF, 1);
-    setFaceImg(faceB, imgB, total >= 2 ? 2 : null);
+
+    setFaceOrBlank(faceF, imgF, 1, false);
+    setFaceOrBlank(faceB, imgB, total >= 2 ? 2 : null, false);
     leaf.className = "leaf pos-r";
     leaf.style.display = "block";
     leaf.style.transition = "none";
     leaf.style.transform = "rotateY(0deg)";
-    setHalf(imgL, halfL, total >= 2 ? 2 : null);
-    setHalf(imgR, halfR, total >= 3 ? 3 : null);
-    updateUI();
-    setTimeout(openMagazine, 350);
+    setHalfOrBlank(imgL, halfL, total >= 2 ? 2 : null, false);
+    setHalfOrBlank(imgR, halfR, total >= 3 ? 3 : null, false);
+
+    updateUI(true);
+    setTimeout(openMagazine, 320);
   });
+
   document.getElementById("end-close").addEventListener("click", closeReader);
 
   document.getElementById("r-fs").addEventListener("click", function () {
-    if (!document.fullscreenElement) { (reader.requestFullscreen ? reader.requestFullscreen() : Promise.resolve()).catch(function () {}); }
-    else { document.exitFullscreen().catch(function () {}); }
+    if (!document.fullscreenElement) {
+      (reader.requestFullscreen ? reader.requestFullscreen() : Promise.resolve()).catch(function () {});
+    } else {
+      document.exitFullscreen().catch(function () {});
+    }
   });
 
   document.addEventListener("keydown", function (e) {
     if (reader.hidden) return;
     if (e.key === "Escape") { closeReader(); return; }
+
     var dir = 0;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") dir = 1;
     else if (e.key === "ArrowLeft" || e.key === "PageUp") dir = -1;
     else return;
+
     e.preventDefault();
-    if (e.repeat) startHeld(dir);
-    else {
+
+    if (e.repeat) {
+      startHeld(dir);
+    } else {
       navigateOnce(dir);
       clearTimeout(holdTimeout);
-      holdTimeout = setTimeout(function () { startHeld(dir); }, 380);
+      holdTimeout = setTimeout(function () { startHeld(dir); }, 340);
     }
   });
+
   document.addEventListener("keyup", function (e) {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === "PageUp" || e.key === "PageDown" || e.key === " ") {
       clearTimeout(holdTimeout);
@@ -1372,15 +1797,22 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
   var tx0 = 0, ty0 = 0, tt0 = 0, tracking = false;
   reader.addEventListener("touchstart", function (e) {
     if (e.touches.length !== 1) { tracking = false; return; }
-    tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; tt0 = Date.now(); tracking = true;
+    tx0 = e.touches[0].clientX;
+    ty0 = e.touches[0].clientY;
+    tt0 = Date.now();
+    tracking = true;
   }, { passive: true });
+
   reader.addEventListener("touchend", function (e) {
     if (!tracking) return;
     tracking = false;
     var t = e.changedTouches[0];
-    var dx = t.clientX - tx0, dy = t.clientY - ty0, dt = Date.now() - tt0;
+    var dx = t.clientX - tx0;
+    var dy = t.clientY - ty0;
+    var dt = Date.now() - tt0;
     if (Math.abs(dx) < 46 || Math.abs(dx) < Math.abs(dy) * 1.25 || dt > 900) return;
-    if (dx < 0) navigateOnce(1); else navigateOnce(-1);
+    if (dx < 0) navigateOnce(1);
+    else navigateOnce(-1);
   }, { passive: true });
 
   var rt = null;
@@ -1389,7 +1821,10 @@ body { font-family: var(--body); background: var(--paper); color: var(--ink); li
     clearTimeout(rt);
     rt = setTimeout(function () { layout(); }, 160);
   });
-  document.addEventListener("fullscreenchange", function () { if (!reader.hidden) layout(); });
+
+  document.addEventListener("fullscreenchange", function () {
+    if (!reader.hidden) layout();
+  });
 })();
 </script>
 </body>
