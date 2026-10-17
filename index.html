@@ -698,7 +698,7 @@ body {
   );
 }
 
-/* Internet Archive style page sheets */
+/* Internet Archive style vertical page sheets, connected like a real book edge */
 .page-stack {
   position: absolute;
   top: 1.5%;
@@ -709,32 +709,35 @@ body {
   pointer-events: none;
   transition: width 0.45s var(--ease-out), opacity 0.35s ease;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   box-shadow: 0 10px 22px rgba(0,0,0,0.45);
 }
-.page-stack--r { left: 100%; border-radius: 0 4px 4px 0; }
-.page-stack--l { right: 100%; border-radius: 4px 0 0 4px; }
+.page-stack--r {
+  left: 100%;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(to right, #AFA796 0%, #D8D2C4 18%, #F2EEE2 60%, #FBF8EF 100%);
+}
+.page-stack--l {
+  right: 100%;
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(to left, #AFA796 0%, #D8D2C4 18%, #F2EEE2 60%, #FBF8EF 100%);
+}
 .sheet {
   flex: 1 1 0;
-  min-height: 1px;
-  border-bottom: 1px solid rgba(0,0,0,0.16);
-  background: linear-gradient(to right, #C7C1B2 0%, #EFEADC 55%, #FAF7EE 100%);
-  transition: filter 0.15s ease, transform 0.15s ease, background 0.15s ease;
-}
-.page-stack--l .sheet {
-  background: linear-gradient(to left, #C7C1B2 0%, #EFEADC 55%, #FAF7EE 100%);
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.14s ease, filter 0.14s ease;
 }
 .sheet:hover {
-  filter: brightness(1.12);
-  background: linear-gradient(to right, #D7CFA8 0%, #FFF4CF 55%, #FFFBEF 100%);
-  transform: scaleX(1.08);
+  background: rgba(255, 220, 120, 0.30);
 }
-.page-stack--l .sheet:hover {
-  background: linear-gradient(to left, #D7CFA8 0%, #FFF4CF 55%, #FFFBEF 100%);
-  transform: scaleX(1.08);
+.sheet:active {
+  background: rgba(255, 220, 120, 0.45);
 }
-.sheet:last-child { border-bottom: none; }
 
 .sheet-tip {
   position: fixed;
@@ -1065,7 +1068,6 @@ body {
   50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); }
 }
 
-/* Moved to top so it does NOT cover the back cover thank-you text */
 .end-card {
   position: absolute;
   left: 50%;
@@ -1383,6 +1385,16 @@ body {
           <div class="face face--b" id="face-b">
             <img id="img-b" alt="">
             <div class="inner-cover"></div>
+            <div class="backcover-design">
+              <svg class="bc-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>
+              </svg>
+              <span class="bc-brand">EPSF Alex</span>
+              <span class="bc-sub">PE Magazine</span>
+              <span class="bc-rule"></span>
+              <span class="bc-thanks">Thank you for reading</span>
+            </div>
           </div>
         </div>
 
@@ -1500,11 +1512,10 @@ body {
     });
   }
 
-  /* ===================== AUDIO ===================== */
+  /* ===================== SPARK AUDIO ONLY ===================== */
   var audioCtx = null;
   var soundsInitialized = false;
-  var soundBuffers = { flip: null, flipFast: null, spark: null };
-  var lastFlipSound = 0;
+  var sparkBuffer = null;
   var lastSparkSound = 0;
 
   function ensureAudio() {
@@ -1523,8 +1534,8 @@ body {
       var i = 0;
       function tryNext() {
         if (i >= urls.length) return reject(new Error("no source"));
-        var url = urls[i++];
-        fetch(url, { cache: "force-cache" })
+        var u = urls[i++];
+        fetch(u, { cache: "force-cache" })
           .then(function (r) {
             if (!r.ok) throw new Error("bad response");
             return r.arrayBuffer();
@@ -1545,27 +1556,19 @@ body {
     var base = (reader && reader.dataset && reader.dataset.soundsBase) ? reader.dataset.soundsBase.replace(/\/$/, "") : "";
     if (!base) return;
 
-    loadBufferFromUrls([base + "/page-flip.mp3", base + "/page-flip.ogg"])
-      .then(function (b) { soundBuffers.flip = b; })
-      .catch(function () {});
-
-    loadBufferFromUrls([base + "/page-flip-fast.mp3", base + "/page-flip-fast.ogg"])
-      .then(function (b) { soundBuffers.flipFast = b; })
-      .catch(function () {});
-
     loadBufferFromUrls([base + "/spark.mp3", base + "/spark.ogg", base + "/electric.mp3", base + "/electric.ogg"])
-      .then(function (b) { soundBuffers.spark = b; })
+      .then(function (b) { sparkBuffer = b; })
       .catch(function () {});
   }
 
-  function playBuffer(name, volume, rate) {
-    if (!audioCtx || !soundBuffers[name]) return false;
+  function playSparkBuffer() {
+    if (!audioCtx || !sparkBuffer) return false;
     try {
       var src = audioCtx.createBufferSource();
-      src.buffer = soundBuffers[name];
-      src.playbackRate.value = rate * (0.94 + Math.random() * 0.12);
+      src.buffer = sparkBuffer;
+      src.playbackRate.value = 0.9 + Math.random() * 0.25;
       var g = audioCtx.createGain();
-      g.gain.value = volume;
+      g.gain.value = 0.20;
       src.connect(g);
       g.connect(audioCtx.destination);
       src.start();
@@ -1573,64 +1576,6 @@ body {
     } catch (e) {
       return false;
     }
-  }
-
-  function synthFlip(rapid) {
-    try {
-      var ctx = ensureAudio();
-      if (!ctx) return;
-      var t = ctx.currentTime;
-      var dur = rapid ? 0.10 : 0.28;
-      var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
-      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
-      var d = buf.getChannelData(0);
-
-      for (var i = 0; i < len; i++) {
-        var p = i / len;
-        var env = Math.pow(1 - p, rapid ? 2.2 : 1.55);
-        var rustle = (Math.random() * 2 - 1) * env;
-        var body = Math.sin(i * (rapid ? 0.18 : 0.08)) * 0.18 * env;
-        d[i] = rustle * 0.85 + body;
-      }
-
-      var src = ctx.createBufferSource();
-      src.buffer = buf;
-
-      var bp = ctx.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.setValueAtTime(rapid ? 2800 : 1700, t);
-      bp.frequency.exponentialRampToValueAtTime(rapid ? 1200 : 520, t + dur);
-      bp.Q.value = rapid ? 1.1 : 0.75;
-
-      var lp = ctx.createBiquadFilter();
-      lp.type = "lowpass";
-      lp.frequency.value = rapid ? 6500 : 4200;
-
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(rapid ? 0.13 : 0.30, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-      src.connect(bp);
-      bp.connect(lp);
-      lp.connect(g);
-      g.connect(ctx.destination);
-      src.start(t);
-      src.stop(t + dur);
-
-      if (!rapid) {
-        var osc = ctx.createOscillator();
-        var og = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(120, t);
-        osc.frequency.exponentialRampToValueAtTime(55, t + 0.16);
-        og.gain.setValueAtTime(0.10, t);
-        og.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-        osc.connect(og);
-        og.connect(ctx.destination);
-        osc.start(t);
-        osc.stop(t + 0.2);
-      }
-    } catch (e) {}
   }
 
   function synthSpark() {
@@ -1683,26 +1628,11 @@ body {
     } catch (e) {}
   }
 
-  function playFlipSound(rapid) {
-    var now = performance.now();
-    if (now - lastFlipSound < (rapid ? 35 : 70)) return;
-    lastFlipSound = now;
-
-    if (rapid) {
-      if (playBuffer("flipFast", 0.24, 1.0)) return;
-      if (playBuffer("flip", 0.18, 1.85)) return;
-      synthFlip(true);
-    } else {
-      if (playBuffer("flip", 0.42, 1.0)) return;
-      synthFlip(false);
-    }
-  }
-
   function playSparkSound() {
     var now = performance.now();
     if (now - lastSparkSound < 80) return;
     lastSparkSound = now;
-    if (playBuffer("spark", 0.20, 0.9 + Math.random() * 0.25)) return;
+    if (playSparkBuffer()) return;
     synthSpark();
   }
 
@@ -1749,7 +1679,7 @@ body {
   var spread = 1;
   var aspect = 0.72;
   var busy = false;
-  var bookState = "closed-front"; // closed-front | open | closed-back
+  var bookState = "closed-front";
   var idleTimer = null;
   var cache = Object.create(null);
   var inflight = Object.create(null);
@@ -1930,13 +1860,11 @@ body {
       rSheet.dataset.label = spreadLabel(s);
       stackR.appendChild(rSheet);
       stackRSheets.push(rSheet);
-    }
 
-    for (var l = maxSpread; l >= 1; l--) {
       var lSheet = document.createElement("div");
       lSheet.className = "sheet";
-      lSheet.dataset.spread = String(l);
-      lSheet.dataset.label = spreadLabel(l);
+      lSheet.dataset.spread = String(s);
+      lSheet.dataset.label = spreadLabel(s);
       stackL.appendChild(lSheet);
       stackLSheets.push(lSheet);
     }
@@ -1949,8 +1877,11 @@ body {
     var read = Math.max(0, spread - 1);
     var open = bookState === "open";
 
-    stackR.style.width = (open && unread > 0) ? Math.min(34, 8 + unread * 1.15) + "px" : "0px";
-    stackL.style.width = (open && read > 0) ? Math.min(34, 8 + read * 1.15) + "px" : "0px";
+    var wR = (open && unread > 0) ? Math.min(56, Math.max(10, unread * 1.6)) : 0;
+    var wL = (open && read > 0) ? Math.min(56, Math.max(10, read * 1.6)) : 0;
+
+    stackR.style.width = wR + "px";
+    stackL.style.width = wL + "px";
     stackR.style.opacity = (open && unread > 0) ? "1" : "0";
     stackL.style.opacity = (open && read > 0) ? "1" : "0";
     stackR.style.pointerEvents = (open && unread > 0) ? "auto" : "none";
@@ -2026,6 +1957,7 @@ body {
     leaf.style.transition = "none";
     leaf.style.transform = "rotateY(0deg)";
     faceF.classList.remove("is-backcover");
+    faceB.classList.remove("is-backcover");
     faceF.classList.remove("is-blank");
     faceB.classList.remove("is-blank");
   }
@@ -2137,7 +2069,6 @@ body {
     bookPos.classList.remove("closed-back");
     reader.classList.remove("state-closed");
 
-    playFlipSound(false);
     preloadAhead(1);
 
     waitFlip(BOOK_DUR).then(function () {
@@ -2176,7 +2107,6 @@ body {
 
     bookPos.classList.remove("closed-back");
     bookPos.classList.add("closed");
-    playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
       resetLeaf();
@@ -2201,9 +2131,7 @@ body {
     setHalf(imgL, halfL, leftPage, true);
     setHalf(imgR, halfR, rightPage, true);
 
-    // Front of flipping leaf = current right page (or blank/inner if even page count)
     setFaceImg(faceF, imgF, rightPage, true);
-    // Back of flipping leaf = branded back cover
     setFaceBackcover(faceB, imgB);
 
     leaf.className = "leaf pos-r";
@@ -2220,10 +2148,8 @@ body {
     bookPos.classList.remove("closed");
     bookPos.classList.add("closed-back");
     reader.classList.remove("state-closed");
-    playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
-      // Do NOT reset leaf. Keep it parked at -180 so the back cover remains visible.
       leaf.classList.remove("is-flipping");
       bookState = "closed-back";
       busy = false;
@@ -2261,7 +2187,6 @@ body {
 
     bookPos.classList.remove("closed-back");
     reader.classList.remove("state-closed");
-    playFlipSound(false);
 
     waitFlip(BOOK_DUR).then(function () {
       resetLeaf();
@@ -2319,7 +2244,6 @@ body {
       leaf.style.transition = "transform " + duration + "ms cubic-bezier(0.55,0.085,0.68,0.53)";
       leaf.style.transform = dir > 0 ? "rotateY(-180deg)" : "rotateY(180deg)";
 
-      playFlipSound(duration < 350);
       preloadAhead(nextSpread);
 
       return waitFlip(duration).then(function () {
@@ -2334,7 +2258,7 @@ body {
     }
 
     if (instant) {
-      preload([front, back, staticPage]); // fire and forget
+      preload([front, back, staticPage]);
       return runAnim().catch(function () {
         resetLeaf();
         busy = false;
@@ -2357,7 +2281,6 @@ body {
 
     var dir = target > spread ? 1 : -1;
 
-    // Immediately request target pages so final landing is not blank for long.
     preload([target * 2, target * 2 + 1]);
 
     if (sparks) showSparks(dir);
