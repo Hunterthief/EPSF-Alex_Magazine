@@ -442,28 +442,46 @@ body {
 }
 
 .site-footer {
-  background: var(--ink);
-  color: rgba(255,255,255,0.62);
-  padding: 54px 28px;
-  margin-top: 40px;
+  background: var(--primary);
+  color: rgba(255,255,255,0.78);
+  padding: 58px 28px;
+  margin-top: 64px;
   text-align: center;
   position: relative;
+  overflow: hidden;
 }
 .site-footer::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+}
+.site-footer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 520px 220px at 15% 0%, rgba(255,255,255,0.08), transparent 62%),
+    radial-gradient(ellipse 520px 220px at 85% 100%, rgba(110,155,255,0.16), transparent 62%);
+}
+.site-footer > * {
+  position: relative;
+  z-index: 1;
 }
 .site-footer .f-logo {
   font-family: var(--display);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: #fff;
   margin-bottom: 8px;
+  letter-spacing: -0.01em;
 }
-.site-footer p { font-size: 0.8rem; }
+.site-footer p {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.76);
+}
 
 /* ============ READER ============ */
 .reader {
