@@ -549,6 +549,13 @@ main {
   transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
 }
 .r-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.r-brand-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+.r-brand-fallback { display: none; }
 .r-brand {
   font-family: var(--display);
   font-size: 0.95rem;
@@ -1174,6 +1181,7 @@ main {
   .card .issue-meta { font-size: 0.6rem; }
   .logo-mark { height: 46px; }
   .r-top { padding: 14px 16px; }
+  .r-brand-logo { height: 24px; }
   .r-title, .r-sep { display: none; }
   .r-btn .lbl { display: none; }
   .r-btn { width: 38px; padding: 0; justify-content: center; }
@@ -1324,7 +1332,13 @@ main {
 
   <div class="r-top">
     <div class="r-top-left">
-      <span class="r-brand">EPSF Alex</span>
+      <img
+        class="r-brand-logo"
+        src="{{ '/assets/images/logo-white.png' | relative_url }}"
+        alt="EPSF Alex"
+        onerror="this.style.display='none'; if(this.nextElementSibling)this.nextElementSibling.style.display='inline';"
+      >
+      <span class="r-brand r-brand-fallback">EPSF Alex</span>
       <span class="r-sep"></span>
       <span class="r-title" id="r-title">—</span>
     </div>
@@ -1399,7 +1413,13 @@ main {
 <div class="zoom-overlay" id="zoom-overlay" hidden>
   <div class="zoom-top">
     <div class="zoom-title">
-      <span class="r-brand">EPSF Alex</span>
+      <img
+        class="r-brand-logo"
+        src="{{ '/assets/images/logo-white.png' | relative_url }}"
+        alt="EPSF Alex"
+        onerror="this.style.display='none'; if(this.nextElementSibling)this.nextElementSibling.style.display='inline';"
+      >
+      <span class="r-brand r-brand-fallback">EPSF Alex</span>
       <span class="r-sep"></span>
       <span class="r-title" id="zoom-label">Zoom</span>
     </div>
@@ -1603,8 +1623,19 @@ main {
     if (da && p.date) da.textContent = p.date.toLocaleDateString("en", { year: "numeric", month: "long", timeZone: "UTC" });
   });
 
+  var uniqueIssueNames = Object.create(null);
+  var uniqueIssueCount = 0;
+
+  cards.forEach(function (card) {
+    var fileName = card.dataset.fileName;
+    if (fileName && !uniqueIssueNames[fileName]) {
+      uniqueIssueNames[fileName] = true;
+      uniqueIssueCount++;
+    }
+  });
+
   var statIssues = document.getElementById("stat-issues");
-  if (statIssues) statIssues.textContent = cards.length ? String(cards.length).padStart(2, "0") : "—";
+  if (statIssues) statIssues.textContent = uniqueIssueCount ? String(uniqueIssueCount).padStart(2, "0") : "—";
 
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
