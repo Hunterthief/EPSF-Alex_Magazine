@@ -18,9 +18,9 @@ title: Home
   --ink-deep: #050B16;
   --paper: #F6F7F9;
   --white: #FFFFFF;
-  --primary: #1E3A8A;
-  --accent: #D4AF37;
-  --accent-soft: #E8C86A;
+  --primary: #0241c4;
+  --accent: #0241c4;
+  --accent-soft: #6E9BFF;
   --muted: #6B7A90;
   --border: #E3E8EF;
   --display: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -57,12 +57,12 @@ body {
   align-items: center;
   gap: 16px;
 }
-.logo-mark { flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(30,58,138,0.25)); }
+.logo-mark { flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(2,65,196,0.25)); }
 .logo-text-group { display: flex; flex-direction: column; line-height: 1; }
 .logo-text { font-family: var(--display); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.01em; }
 .logo-sub {
   font-size: 0.62rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--primary);
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -75,8 +75,8 @@ body {
   text-align: center;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 800px 400px at 20% 0%, rgba(30,58,138,0.09), transparent 60%),
-    radial-gradient(ellipse 700px 380px at 85% 20%, rgba(212,175,55,0.11), transparent 60%),
+    radial-gradient(ellipse 800px 400px at 20% 0%, rgba(2,65,196,0.09), transparent 60%),
+    radial-gradient(ellipse 700px 380px at 85% 20%, rgba(2,65,196,0.10), transparent 60%),
     linear-gradient(180deg, #FFFFFF 0%, var(--paper) 100%);
 }
 .hero::after {
@@ -84,14 +84,14 @@ body {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.55), transparent);
+  background: linear-gradient(90deg, transparent, rgba(2,65,196,0.55), transparent);
 }
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--primary);
@@ -118,8 +118,8 @@ body {
 }
 .hero h1 em {
   font-style: italic;
-  font-weight: 700;
-  background: linear-gradient(100deg, var(--primary), var(--accent) 90%);
+  font-weight: 800;
+  background: linear-gradient(100deg, var(--primary), var(--accent-soft) 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -154,7 +154,7 @@ body {
   display: block;
   margin-top: 8px;
   font-size: 0.64rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
@@ -194,7 +194,7 @@ body {
 .section-head .note {
   font-size: 0.82rem;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .featured-slot { margin-bottom: 92px; }
@@ -258,19 +258,19 @@ body {
   padding: 7px 15px;
   border-radius: 100px;
   background: linear-gradient(100deg, var(--accent), var(--accent-soft));
-  color: #2A2205;
+  color: #FFFFFF;
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  box-shadow: 0 4px 14px rgba(212,175,55,0.4);
+  box-shadow: 0 4px 14px rgba(2,65,196,0.35);
 }
 .badge::before {
   content: "";
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2A2205;
+  background: #FFFFFF;
   animation: pulseDot 2s ease-in-out infinite;
 }
 @keyframes pulseDot {
@@ -416,7 +416,7 @@ body {
   font-size: 0.82rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-soft);
   font-weight: 800;
 }
 .fallback-title {
@@ -474,7 +474,7 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(ellipse 120% 90% at 50% 32%, #1B2C4A 0%, #0C1729 42%, #04070D 100%);
+  background: radial-gradient(ellipse 120% 90% at 50% 32%, #0B2E7A 0%, #06173D 42%, #020814 100%);
 }
 .reader[hidden] { display: none; }
 .reader::before {
@@ -498,7 +498,7 @@ body {
 .reader-fade {
   position: absolute;
   inset: 0;
-  background: #04070D;
+  background: #020814;
   opacity: 1;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -516,7 +516,7 @@ body {
   justify-content: space-between;
   gap: 18px;
   padding: 22px 28px;
-  background: linear-gradient(180deg, rgba(4,7,13,0.82) 0%, rgba(4,7,13,0.35) 55%, transparent 100%);
+  background: linear-gradient(180deg, rgba(2,8,20,0.86) 0%, rgba(2,8,20,0.38) 55%, transparent 100%);
   transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
 }
 .r-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
@@ -524,7 +524,7 @@ body {
   font-family: var(--display);
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-soft);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -564,7 +564,7 @@ body {
 }
 .r-btn:hover {
   background: rgba(255,255,255,0.15);
-  border-color: rgba(212,175,55,0.65);
+  border-color: rgba(110,155,255,0.65);
   color: #fff;
   transform: translateY(-1px);
 }
@@ -677,12 +677,12 @@ body {
   flex: 1 1 0;
   min-width: 0;
   height: 100%;
-  background: #F7F4EA;
+  background: #F5F7FF;
   border: none;
   pointer-events: none;
 }
 .sheet.sheet-gray {
-  background: #D7D1C4;
+  background: #D3DCEB;
 }
 .stack-hover {
   position: absolute;
@@ -704,8 +704,8 @@ body {
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.12s ease, transform 0.12s ease;
-  background: rgba(9,16,29,0.94);
-  border: 1px solid rgba(212,175,55,0.55);
+  background: rgba(2,12,34,0.94);
+  border: 1px solid rgba(110,155,255,0.55);
   color: #fff;
   padding: 8px 12px;
   border-radius: 9px;
@@ -731,8 +731,8 @@ body {
   width: 2px;
   border-radius: 2px;
   opacity: 0;
-  background: linear-gradient(to bottom, transparent, #FFFBE6 20%, #FFD75E 50%, #FFFBE6 80%, transparent);
-  box-shadow: 0 0 8px 1px rgba(255,220,110,0.85), 0 0 18px 2px rgba(255,190,60,0.4);
+  background: linear-gradient(to bottom, transparent, #FFFFFF 20%, #8AB4FF 50%, #FFFFFF 80%, transparent);
+  box-shadow: 0 0 8px 1px rgba(138,180,255,0.85), 0 0 18px 2px rgba(2,65,196,0.45);
   animation: sparkFly 0.5s ease-out forwards;
 }
 @keyframes sparkFly {
@@ -746,8 +746,8 @@ body {
   height: 5px;
   border-radius: 50%;
   opacity: 0;
-  background: #FFF6D0;
-  box-shadow: 0 0 10px 3px rgba(255,235,160,0.9), 0 0 24px 6px rgba(255,200,80,0.45);
+  background: #EAF2FF;
+  box-shadow: 0 0 10px 3px rgba(138,180,255,0.9), 0 0 24px 6px rgba(2,65,196,0.45);
   animation: dotFly 0.45s ease-out forwards;
 }
 @keyframes dotFly {
@@ -764,9 +764,9 @@ body {
   mix-blend-mode: screen;
 }
 .rapid-flash.active { animation: flashPulse 0.16s ease-in-out infinite alternate; }
-.rapid-flash.side-l { background: radial-gradient(ellipse 24% 92% at 6% 50%, rgba(255,246,205,0.6), rgba(255,215,94,0.18) 45%, transparent 72%); }
-.rapid-flash.side-r { background: radial-gradient(ellipse 24% 92% at 94% 50%, rgba(255,246,205,0.6), rgba(255,215,94,0.18) 45%, transparent 72%); }
-.rapid-flash.side-b { background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,246,205,0.4), rgba(255,215,94,0.12) 45%, transparent 72%); }
+.rapid-flash.side-l { background: radial-gradient(ellipse 24% 92% at 6% 50%, rgba(234,242,255,0.58), rgba(110,155,255,0.18) 45%, transparent 72%); }
+.rapid-flash.side-r { background: radial-gradient(ellipse 24% 92% at 94% 50%, rgba(234,242,255,0.58), rgba(110,155,255,0.18) 45%, transparent 72%); }
+.rapid-flash.side-b { background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(234,242,255,0.38), rgba(110,155,255,0.12) 45%, transparent 72%); }
 @keyframes flashPulse { from { opacity: 0.35; } to { opacity: 0.9; } }
 
 .edge {
@@ -781,7 +781,7 @@ body {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(10,18,32,0.55);
+  background: rgba(2,18,51,0.62);
   color: rgba(255,255,255,0.9);
   font-size: 1.5rem;
   line-height: 1;
@@ -792,8 +792,8 @@ body {
   transition: background 0.25s, border-color 0.25s, transform 0.3s var(--ease-out), opacity 0.3s;
 }
 .edge:hover {
-  background: rgba(212,175,55,0.24);
-  border-color: rgba(212,175,55,0.75);
+  background: rgba(2,65,196,0.30);
+  border-color: rgba(110,155,255,0.75);
   transform: translateY(-50%) scale(1.09);
 }
 .edge--l { left: 22px; }
@@ -811,7 +811,7 @@ body {
   gap: 20px;
   padding: 12px 20px;
   border-radius: 100px;
-  background: rgba(9,16,29,0.72);
+  background: rgba(2,18,51,0.74);
   border: 1px solid rgba(255,255,255,0.11);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -833,7 +833,7 @@ body {
   justify-content: center;
   transition: background 0.25s, transform 0.25s var(--ease-out);
 }
-.dock-btn:hover:not(:disabled) { background: var(--accent); color: #1A1403; transform: scale(1.08); }
+.dock-btn:hover:not(:disabled) { background: var(--accent); color: #fff; transform: scale(1.08); }
 .dock-btn:disabled { opacity: 0.24; cursor: default; }
 .dock-mid { display: flex; flex-direction: column; align-items: center; gap: 9px; min-width: 172px; }
 .dock-pages {
@@ -851,7 +851,7 @@ body {
   width: 72px;
   height: 26px;
   border-radius: 6px;
-  border: 1px solid rgba(212,175,55,0.65);
+  border: 1px solid rgba(110,155,255,0.65);
   background: rgba(255,255,255,0.1);
   color: #fff;
   text-align: center;
@@ -903,8 +903,8 @@ body {
   gap: 12px;
   padding: 12px 24px;
   border-radius: 100px;
-  background: rgba(212,175,55,0.14);
-  border: 1px solid rgba(212,175,55,0.5);
+  background: rgba(2,65,196,0.20);
+  border: 1px solid rgba(110,155,255,0.55);
   color: var(--accent-soft);
   font-size: 0.72rem;
   font-weight: 800;
@@ -916,8 +916,8 @@ body {
 }
 .hint.show { display: inline-flex; }
 @keyframes hintPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.42); transform: translateX(-50%) translateY(0); }
-  50% { box-shadow: 0 0 0 14px rgba(212,175,55,0); transform: translateX(-50%) translateY(-4px); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(110,155,255,0.42); transform: translateX(-50%) translateY(0); }
+  50% { box-shadow: 0 0 0 14px rgba(110,155,255,0); transform: translateX(-50%) translateY(-4px); }
 }
 
 .end-card {
@@ -933,7 +933,7 @@ body {
   gap: 10px;
   padding: 16px 22px;
   border-radius: 16px;
-  background: rgba(9,16,29,0.78);
+  background: rgba(2,18,51,0.80);
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -961,7 +961,7 @@ body {
   text-transform: uppercase;
   transition: background 0.25s, color 0.25s, transform 0.25s var(--ease-out);
 }
-.end-again { background: var(--accent); border: none; color: #1A1403; }
+.end-again { background: var(--accent); border: none; color: #fff; }
 .end-again:hover { background: var(--accent-soft); transform: translateY(-1px); }
 .end-close { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #fff; }
 .end-close:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
@@ -975,7 +975,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 22px;
-  background: radial-gradient(ellipse at 50% 45%, #16233C 0%, #080E1A 70%);
+  background: radial-gradient(ellipse at 50% 45%, #0B255F 0%, #041026 70%);
   transition: opacity 0.45s ease;
 }
 .loader.gone { opacity: 0; pointer-events: none; }
@@ -983,8 +983,8 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 2px solid rgba(212,175,55,0.18);
-  border-top-color: var(--accent);
+  border: 2px solid rgba(110,155,255,0.18);
+  border-top-color: var(--accent-soft);
   animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -1016,7 +1016,7 @@ body {
   z-index: 10000;
   display: flex;
   flex-direction: column;
-  background: rgba(4, 7, 13, 0.97);
+  background: rgba(2, 8, 20, 0.97);
   opacity: 0;
   transition: opacity 0.22s ease;
 }
@@ -1029,7 +1029,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
-  background: linear-gradient(180deg, rgba(4,7,13,0.92), rgba(4,7,13,0.35), transparent);
+  background: linear-gradient(180deg, rgba(2,8,20,0.92), rgba(2,8,20,0.35), transparent);
 }
 
 .zoom-title {
@@ -1079,7 +1079,7 @@ body {
 }
 .zoom-btn:hover {
   background: rgba(255,255,255,0.16);
-  border-color: rgba(212,175,55,0.6);
+  border-color: rgba(110,155,255,0.6);
   transform: translateY(-1px);
 }
 .zoom-btn.percent {
@@ -1175,8 +1175,8 @@ body {
 <header class="site-header">
   <div class="inner">
     <svg class="logo-mark" viewBox="0 0 50 50" width="44" height="44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
-      <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#1E3A8A"/>
+      <circle cx="25" cy="25" r="23" fill="none" stroke="#0241c4" stroke-width="2"/>
+      <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#0241c4"/>
     </svg>
     <div class="logo-text-group">
       <span class="logo-text">EPSF Alex</span>
@@ -1414,10 +1414,7 @@ body {
   ];
 
   var PAGE_FLIP_SCRIPT_URLS = [
-    '{{ "/assets/vendor/page-flip.browser.js" | relative_url }}',
-    "https://cdn.jsdelivr.net/gh/Nodlik/StPageFlip@2.0.7/dist/page-flip.browser.js",
-    "https://unpkg.com/page-flip@2.0.7/dist/page-flip.browser.js",
-    "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/page-flip.browser.js"
+    '{{ "/assets/vendor/page-flip.browser.js" | relative_url }}'
   ];
 
   var pageFlipLoadPromise = null;
@@ -1843,25 +1840,25 @@ body {
       '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
         '<defs>' +
           '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">' +
-            '<stop offset="0" stop-color="#0A192F"/>' +
-            '<stop offset="0.6" stop-color="#12233F"/>' +
-            '<stop offset="1" stop-color="#1E3A8A"/>' +
+            '<stop offset="0" stop-color="#001233"/>' +
+            '<stop offset="0.6" stop-color="#022a73"/>' +
+            '<stop offset="1" stop-color="#0241c4"/>' +
           '</linearGradient>' +
           '<radialGradient id="glow" cx="0.5" cy="0.15" r="0.8">' +
-            '<stop offset="0" stop-color="#D4AF37" stop-opacity="0.18"/>' +
-            '<stop offset="1" stop-color="#D4AF37" stop-opacity="0"/>' +
+            '<stop offset="0" stop-color="#6E9BFF" stop-opacity="0.22"/>' +
+            '<stop offset="1" stop-color="#6E9BFF" stop-opacity="0"/>' +
           '</radialGradient>' +
         '</defs>' +
         '<rect width="' + w + '" height="' + h + '" fill="url(#bg)"/>' +
         '<rect width="' + w + '" height="' + h + '" fill="url(#glow)"/>' +
         '<g transform="translate(' + (cx - logoSize / 2) + ',' + (cy - logoSize * 1.45) + ') scale(' + (logoSize / 50) + ')">' +
-          '<circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>' +
-          '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#D4AF37"/>' +
+          '<circle cx="25" cy="25" r="23" fill="none" stroke="#8AB4FF" stroke-width="2"/>' +
+          '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#FFFFFF"/>' +
         '</g>' +
         '<text x="' + cx + '" y="' + (cy + logoSize * 0.15) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="800" fill="#FFFFFF">EPSF Alex</text>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.55">PE MAGAZINE</text>' +
-        '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 1.05) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#D4AF37"/>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 1.55) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.78">THANK YOU FOR READING</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.62">PE MAGAZINE</text>' +
+        '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 1.05) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#6E9BFF"/>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.55) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.82">THANK YOU FOR READING</text>' +
       '</svg>';
 
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
