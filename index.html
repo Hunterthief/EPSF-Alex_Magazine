@@ -96,13 +96,13 @@ body {
     radial-gradient(ellipse 700px 380px at 85% 20%, rgba(2,65,196,0.08), transparent 60%),
     linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(246,247,249,0.78) 100%);
 }
+
+/* Hide the hero bottom line so the lower overlay connects seamlessly */
 .hero::after {
   content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(2,65,196,0.55), transparent);
+  display: none;
 }
+
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -182,6 +182,25 @@ body {
 }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+/* ============ LOWER WHITE OVERLAY ============ */
+.lower-veil {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% 0%, rgba(2,65,196,0.035), transparent 65%),
+    linear-gradient(180deg, rgba(246,247,249,0.78) 0%, rgba(255,255,255,0.78) 100%);
+}
+
+.lower-veil::before,
+.lower-veil::after {
+  content: none;
+  display: none;
+}
 
 main {
   position: relative;
@@ -1228,87 +1247,91 @@ main {
   {% for f in pdfs %}{% if f.path contains '/magazines/' %}{% assign count = count | plus: 1 %}{% endif %}{% endfor %}
 
   {% if count > 0 %}
-  <div class="wrap">
-    <section class="section featured-slot">
-      <div class="section-head">
-        <h2>Latest Issue</h2>
-        <span class="note">Just published</span>
-      </div>
-      {% for file in pdfs %}
-        {% if file.path contains '/magazines/' %}
-          {% unless has_issues %}
-            {% assign folder = file.name | replace: '.pdf', '' %}
-            {% assign cover = '/assets/issues/' | append: folder | append: '/1.jpg' | relative_url %}
-            {% assign dir = '/assets/issues/' | append: folder | relative_url %}
-            <div class="card-featured tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
-              <div class="cover">
-                <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
-                <div class="fallback">
-                  <span class="fallback-brand">EPSF Alex</span>
-                  <span class="fallback-title js-cover-title">{{ file.name }}</span>
-                </div>
-              </div>
-              <div class="body">
-                <span class="badge">Latest Issue</span>
-                <h3 class="issue-title js-issue-title">{{ file.name }}</h3>
-                <div class="issue-meta">
-                  <span class="js-issue-date">—</span>
-                  <span class="dot"></span>
-                  <span>Digital Edition</span>
-                </div>
-                <p class="issue-desc">Open the full issue in our interactive reader and turn the pages just like a real magazine.</p>
-                <span class="cta">Read Now
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-              </div>
-            </div>
-            {% assign has_issues = true %}
-          {% endunless %}
-        {% endif %}
-      {% endfor %}
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <h2>The Archive</h2>
-        <span class="note">{{ count }} issue{% if count != 1 %}s{% endif %} published</span>
-      </div>
-      <div class="grid">
+  <div class="lower-veil">
+    <div class="wrap">
+      <section class="section featured-slot">
+        <div class="section-head">
+          <h2>Latest Issue</h2>
+          <span class="note">Just published</span>
+        </div>
         {% for file in pdfs %}
           {% if file.path contains '/magazines/' %}
-            {% assign folder = file.name | replace: '.pdf', '' %}
-            {% assign cover = '/assets/issues/' | append: folder | append: '/1.jpg' | relative_url %}
-            {% assign dir = '/assets/issues/' | append: folder | relative_url %}
-            <div class="card tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
-              <div class="cover">
-                <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
-                <div class="fallback">
-                  <span class="fallback-brand">EPSF Alex</span>
-                  <span class="fallback-title js-cover-title">{{ file.name }}</span>
+            {% unless has_issues %}
+              {% assign folder = file.name | replace: '.pdf', '' %}
+              {% assign cover = '/assets/issues/' | append: folder | append: '/1.jpg' | relative_url %}
+              {% assign dir = '/assets/issues/' | append: folder | relative_url %}
+              <div class="card-featured tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
+                <div class="cover">
+                  <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
+                  <div class="fallback">
+                    <span class="fallback-brand">EPSF Alex</span>
+                    <span class="fallback-title js-cover-title">{{ file.name }}</span>
+                  </div>
                 </div>
-                <span class="cover-cta">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                  Read Issue
-                </span>
+                <div class="body">
+                  <span class="badge">Latest Issue</span>
+                  <h3 class="issue-title js-issue-title">{{ file.name }}</h3>
+                  <div class="issue-meta">
+                    <span class="js-issue-date">—</span>
+                    <span class="dot"></span>
+                    <span>Digital Edition</span>
+                  </div>
+                  <p class="issue-desc">Open the full issue in our interactive reader and turn the pages just like a real magazine.</p>
+                  <span class="cta">Read Now
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  </span>
+                </div>
               </div>
-              <div class="body">
-                <h3 class="issue-title js-issue-title">{{ file.name }}</h3>
-                <div class="issue-meta"><span class="js-issue-date">—</span></div>
-              </div>
-            </div>
+              {% assign has_issues = true %}
+            {% endunless %}
           {% endif %}
         {% endfor %}
-      </div>
-    </section>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>The Archive</h2>
+          <span class="note">{{ count }} issue{% if count != 1 %}s{% endif %} published</span>
+        </div>
+        <div class="grid">
+          {% for file in pdfs %}
+            {% if file.path contains '/magazines/' %}
+              {% assign folder = file.name | replace: '.pdf', '' %}
+              {% assign cover = '/assets/issues/' | append: folder | append: '/1.jpg' | relative_url %}
+              {% assign dir = '/assets/issues/' | append: folder | relative_url %}
+              <div class="card tilt" data-file-name="{{ file.name }}" data-pdf-url="{{ file.path | relative_url }}" data-pages-url="{{ dir }}" role="button" tabindex="0">
+                <div class="cover">
+                  <img src="{{ cover }}" alt="" onerror="this.style.display='none'">
+                  <div class="fallback">
+                    <span class="fallback-brand">EPSF Alex</span>
+                    <span class="fallback-title js-cover-title">{{ file.name }}</span>
+                  </div>
+                  <span class="cover-cta">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Read Issue
+                  </span>
+                </div>
+                <div class="body">
+                  <h3 class="issue-title js-issue-title">{{ file.name }}</h3>
+                  <div class="issue-meta"><span class="js-issue-date">—</span></div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    </div>
   </div>
   {% else %}
-  <div class="wrap">
-    <section class="section">
-      <div class="empty-state">
-        <h3>No issues yet</h3>
-        <p>Upload your first PDF to the <code>magazines/</code> folder and it will appear here automatically.</p>
-      </div>
-    </section>
+  <div class="lower-veil">
+    <div class="wrap">
+      <section class="section">
+        <div class="empty-state">
+          <h3>No issues yet</h3>
+          <p>Upload your first PDF to the <code>magazines/</code> folder and it will appear here automatically.</p>
+        </div>
+      </section>
+    </div>
   </div>
   {% endif %}
 </main>
