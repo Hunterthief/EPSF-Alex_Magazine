@@ -50,7 +50,7 @@ body {
   z-index: 0;
   pointer-events: none;
   opacity: 0.2;
-  background-image: url('{{ "/assets/images/logo-watermark.png" | relative_url }}');
+  background-image: url('{{ "/assets/images/logo-mark.png" | relative_url }}');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: auto 100%;
@@ -86,7 +86,13 @@ body {
   align-items: center;
   gap: 16px;
 }
-.logo-mark { flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(2,65,196,0.25)); }
+.logo-mark {
+  flex-shrink: 0;
+  height: 46px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(2,65,196,0.25));
+}
 .logo-text-group { display: flex; flex-direction: column; line-height: 1; }
 .logo-text { font-family: var(--display); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.01em; }
 .logo-sub {
@@ -1170,6 +1176,7 @@ main {
   .card .body { padding: 16px 16px 20px; }
   .card .issue-title { font-size: 0.98rem; }
   .card .issue-meta { font-size: 0.6rem; }
+  .logo-mark { height: 38px; }
   .r-top { padding: 14px 16px; }
   .r-title, .r-sep { display: none; }
   .r-btn .lbl { display: none; }
@@ -1204,10 +1211,7 @@ main {
 
 <header class="site-header">
   <div class="inner">
-    <svg class="logo-mark" viewBox="0 0 50 50" width="44" height="44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="25" cy="25" r="23" fill="none" stroke="#0241c4" stroke-width="2"/>
-      <path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#0241c4"/>
-    </svg>
+    <img class="logo-mark" src="{{ "/assets/images/logo-mark.png" | relative_url }}" alt="EPSF Alex logo">
     <div class="logo-text-group">
       <span class="logo-text">EPSF Alex</span>
       <span class="logo-sub">PE Magazine</span>
@@ -1434,6 +1438,32 @@ main {
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
+
+  /* ===================== LOGO ASSET (for back cover) ===================== */
+  var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
+  var logoDataUri = null;
+
+  (function loadLogoForBackCover() {
+    try {
+      fetch(LOGO_URL, { cache: "force-cache" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("logo " + r.status);
+          return r.blob();
+        })
+        .then(function (blob) {
+          return new Promise(function (resolve, reject) {
+            var fr = new FileReader();
+            fr.onload = function () { resolve(fr.result); };
+            fr.onerror = reject;
+            fr.readAsDataURL(blob);
+          });
+        })
+        .then(function (uri) { logoDataUri = uri; })
+        .catch(function () { logoDataUri = null; });
+    } catch (e) {
+      logoDataUri = null;
+    }
+  })();
 
   /* ===================== PAGE FLIP LOADER ===================== */
   var PAGE_FLIP_ESM_URLS = [
@@ -1864,7 +1894,25 @@ main {
   function makeBackCoverDataUrl(w, h) {
     var cx = w / 2;
     var cy = h / 2;
-    var logoSize = Math.round(Math.min(w, h) * 0.12);
+    var logoSize = Math.round(Math.min(w, h) * 0.14);
+
+    /* Real logo (tinted white) if the PNG loaded; otherwise the drawn fallback mark. */
+    var logoMarkup;
+    if (logoDataUri) {
+      var LH = logoSize * 2.0;
+      var LW = logoSize * 2.0;
+      var LX = cx - LW / 2;
+      var LY = (cy - logoSize * 1.05) - LH / 2;
+      logoMarkup =
+        '<image x="' + LX + '" y="' + LY + '" width="' + LW + '" height="' + LH + '"' +
+        ' preserveAspectRatio="xMidYMid meet" filter="url(#whiteTint)" href="' + logoDataUri + '"/>';
+    } else {
+      logoMarkup =
+        '<g transform="translate(' + (cx - logoSize / 2) + ',' + (cy - logoSize * 1.45) + ') scale(' + (logoSize / 50) + ')">' +
+          '<circle cx="25" cy="25" r="23" fill="none" stroke="#8AB4FF" stroke-width="2"/>' +
+          '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#FFFFFF"/>' +
+        '</g>';
+    }
 
     var svg =
       '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
@@ -1878,13 +1926,13 @@ main {
             '<stop offset="0" stop-color="#6E9BFF" stop-opacity="0.22"/>' +
             '<stop offset="1" stop-color="#6E9BFF" stop-opacity="0"/>' +
           '</radialGradient>' +
+          '<filter id="whiteTint" x="-10%" y="-10%" width="120%" height="120%">' +
+            '<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>' +
+          '</filter>' +
         '</defs>' +
         '<rect width="' + w + '" height="' + h + '" fill="url(#bg)"/>' +
         '<rect width="' + w + '" height="' + h + '" fill="url(#glow)"/>' +
-        '<g transform="translate(' + (cx - logoSize / 2) + ',' + (cy - logoSize * 1.45) + ') scale(' + (logoSize / 50) + ')">' +
-          '<circle cx="25" cy="25" r="23" fill="none" stroke="#8AB4FF" stroke-width="2"/>' +
-          '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#FFFFFF"/>' +
-        '</g>' +
+        logoMarkup +
         '<text x="' + cx + '" y="' + (cy + logoSize * 0.15) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="800" fill="#FFFFFF">EPSF Alex</text>' +
         '<text x="' + cx + '" y="' + (cy + logoSize * 0.75) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.62">PE MAGAZINE</text>' +
         '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 1.05) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#6E9BFF"/>' +
