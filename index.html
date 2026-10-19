@@ -1813,12 +1813,50 @@ main { position: relative; z-index: 2; }
     return step(2).then(function () { return n; });
   }
 
+  function makeInsideCoverDataUrl(w, h) {
+    var cx = w / 2;
+    var cy = h / 2;
+    var logoSize = Math.round(Math.min(w, h) * 0.16);
+
+    var logoMarkup = "";
+    if (logoDataUri) {
+      var LH = logoSize * 2.4;
+      var LW = logoSize * 2.4;
+      var LX = cx - LW / 2;
+      var LY = cy - logoSize * 3.8;
+      logoMarkup =
+        '<image x="' + LX + '" y="' + LY + '" width="' + LW + '" height="' + LH + '"' +
+        ' preserveAspectRatio="xMidYMid meet" filter="url(#whiteTint)" href="' + logoDataUri + '"/>';
+    }
+
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+        '<defs>' +
+          '<linearGradient id="bgInside" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#0241c4"/>' +
+            '<stop offset="0.5" stop-color="#1e5ee6"/>' +
+            '<stop offset="1" stop-color="#6E9BFF"/>' +
+          '</linearGradient>' +
+          '<filter id="whiteTint" x="-10%" y="-10%" width="120%" height="120%">' +
+            '<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>' +
+          '</filter>' +
+        '</defs>' +
+        '<rect width="' + w + '" height="' + h + '" fill="url(#bgInside)"/>' +
+        logoMarkup +
+        '<text x="' + cx + '" y="' + (cy - logoSize * 0.2) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.55) + '" font-weight="800" letter-spacing="4" fill="#FFFFFF">HAPPY READING</text>' +
+        '<rect x="' + (cx - logoSize * 0.6) + '" y="' + (cy + logoSize * 0.4) + '" width="' + (logoSize * 1.2) + '" height="4" rx="2" fill="#FFFFFF" fill-opacity="0.8"/>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.4) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.24) + '" font-weight="600" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.9">ENJOY THE ISSUE</text>' +
+      '</svg>';
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
   function makeBackCoverDataUrl(w, h) {
     var cx = w / 2;
     var cy = h / 2;
     var logoSize = Math.round(Math.min(w, h) * 0.14);
 
-    var logoMarkup;
+    var logoMarkup = "";
     if (logoDataUri) {
       var LH = logoSize * 2.0;
       var LW = logoSize * 2.0;
@@ -1830,7 +1868,7 @@ main { position: relative; z-index: 2; }
     } else {
       logoMarkup =
         '<g transform="translate(' + (cx - logoSize / 2) + ',' + (cy - logoSize * 1.45) + ') scale(' + (logoSize / 50) + ')">' +
-          '<circle cx="25" cy="25" r="23" fill="none" stroke="#8AB4FF" stroke-width="2"/>' +
+          '<circle cx="25" cy="25" r="23" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.8"/>' +
           '<path d="M15 15 L35 15 L35 20 L20 20 L20 23 L32 23 L32 28 L20 28 L20 35 L35 35 L35 40 L15 40 Z" fill="#FFFFFF"/>' +
         '</g>';
     }
@@ -1838,25 +1876,20 @@ main { position: relative; z-index: 2; }
     var svg =
       '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
         '<defs>' +
-          '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">' +
-            '<stop offset="0" stop-color="#001233"/>' +
-            '<stop offset="0.6" stop-color="#022a73"/>' +
-            '<stop offset="1" stop-color="#0241c4"/>' +
+          '<linearGradient id="bgBack" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#0241c4"/>' +
+            '<stop offset="0.5" stop-color="#1e5ee6"/>' +
+            '<stop offset="1" stop-color="#6E9BFF"/>' +
           '</linearGradient>' +
-          '<radialGradient id="glow" cx="0.5" cy="0.15" r="0.8">' +
-            '<stop offset="0" stop-color="#6E9BFF" stop-opacity="0.22"/>' +
-            '<stop offset="1" stop-color="#6E9BFF" stop-opacity="0"/>' +
-          '</radialGradient>' +
           '<filter id="whiteTint" x="-10%" y="-10%" width="120%" height="120%">' +
             '<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>' +
           '</filter>' +
         '</defs>' +
-        '<rect width="' + w + '" height="' + h + '" fill="url(#bg)"/>' +
-        '<rect width="' + w + '" height="' + h + '" fill="url(#glow)"/>' +
+        '<rect width="' + w + '" height="' + h + '" fill="url(#bgBack)"/>' +
         logoMarkup +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 0.20) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.62">PE MAGAZINE</text>' +
-        '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 0.50) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#6E9BFF"/>' +
-        '<text x="' + cx + '" y="' + (cy + logoSize * 0.95) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.82">THANK YOU FOR READING</text>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.20) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.9">PE MAGAZINE</text>' +
+        '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 0.50) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#FFFFFF" fill-opacity="0.8"/>' +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 0.95) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.95">THANK YOU FOR READING</text>' +
       '</svg>';
 
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -2730,10 +2763,13 @@ main { position: relative; z-index: 2; }
       total = Math.max(1, t);
 
       bookPages = [];
-      bookPages.push(url(1));
-      for (var i = 2; i <= total; i++) bookPages.push(url(i));
+      bookPages.push(url(1)); // Front Cover
+      bookPages.push(makeInsideCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72))))); // Welcome Page
 
-      if ((total - 1) % 2 !== 0) {
+      for (var i = 3; i <= total; i++) bookPages.push(url(i));
+
+      var innerCount = bookPages.length - 1;
+      if (innerCount % 2 !== 0) {
         bookPages.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
       }
 
