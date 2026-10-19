@@ -634,6 +634,7 @@ main {
   width: 100%;
   height: 100%;
   z-index: 1;
+  transition: opacity 0.45s ease;
 }
 
 #flipbook {
@@ -641,30 +642,61 @@ main {
   width: 100%;
   height: 100%;
   touch-action: none;
-  clip-path: inset(0 0 0 0);
-  transition:
-    transform 0.28s var(--ease-out),
-    clip-path 0.28s var(--ease-out);
-  will-change: transform, clip-path;
 }
 
 #flipbook canvas {
   display: block;
 }
 
-/*
-  StPageFlip renders hard covers on one half of the spread with an empty opposite half.
-  These classes clip only the painted cover half and shift it to the center when resting.
-*/
-.book-wrap.cover-front-static #flipbook {
-  transform: translateX(-25%);
-  clip-path: inset(0 0 0 50%);
+/* Cover / back-cover modes hide the spread engine completely (no blank halves ever) */
+.book-wrap.cover-mode #flipbook-mount,
+.book-wrap.back-mode #flipbook-mount {
+  opacity: 0;
+  pointer-events: none;
+}
+.book-wrap.cover-mode .page-stack,
+.book-wrap.back-mode .page-stack {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.book-wrap.cover-mode .book-shadow,
+.book-wrap.back-mode .book-shadow {
+  width: 52%;
 }
 
-.book-wrap.cover-back-static #flipbook {
-  transform: translateX(25%);
-  clip-path: inset(0 50% 0 0);
+/* ============ CUSTOM COVER LAYERS ============ */
+.cover-layer {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  z-index: 25;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0A192F;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.25),
+    0 30px 60px -12px rgba(0,0,0,0.55);
+  cursor: pointer;
+  touch-action: none;
+  will-change: transform, opacity;
+  transform-origin: left center;
+  transition: transform 0.75s var(--ease-book), opacity 0.55s ease;
 }
+.cover-layer[hidden] { display: none; }
+.cover-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.cover-layer.back {
+  transform-origin: right center;
+  cursor: pointer;
+}
+.cover-layer.no-anim { transition: none; }
 
 .book-shadow {
   position: absolute;
@@ -678,11 +710,7 @@ main {
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
   filter: blur(14px);
   z-index: 0;
-}
-
-.book-wrap.cover-front-static .book-shadow,
-.book-wrap.cover-back-static .book-shadow {
-  width: 52%;
+  transition: width 0.45s var(--ease-out);
 }
 
 /* Vertical page sheets, same height as pages */
@@ -1365,12 +1393,19 @@ main {
   </div>
 
   <div class="r-stage" id="r-stage">
-    <div class="book-wrap" id="book-wrap">
+    <div class="book-wrap cover-mode" id="book-wrap">
       <div class="page-stack page-stack--l" id="stack-l"></div>
       <div class="page-stack page-stack--r" id="stack-r"></div>
 
       <div id="flipbook-mount"></div>
       <div class="book-shadow"></div>
+
+      <div class="cover-layer" id="cover-front" hidden>
+        <img id="cover-front-img" alt="Magazine cover" draggable="false">
+      </div>
+      <div class="cover-layer back" id="cover-back" hidden>
+        <img id="cover-back-img" alt="Magazine back cover" draggable="false">
+      </div>
 
       <div class="rapid-flash" id="rapid-flash"></div>
       <div class="sparks" id="sparks"></div>
@@ -1382,7 +1417,7 @@ main {
 
   <div class="hint" id="hint">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    <span id="hint-txt">Drag a corner or click to flip</span>
+    <span id="hint-txt">Click or drag the cover to open</span>
   </div>
 
   <div class="end-card" id="end-card">
@@ -1450,6 +1485,7 @@ main {
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
+  var COVER_ANIM_MS = RM ? 0 : 760;
 
   /* ===================== LOGO ASSET (for back cover) ===================== */
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
@@ -1821,21 +1857,31 @@ main {
   var dTrack     = document.getElementById("d-track");
   var dFill      = document.getElementById("d-fill");
 
+  var frontLayer    = document.getElementById("cover-front");
+  var frontLayerImg = document.getElementById("cover-front-img");
+  var backLayer     = document.getElementById("cover-back");
+  var backLayerImg  = document.getElementById("cover-back-img");
+
   var pagesUrl = "";
-  var total = 1;
-  var pageCount = 0;
-  var contentLastIdx = 0;
+  var total = 1;          /* original page images (1.jpg .. total.jpg) */
+  var inner = [];         /* flipbook pages: originals 2..total (+ colophon if needed) */
+  var N = 0;              /* inner.length */
+  var lastSpreadIdx = 0;  /* landscape: index of left page of last spread */
   var maxSpread = 0;
   var aspect = 0.72;
   var pageW = 0;
   var pageH = 0;
+  var backCoverSrc = "";
 
   var pageFlip = null;
-  var images = [];
   var currentIdx = 0;
   var sfState = "read";
   var isInitializing = false;
   var suppressLoader = false;
+
+  var viewMode = "front";   /* front | book | back */
+  var coverAnimating = false;
+  var coverAnimToken = 0;
 
   var heldDir = 0;
   var heldLoopRunning = false;
@@ -1919,7 +1965,6 @@ main {
     var cy = h / 2;
     var logoSize = Math.round(Math.min(w, h) * 0.14);
 
-    /* Real logo (tinted white) if the PNG loaded; otherwise the drawn fallback mark. */
     var logoMarkup;
     if (logoDataUri) {
       var LH = logoSize * 2.0;
@@ -1959,6 +2004,25 @@ main {
         '<text x="' + cx + '" y="' + (cy + logoSize * 0.20) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.18) + '" letter-spacing="6" fill="#FFFFFF" fill-opacity="0.62">PE MAGAZINE</text>' +
         '<rect x="' + (cx - logoSize * 0.35) + '" y="' + (cy + logoSize * 0.50) + '" width="' + (logoSize * 0.7) + '" height="3" rx="1.5" fill="#6E9BFF"/>' +
         '<text x="' + cx + '" y="' + (cy + logoSize * 0.95) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.2) + '" letter-spacing="4" fill="#FFFFFF" fill-opacity="0.82">THANK YOU FOR READING</text>' +
+      '</svg>';
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
+  function makeColophonDataUrl(w, h) {
+    var cx = w / 2;
+    var cy = h / 2;
+    var logoSize = Math.round(Math.min(w, h) * 0.16);
+
+    var logoMarkup = logoDataUri
+      ? '<image x="' + (cx - logoSize) + '" y="' + (cy - logoSize * 1.6) + '" width="' + (logoSize * 2) + '" height="' + (logoSize * 2) + '" preserveAspectRatio="xMidYMid meet" href="' + logoDataUri + '"/>'
+      : '';
+
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+        '<rect width="' + w + '" height="' + h + '" fill="#F5F7FF"/>' +
+        logoMarkup +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.1) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.22) + '" letter-spacing="4" fill="#0241c4" fill-opacity="0.55">EPSF ALEX PE MAGAZINE</text>' +
       '</svg>';
 
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -2005,8 +2069,254 @@ main {
       bookWrap.style.width = (pageW * 2) + "px";
       bookWrap.style.height = pageH + "px";
     }
+
+    positionCoverLayers();
   }
 
+  function positionCoverLayers() {
+    [frontLayer, backLayer].forEach(function (el) {
+      if (!el) return;
+      el.style.height = pageH + "px";
+      el.style.width = pageW + "px";
+      el.style.top = "0px";
+      el.style.left = (isPortrait ? 0 : pageW / 2) + "px";
+    });
+  }
+
+  /* ---------- cover layer swing helpers ---------- */
+  var SWING_FRONT = "perspective(2200px) rotateY(-172deg)";
+  var SWING_BACK  = "perspective(2200px) rotateY(172deg)";
+
+  function setLayerSwung(el, swing) {
+    el.style.transform = swing;
+    el.style.opacity = "0";
+  }
+  function setLayerSettled(el) {
+    el.style.transform = "perspective(2200px) rotateY(0deg)";
+    el.style.opacity = "1";
+  }
+
+  function updateUIAll() {
+    updateStacks();
+    updateDock();
+    updateHint();
+    updateEnd();
+  }
+
+  function finishCoverAnim(token) {
+    if (token !== coverAnimToken) return;
+    coverAnimating = false;
+    updateUIAll();
+  }
+
+  function openCover() {
+    if (viewMode !== "front" || coverAnimating) return;
+    ensureAudio();
+    playSparkSound();
+
+    coverAnimating = true;
+    var token = ++coverAnimToken;
+
+    viewMode = "book";
+    hideHint();
+
+    frontLayer.classList.remove("no-anim");
+    setLayerSwung(frontLayer, SWING_FRONT);
+    bookWrap.classList.remove("cover-mode");
+
+    setTimeout(function () {
+      frontLayer.hidden = true;
+      finishCoverAnim(token);
+      wake();
+    }, COVER_ANIM_MS);
+
+    updateUIAll();
+  }
+
+  function closeToCover() {
+    if (viewMode !== "book" || coverAnimating || currentIdx !== 0) return;
+
+    coverAnimating = true;
+    var token = ++coverAnimToken;
+
+    viewMode = "front";
+    hideHint();
+
+    frontLayer.hidden = false;
+    /* start swung (no transition), then settle with transition */
+    frontLayer.classList.add("no-anim");
+    setLayerSwung(frontLayer, SWING_FRONT);
+    void frontLayer.offsetWidth;
+    frontLayer.classList.remove("no-anim");
+    setLayerSettled(frontLayer);
+
+    bookWrap.classList.add("cover-mode");
+
+    setTimeout(function () {
+      finishCoverAnim(token);
+      wake();
+    }, COVER_ANIM_MS);
+
+    updateUIAll();
+  }
+
+  function showBack() {
+    if (viewMode !== "book" || coverAnimating) return;
+    playSparkSound();
+
+    coverAnimating = true;
+    var token = ++coverAnimToken;
+
+    viewMode = "back";
+    hideHint();
+
+    backLayer.hidden = false;
+    backLayer.classList.add("no-anim");
+    setLayerSwung(backLayer, SWING_BACK);
+    void backLayer.offsetWidth;
+    backLayer.classList.remove("no-anim");
+    setLayerSettled(backLayer);
+
+    bookWrap.classList.add("back-mode");
+
+    setTimeout(function () {
+      finishCoverAnim(token);
+      wake();
+    }, COVER_ANIM_MS);
+
+    updateUIAll();
+  }
+
+  function closeBack() {
+    if (viewMode !== "back" || coverAnimating) return;
+
+    coverAnimating = true;
+    var token = ++coverAnimToken;
+
+    viewMode = "book";
+    hideEnd();
+
+    backLayer.classList.remove("no-anim");
+    setLayerSwung(backLayer, SWING_BACK);
+    bookWrap.classList.remove("back-mode");
+
+    setTimeout(function () {
+      backLayer.hidden = true;
+      finishCoverAnim(token);
+      wake();
+    }, COVER_ANIM_MS);
+
+    updateUIAll();
+  }
+
+  function forceFront() {
+    coverAnimToken++;
+    coverAnimating = false;
+    viewMode = "front";
+    bookWrap.classList.add("cover-mode");
+    bookWrap.classList.remove("back-mode");
+    backLayer.hidden = true;
+    frontLayer.hidden = false;
+    frontLayer.classList.add("no-anim");
+    setLayerSettled(frontLayer);
+    void frontLayer.offsetWidth;
+    frontLayer.classList.remove("no-anim");
+    updateUIAll();
+  }
+
+  function forceBack() {
+    coverAnimToken++;
+    coverAnimating = false;
+    viewMode = "back";
+    bookWrap.classList.add("back-mode");
+    bookWrap.classList.remove("cover-mode");
+    frontLayer.hidden = true;
+    backLayer.hidden = false;
+    backLayer.classList.add("no-anim");
+    setLayerSettled(backLayer);
+    void backLayer.offsetWidth;
+    backLayer.classList.remove("no-anim");
+    updateUIAll();
+  }
+
+  function forceBook(idx) {
+    coverAnimToken++;
+    coverAnimating = false;
+    viewMode = "book";
+    bookWrap.classList.remove("cover-mode", "back-mode");
+    frontLayer.hidden = true;
+    backLayer.hidden = true;
+
+    if (pageFlip && N > 0) {
+      var t = clampInner(idx);
+      try { pageFlip.turnToPage(t); } catch (e) {}
+      currentIdx = t;
+    }
+    updateUIAll();
+  }
+
+  function clampInner(idx) {
+    if (N <= 0) return 0;
+    var max = isPortrait ? (N - 1) : lastSpreadIdx;
+    idx = Math.max(0, Math.min(max, idx));
+    if (!isPortrait) idx -= (idx % 2);
+    return idx;
+  }
+
+  /* ---------- front cover drag-to-open ---------- */
+  var coverDrag = { active: false, id: null, x0: 0, y0: 0, moved: false, p: 0 };
+
+  if (frontLayer) {
+    frontLayer.addEventListener("pointerdown", function (e) {
+      if (viewMode !== "front" || coverAnimating) return;
+      coverDrag.active = true;
+      coverDrag.id = e.pointerId;
+      coverDrag.x0 = e.clientX;
+      coverDrag.y0 = e.clientY;
+      coverDrag.moved = false;
+      coverDrag.p = 0;
+      frontLayer.classList.add("no-anim");
+      try { frontLayer.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    frontLayer.addEventListener("pointermove", function (e) {
+      if (!coverDrag.active || e.pointerId !== coverDrag.id) return;
+
+      var dx = e.clientX - coverDrag.x0;
+      var dy = e.clientY - coverDrag.y0;
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) coverDrag.moved = true;
+
+      var p = Math.max(0, Math.min(1, -dx / Math.max(pageW, 1)));
+      coverDrag.p = p;
+
+      frontLayer.style.transform = "perspective(2200px) rotateY(" + (-172 * p).toFixed(2) + "deg)";
+      frontLayer.style.opacity = String(1 - p * 0.85);
+    });
+
+    function endFrontDrag(e) {
+      if (!coverDrag.active || (e && e.pointerId !== coverDrag.id)) return;
+      coverDrag.active = false;
+      try { frontLayer.releasePointerCapture(coverDrag.id); } catch (err) {}
+      frontLayer.classList.remove("no-anim");
+
+      if (!coverDrag.moved || coverDrag.p > 0.3) {
+        openCover();
+      } else {
+        setLayerSettled(frontLayer);
+      }
+    }
+
+    frontLayer.addEventListener("pointerup", endFrontDrag);
+    frontLayer.addEventListener("pointercancel", endFrontDrag);
+  }
+
+  if (backLayer) {
+    backLayer.addEventListener("click", function () {
+      if (viewMode === "back" && !coverAnimating) closeBack();
+    });
+  }
+
+  /* ---------- stacks ---------- */
   function spreadLabel(s) {
     var left = s * 2;
     var right = s * 2 + 1;
@@ -2053,23 +2363,21 @@ main {
   }
 
   function spreadFromIndex(idx) {
-    if (idx <= 0) return 0;
-    if (idx >= contentLastIdx) return maxSpread;
-    return Math.max(0, Math.min(maxSpread, Math.ceil(idx / 2)));
+    if (maxSpread <= 0) return 0;
+    if (isPortrait) return Math.max(1, Math.min(maxSpread, Math.ceil((idx + 1) / 2)));
+    return Math.max(1, Math.min(maxSpread, idx / 2 + 1));
   }
 
   function indexFromSpread(s) {
-    var idx = 2 * s - 1;
-    if (idx > contentLastIdx) idx = contentLastIdx;
-    if (idx < 1) idx = 1;
-    return idx;
+    var idx = (s - 1) * 2;
+    return clampInner(idx);
   }
 
   function updateStacks() {
-    var open = !isPortrait && currentIdx > 0 && currentIdx < contentLastIdx;
-    var currentSpread = spreadFromIndex(currentIdx);
-    var unread = Math.max(0, maxSpread - currentSpread);
-    var read = Math.max(0, currentSpread - 1);
+    var open = viewMode === "book" && !isPortrait && N > 0 && currentIdx >= 0 && currentIdx <= lastSpreadIdx;
+    var currentSpread = open ? spreadFromIndex(currentIdx) : 0;
+    var unread = open ? Math.max(0, maxSpread - currentSpread) : 0;
+    var read = open ? Math.max(0, currentSpread - 1) : 0;
 
     var wR = (open && unread > 0) ? Math.min(STACK_MAX, Math.max(14, unread * 2)) : 0;
     var wL = (open && read > 0) ? Math.min(STACK_MAX, Math.max(14, read * 2)) : 0;
@@ -2120,42 +2428,49 @@ main {
   }
 
   function updateDock() {
-    if (currentIdx <= 0) {
+    if (viewMode === "front") {
       dPages.textContent = "Cover";
       dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
       dPrev.disabled = true;
-      dNext.disabled = contentLastIdx < 1;
+      dNext.disabled = N <= 0;
       edgeL.classList.add("off");
-      edgeR.classList.toggle("off", contentLastIdx < 1);
+      edgeR.classList.toggle("off", N <= 0);
       return;
     }
 
-    if (currentIdx >= contentLastIdx) {
+    if (viewMode === "back") {
       dPages.textContent = "Back Cover";
       dFill.style.width = "100%";
-      dPrev.disabled = false;
+      dPrev.disabled = N <= 0;
       dNext.disabled = true;
-      edgeL.classList.remove("off");
+      edgeL.classList.toggle("off", N <= 0);
+      edgeR.classList.add("off");
+      return;
+    }
+
+    if (N <= 0) {
+      dPages.textContent = "Cover";
+      dFill.style.width = "0%";
+      dPrev.disabled = true;
+      dNext.disabled = true;
+      edgeL.classList.add("off");
       edgeR.classList.add("off");
       return;
     }
 
     if (isPortrait) {
-      var pageNum = currentIdx + 1;
-      if (pageNum > total) pageNum = total;
-
-      dPages.textContent = "Page " + pageNum + " / " + total;
-      dFill.style.width = Math.round((pageNum / Math.max(total, 1)) * 100) + "%";
+      var orig = currentIdx + 2;
+      if (orig > total) orig = total;
+      dPages.textContent = "Page " + orig + " / " + total;
+      dFill.style.width = Math.round((orig / Math.max(total, 1)) * 100) + "%";
     } else {
-      var leftImg = currentIdx + 1;
-      var rightImg = currentIdx + 2;
+      var leftOrig = currentIdx + 2;
+      var rightOrig = currentIdx + 3;
+      if (leftOrig > total) leftOrig = total;
+      if (rightOrig > total) rightOrig = 0;
 
-      if (leftImg > total) leftImg = total;
-      if (rightImg > total) rightImg = 0;
-
-      dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
-
-      var lastVisible = rightImg || leftImg;
+      dPages.textContent = (rightOrig ? leftOrig + "–" + rightOrig : leftOrig) + " / " + total;
+      var lastVisible = rightOrig || leftOrig;
       dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
     }
 
@@ -2166,7 +2481,9 @@ main {
   }
 
   function updateHint() {
-    if (currentIdx === 0) {
+    if (viewMode === "front") {
+      showHint(isPortrait ? "Tap the cover to open" : "Click or drag the cover to open");
+    } else if (viewMode === "book" && currentIdx === 0) {
       showHint(isPortrait ? "Swipe or tap to flip" : "Drag a corner or click to flip");
     } else {
       hideHint();
@@ -2174,43 +2491,8 @@ main {
   }
 
   function updateEnd() {
-    if (currentIdx >= contentLastIdx) showEnd();
+    if (viewMode === "back") showEnd();
     else hideEnd();
-  }
-
-  function updateCoverView() {
-    if (!bookWrap) return;
-
-    var canStatic =
-      !isPortrait &&
-      contentLastIdx > 0 &&
-      sfState === "read" &&
-      !isJumping &&
-      !isInitializing;
-
-    var front = canStatic && currentIdx === 0;
-    var back = canStatic && currentIdx >= contentLastIdx;
-
-    bookWrap.classList.toggle("cover-front-static", front);
-    bookWrap.classList.toggle("cover-back-static", back);
-  }
-
-  function clearCoverView() {
-    if (bookWrap) {
-      bookWrap.classList.remove("cover-front-static");
-      bookWrap.classList.remove("cover-back-static");
-    }
-  }
-
-  function updateFromPageFlip(idx) {
-    if (idx === undefined) idx = getCurrentIndex();
-    idx = Math.max(0, Math.min(contentLastIdx, idx));
-    currentIdx = idx;
-    updateStacks();
-    updateDock();
-    updateHint();
-    updateEnd();
-    updateCoverView();
   }
 
   function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
@@ -2291,10 +2573,8 @@ main {
     }
   }
 
-  /* ---------- StPageFlip lifecycle ---------- */
+  /* ---------- StPageFlip lifecycle (inner pages only) ---------- */
   function destroyFlipbook() {
-    clearCoverView();
-
     if (pageFlip) {
       try { pageFlip.destroy(); } catch (e) {}
       pageFlip = null;
@@ -2315,7 +2595,7 @@ main {
       return;
     }
 
-    if (!images.length) {
+    if (!inner.length) {
       failLoad("No pages to display.");
       return;
     }
@@ -2333,12 +2613,12 @@ main {
         width: pageW,
         height: pageH,
         size: "fixed",
-        showCover: true,
+        showCover: false,
         usePortrait: isPortrait,
         flippingTime: RM ? 1 : 700,
         maxShadowOpacity: 0.75,
         mobileScrollSupport: false,
-        startPage: startIndex,
+        startPage: clampInner(startIndex),
         startZIndex: 0,
         autoSize: false,
         clickEventForward: true,
@@ -2352,52 +2632,57 @@ main {
 
     pageFlip.on("init", function () {
       isInitializing = false;
-
-      try {
-        var libCount = pageFlip.getPageCount();
-        if (libCount && libCount > pageCount) pageCount = libCount;
-      } catch (e) {}
+      currentIdx = clampInner(startIndex);
 
       if (!suppressLoader) loader.classList.add("gone");
       bookWrap.classList.add("visible");
       reader.classList.add("is-open");
-      updateFromPageFlip(startIndex);
+      updateUIAll();
     });
 
     pageFlip.on("flip", function (e) {
       var idx = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
-
-      if (idx > contentLastIdx) {
-        idx = contentLastIdx;
-        try { pageFlip.turnToPage(contentLastIdx); } catch (err) {}
-      }
-
-      updateFromPageFlip(idx);
+      currentIdx = clampInner(idx);
+      updateUIAll();
     });
 
     pageFlip.on("changeState", function (e) {
       sfState = (e && e.data) ? e.data : "read";
-      updateCoverView();
-
       if (sfState === "read" && heldLoopRunning) {
         setTimeout(heldLoop, 30);
       }
     });
 
-    pageFlip.loadFromImages(images);
+    pageFlip.loadFromImages(inner);
   }
 
   function requestFlip(dir) {
-    if (!pageFlip || isJumping) return;
+    if (coverAnimating || isJumping) return;
+
+    if (viewMode === "front") {
+      if (dir > 0) openCover();
+      return;
+    }
+
+    if (viewMode === "back") {
+      if (dir < 0) closeBack();
+      return;
+    }
+
+    if (!pageFlip || N <= 0) return;
     hideHint();
-    clearCoverView();
 
     if (dir > 0) {
-      if (currentIdx >= contentLastIdx) return;
-      try { pageFlip.flipNext("bottom"); } catch (e) {}
+      if (isPortrait) {
+        if (currentIdx >= N - 1) showBack();
+        else pageFlip.flipNext("bottom");
+      } else {
+        if (currentIdx >= lastSpreadIdx) showBack();
+        else pageFlip.flipNext("bottom");
+      }
     } else {
-      if (currentIdx <= 0) return;
-      try { pageFlip.flipPrev("bottom"); } catch (e) {}
+      if (currentIdx <= 0) closeToCover();
+      else pageFlip.flipPrev("bottom");
     }
   }
 
@@ -2405,29 +2690,39 @@ main {
     if (token !== jumpToken) return;
     isJumping = false;
     hideSparks();
-    if (idx !== undefined) updateFromPageFlip(idx);
-    else updateFromPageFlip();
+    if (idx !== undefined) currentIdx = clampInner(idx);
+    updateUIAll();
   }
 
-  function jumpToIndex(target, sparks) {
+  function jumpToInner(target, sparks) {
+    if (N <= 0) return;
+    target = clampInner(target);
+
+    if (viewMode === "front") {
+      forceBook(target);
+      return;
+    }
+    if (viewMode === "back") {
+      forceBook(target);
+      return;
+    }
+
     if (!pageFlip) return;
-    target = Math.max(0, Math.min(contentLastIdx, target));
-    var cur = getCurrentIndex();
-    if (target === cur) return;
+    if (target === currentIdx) return;
 
     stopHeld();
     hideHint();
-    clearCoverView();
 
     var token = ++jumpToken;
     isJumping = true;
 
-    if (sparks) showSparks(target > cur ? 1 : -1);
+    if (sparks) showSparks(target > currentIdx ? 1 : -1);
 
-    var dist = Math.abs(target - cur);
+    var dist = Math.abs(target - currentIdx);
 
     if (RM || dist > JUMP_ANIMATE_THRESHOLD) {
       try { pageFlip.turnToPage(target); } catch (e) {}
+      currentIdx = target;
       setTimeout(function () { finishJump(token, target); }, 30);
       return;
     }
@@ -2446,12 +2741,13 @@ main {
   function jumpToSpread(targetSpread, sparks) {
     if (maxSpread < 1) return;
     targetSpread = Math.max(1, Math.min(maxSpread, targetSpread));
-    jumpToIndex(indexFromSpread(targetSpread), sparks);
+    jumpToInner(indexFromSpread(targetSpread), sparks);
   }
 
   /* ---------- held-key rapid flipping ---------- */
   function startHeld(dir) {
-    if (isJumping || !pageFlip) return;
+    if (isJumping || coverAnimating) return;
+    if (viewMode !== "book" && !pageFlip) return;
     if (heldDir === dir && heldLoopRunning) return;
     heldDir = dir;
     if (!heldLoopRunning) {
@@ -2468,21 +2764,49 @@ main {
   }
 
   function heldLoop() {
-    if (!heldLoopRunning || heldDir === 0 || !pageFlip || isJumping) return;
+    if (!heldLoopRunning || heldDir === 0 || isJumping) return;
 
-    if (sfState !== "read") {
+    if (coverAnimating) {
+      setTimeout(heldLoop, 60);
+      return;
+    }
+
+    if (viewMode === "front") {
+      if (heldDir > 0) {
+        openCover();
+        setTimeout(heldLoop, 80);
+      } else {
+        stopHeld();
+      }
+      return;
+    }
+
+    if (viewMode === "back") {
+      if (heldDir < 0) {
+        closeBack();
+        setTimeout(heldLoop, 80);
+      } else {
+        stopHeld();
+      }
+      return;
+    }
+
+    if (!pageFlip || sfState !== "read") {
       setTimeout(heldLoop, 60);
       return;
     }
 
     if (heldDir > 0) {
-      if (currentIdx >= contentLastIdx) {
+      var atEnd = isPortrait ? (currentIdx >= N - 1) : (currentIdx >= lastSpreadIdx);
+      if (atEnd) {
+        showBack();
         stopHeld();
         return;
       }
       requestFlip(1);
     } else {
       if (currentIdx <= 0) {
+        closeToCover();
         stopHeld();
         return;
       }
@@ -2496,7 +2820,7 @@ main {
     reader.classList.remove("idle");
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () {
-      if (!isJumping) reader.classList.add("idle");
+      if (!isJumping && !coverAnimating) reader.classList.add("idle");
     }, 2800);
   }
 
@@ -2516,37 +2840,28 @@ main {
   }
 
   function getZoomSources() {
-    if (!images.length) return [];
+    if (viewMode === "front") return total >= 1 ? [url(1)] : [];
+    if (viewMode === "back") return backCoverSrc ? [backCoverSrc] : [];
+    if (!inner.length) return [];
 
-    if (currentIdx >= contentLastIdx) {
-      return [images[contentLastIdx]];
-    }
-
-    if (currentIdx <= 0) {
-      return [images[0]];
-    }
-
-    if (isPortrait) {
-      return [images[currentIdx]];
-    }
-
-    var arr = [images[currentIdx]];
-    if (images[currentIdx + 1]) arr.push(images[currentIdx + 1]);
+    var arr = [inner[currentIdx]];
+    if (!isPortrait && inner[currentIdx + 1]) arr.push(inner[currentIdx + 1]);
     return arr;
   }
 
   function getZoomLabel() {
-    if (!images.length) return "Zoom";
-
-    if (currentIdx <= 0) return "Cover";
-    if (currentIdx >= contentLastIdx) return "Back Cover";
+    if (viewMode === "front") return "Cover";
+    if (viewMode === "back") return "Back Cover";
+    if (!inner.length) return "Zoom";
 
     if (isPortrait) {
-      return "Page " + (currentIdx + 1);
+      var o = currentIdx + 2;
+      return "Page " + (o > total ? total : o);
     }
 
-    var left = currentIdx + 1;
-    var right = currentIdx + 2;
+    var left = currentIdx + 2;
+    var right = currentIdx + 3;
+    if (left > total) left = total;
     if (right > total) right = 0;
 
     return right ? "Pages " + left + "–" + right : "Page " + left;
@@ -2597,7 +2912,7 @@ main {
   }
 
   function openZoom() {
-    if (!images.length || !zoomOverlay || !zoomPages || !zoomStage) return;
+    if (!zoomOverlay || !zoomPages || !zoomStage) return;
 
     var srcs = getZoomSources();
     if (!srcs.length) return;
@@ -2829,14 +3144,17 @@ main {
     rDl.href = card.dataset.pdfUrl;
 
     total = 1;
-    pageCount = 0;
-    contentLastIdx = 0;
+    inner = [];
+    N = 0;
     maxSpread = 0;
+    lastSpreadIdx = 0;
     currentIdx = 0;
-    images = [];
     jumpToken++;
     isJumping = false;
     sfState = "read";
+    coverAnimToken++;
+    coverAnimating = false;
+    viewMode = "front";
 
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
@@ -2847,8 +3165,8 @@ main {
     hideHint();
     hideEnd();
     hideTip();
-    clearCoverView();
-    bookWrap.classList.remove("visible");
+    bookWrap.classList.remove("visible", "back-mode");
+    bookWrap.classList.add("cover-mode");
 
     loadImage(url(1)).then(function (im) {
       if (!im.naturalWidth || !im.naturalHeight) throw new Error("bad first page");
@@ -2869,16 +3187,23 @@ main {
     }).then(function (t) {
       total = Math.max(1, t);
 
-      images = [];
-      for (var i = 1; i <= total; i++) images.push(url(i));
+      /* Inner book = originals 2..total; pad with a colophon page if odd */
+      inner = [];
+      for (var i = 2; i <= total; i++) inner.push(url(i));
+      if (inner.length % 2 === 1) {
+        inner.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
+      }
+
+      N = inner.length;
+      lastSpreadIdx = Math.max(0, N - 2);
+      maxSpread = Math.max(0, N / 2);
 
       var bcW = 1200;
       var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
-      images.push(makeBackCoverDataUrl(bcW, bcH));
+      backCoverSrc = makeBackCoverDataUrl(bcW, bcH);
 
-      contentLastIdx = images.length - 1;
-      pageCount = images.length;
-      maxSpread = Math.max(0, Math.floor(total / 2));
+      frontLayerImg.src = url(1);
+      backLayerImg.src = backCoverSrc;
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
@@ -2886,7 +3211,28 @@ main {
       return ensurePageFlip().then(function () {
         buildStacks();
         computeLayout();
-        createFlipbook(0, false);
+
+        /* cover settled & visible, back swung & hidden */
+        frontLayer.hidden = false;
+        frontLayer.classList.add("no-anim");
+        setLayerSettled(frontLayer);
+        void frontLayer.offsetWidth;
+        frontLayer.classList.remove("no-anim");
+
+        backLayer.hidden = true;
+        backLayer.classList.add("no-anim");
+        setLayerSwung(backLayer, SWING_BACK);
+        void backLayer.offsetWidth;
+        backLayer.classList.remove("no-anim");
+
+        if (N > 0) {
+          createFlipbook(0, false);
+        } else {
+          loader.classList.add("gone");
+          bookWrap.classList.add("visible");
+          reader.classList.add("is-open");
+          updateUIAll();
+        }
       });
     }).catch(function (e) {
       var msg = (e && e.message) ? e.message : String(e);
@@ -2908,7 +3254,9 @@ main {
 
   function closeReader() {
     jumpToken++;
+    coverAnimToken++;
     isJumping = false;
+    coverAnimating = false;
     stopHeld();
     hideSparks();
     hideHint();
@@ -2916,7 +3264,6 @@ main {
     hideTip();
     clearTimeout(idleTimer);
     if (zoom.open) closeZoom();
-    clearCoverView();
     destroyFlipbook();
 
     reader.classList.add("is-closing");
@@ -2990,7 +3337,7 @@ main {
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (isPortrait || currentIdx <= 0 || currentIdx >= contentLastIdx) {
+      if (viewMode !== "book" || isPortrait) {
         hideTip();
         var m0 = hoverMarkerFor(container);
         if (m0) m0.style.opacity = "0";
@@ -3019,7 +3366,7 @@ main {
     });
 
     container.addEventListener("click", function (e) {
-      if (isPortrait || currentIdx <= 0 || currentIdx >= contentLastIdx || isJumping) return;
+      if (viewMode !== "book" || isPortrait || isJumping || coverAnimating) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -3043,15 +3390,23 @@ main {
   edgeL.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (isJumping) return;
+    if (isJumping || coverAnimating) return;
 
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
+    if (viewMode === "front") {
+      if (frac <= 0.02) return;
+      forceBook(0);
+    }
+    if (viewMode === "back") {
+      if (frac >= 0.98) return;
+      forceBook(lastSpreadIdx);
+    }
+
     if (isPortrait) {
-      var targetIdx = Math.round(frac * contentLastIdx);
-      targetIdx = Math.max(0, Math.min(contentLastIdx, targetIdx));
-      jumpToIndex(targetIdx, true);
+      var targetIdx = Math.round(frac * (N - 1));
+      jumpToInner(targetIdx, true);
     } else {
       if (maxSpread < 1) return;
       var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
@@ -3060,14 +3415,14 @@ main {
   });
 
   dPages.addEventListener("click", function () {
-    if (isJumping) return;
+    if (isJumping || coverAnimating) return;
 
     var input = document.createElement("input");
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
     input.max = String(total + 1);
-    input.value = String(Math.min(total + 1, currentIdx + 1));
+    input.value = viewMode === "front" ? "1" : (viewMode === "back" ? String(total + 1) : String(Math.min(total, currentIdx + 2)));
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -3084,15 +3439,18 @@ main {
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        var targetIdx;
-        if (val <= 1) targetIdx = 0;
-        else if (val > total) targetIdx = contentLastIdx;
-        else targetIdx = val - 1;
-
-        jumpToIndex(targetIdx, true);
+        if (val <= 1) {
+          if (viewMode === "book") closeToCover();
+          else if (viewMode === "back") { forceBook(0); closeToCover(); }
+        } else if (val > total) {
+          if (viewMode === "book") showBack();
+          else if (viewMode === "front") { forceBook(lastSpreadIdx); showBack(); }
+        } else {
+          jumpToInner(val - 2, true);
+        }
       }
 
-      updateFromPageFlip();
+      updateUIAll();
     }
 
     input.addEventListener("keydown", function (e) {
@@ -3109,9 +3467,24 @@ main {
   });
 
   document.getElementById("end-again").addEventListener("click", function () {
-    if (!pageFlip || isJumping) return;
+    if (coverAnimating) return;
     hideEnd();
-    jumpToIndex(0, false);
+
+    if (viewMode === "back") {
+      closeBack();
+      setTimeout(function () {
+        jumpToInner(0, false);
+        setTimeout(closeToCoverSafe, RM ? 0 : 780);
+      }, COVER_ANIM_MS);
+    } else {
+      forceBook(0);
+      closeToCoverSafe();
+    }
+
+    function closeToCoverSafe() {
+      if (viewMode === "book" && currentIdx === 0) closeToCover();
+      else forceFront();
+    }
   });
 
   document.getElementById("end-close").addEventListener("click", closeReader);
@@ -3152,15 +3525,9 @@ main {
     if (reader.hidden) return;
     if (e.target && (e.target.tagName === "INPUT" || e.target.isContentEditable)) return;
 
-    if (e.key === "Escape") {
-      closeReader();
-      return;
-    }
+    if (e.key === "Escape") { closeReader(); return; }
 
-    if (e.key === "z" || e.key === "Z") {
-      openZoom();
-      return;
-    }
+    if (e.key === "z" || e.key === "Z") { openZoom(); return; }
 
     var dir = 0;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") dir = 1;
@@ -3189,7 +3556,7 @@ main {
 
   var resizeTimer = null;
   function handleResize() {
-    if (reader.hidden || isInitializing || !pageFlip || !images.length) return;
+    if (reader.hidden || isInitializing || coverAnimating) return;
 
     var oldW = pageW;
     var oldH = pageH;
@@ -3203,11 +3570,9 @@ main {
       Math.abs(oldH - pageH) >= 2
     ) {
       var start = getCurrentIndex();
-      createFlipbook(start, true);
+      if (N > 0) createFlipbook(start, true);
     } else {
-      updateStacks();
-      updateDock();
-      updateCoverView();
+      updateUIAll();
     }
 
     if (zoom.open) fitZoom();
