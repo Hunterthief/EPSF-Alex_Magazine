@@ -619,15 +619,22 @@ main {
   perspective-origin: 50% 46%;
 }
 
+/*
+  book-wrap carries the centering shift:
+  -25% on the front cover, +25% on the back cover, 0 for spreads.
+  The transform transition runs in sync with the flip animation.
+*/
 .book-wrap {
   position: relative;
   width: 0;
   height: 0;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.75s var(--ease-book);
   transform-style: preserve-3d;
+  will-change: transform, opacity;
 }
 .book-wrap.visible { opacity: 1; }
+.book-wrap.snap { transition: opacity 0.5s ease; }
 
 #flipbook-mount {
   position: relative;
@@ -636,25 +643,15 @@ main {
   z-index: 1;
 }
 
-/* The book slides so closed covers sit centered; transition duration is set from JS */
 #flipbook {
   position: relative;
   width: 100%;
   height: 100%;
   touch-action: none;
-  transform: translateX(0);
-  transition: transform 0.45s var(--ease-out);
-  will-change: transform;
 }
 
 #flipbook canvas {
   display: block;
-  background: transparent !important;
-}
-
-/* Safety: never let any library page block paint a white background */
-#flipbook, #flipbook div {
-  background-color: transparent !important;
 }
 
 .book-shadow {
@@ -669,9 +666,12 @@ main {
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
   filter: blur(14px);
   z-index: 0;
-  transition: width 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+  transition:
+    width 0.45s var(--ease-out),
+    left 0.75s var(--ease-book);
 }
-.book-shadow.half { width: 52%; }
+.book-wrap.at-front .book-shadow { left: 75%; width: 52%; }
+.book-wrap.at-back  .book-shadow { left: 25%; width: 52%; }
 
 /* Vertical page sheets, same height as pages */
 .page-stack {
@@ -1358,7 +1358,7 @@ main {
       <div class="page-stack page-stack--r" id="stack-r"></div>
 
       <div id="flipbook-mount"></div>
-      <div class="book-shadow" id="book-shadow"></div>
+      <div class="book-shadow"></div>
 
       <div class="rapid-flash" id="rapid-flash"></div>
       <div class="sparks" id="sparks"></div>
@@ -1370,7 +1370,7 @@ main {
 
   <div class="hint" id="hint">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    <span id="hint-txt">Drag a corner or click to flip</span>
+    <span id="hint-txt">Drag a corner or click to open</span>
   </div>
 
   <div class="end-card" id="end-card">
@@ -1439,8 +1439,18 @@ main {
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
 
-  /* 1x1 fully transparent pixel — used for the invisible "blank" halves */
-  var TRANSPARENT_PX = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  /*
+    Fully transparent page image (empty canvas -> transparent PNG).
+    Used as the invisible partner page beside the front cover and after the back
+    cover, so StPageFlip always has a full two-page spread to render while the
+    "blank" half stays completely invisible — no white page, ever.
+  */
+  var TRANSPARENT_PAGE = (function () {
+    var c = document.createElement("canvas");
+    c.width = 8;
+    c.height = 8;
+    return c.toDataURL("image/png");
+  })();
 
   /* ===================== LOGO ASSET (for back cover) ===================== */
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
@@ -1792,7 +1802,6 @@ main {
   var stage      = document.getElementById("r-stage");
   var bookWrap   = document.getElementById("book-wrap");
   var mount      = document.getElementById("flipbook-mount");
-  var bookShadow = document.getElementById("book-shadow");
   var stackL     = document.getElementById("stack-l");
   var stackR     = document.getElementById("stack-r");
   var sparksEl   = document.getElementById("sparks");
@@ -1814,29 +1823,33 @@ main {
   var dFill      = document.getElementById("d-fill");
 
   var pagesUrl = "";
-  var total = 1;        /* original page images 1..total */
-  var pages = [];       /* flipbook page list incl. transparent pads + back cover */
-  var P = 0;            /* pages.length */
-  var backIdx = 0;      /* index of back cover page */
-  var transparentSet = {}; /* indexes of invisible pad pages */
-  var maxSpread = 0;
+  var total = 1;             /* original page images: 1.jpg .. total.jpg */
+
+  /*
+    bookPages layout (landscape pairing):
+      [0]        transparent partner  (invisible left page beside the cover)
+      [1..total] original pages       (page k lives at index k)
+      [pad?]     colophon page        (only when needed to keep alignment even)
+      [BACK_IDX] back cover
+      [last]     transparent tail     (invisible right page beside the back cover)
+
+    The cover is therefore the RIGHT page of spread (0,1). Shifting the book
+    left by 25% puts the cover dead-center while the invisible partner page
+    still satisfies the two-page spread requirement.
+  */
+  var bookPages = [];
+  var BACK_IDX = 0;          /* index of the back cover page */
+  var contentSpreads = 0;    /* number of two-page content spreads after the cover */
+
   var aspect = 0.72;
   var pageW = 0;
   var pageH = 0;
-  var backCoverSrc = "";
 
   var pageFlip = null;
-  var flipEl = null;
   var currentIdx = 0;
-  var restIdx = 0;
   var sfState = "read";
   var isInitializing = false;
   var suppressLoader = false;
-  var isPortrait = false;
-
-  var pendingDir = 0;      /* intent set by requestFlip */
-  var pointerSide = 0;     /* intent guessed from direct mouse interaction */
-  var shiftPct = 0;        /* current book slide: -25 / 0 / 25 */
 
   var heldDir = 0;
   var heldLoopRunning = false;
@@ -1847,6 +1860,7 @@ main {
 
   var stackRSheets = [];
   var stackLSheets = [];
+  var coverSheetEl = null;
   var stackRVisible = [];
   var stackLVisible = [];
   var stackRHover = null;
@@ -1855,6 +1869,7 @@ main {
   var jumpToken = 0;
   var isJumping = false;
   var idleTimer = null;
+  var isPortrait = false;
 
   var rZoom        = document.getElementById("r-zoom");
   var zoomOverlay  = document.getElementById("zoom-overlay");
@@ -1963,38 +1978,24 @@ main {
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
 
-  /* Build page list: [T, 1..total, (T pad), back, T2] so every "blank" half is a real transparent page */
-  function buildPageList() {
-    pages = [];
-    transparentSet = {};
+  function makeColophonDataUrl(w, h) {
+    var cx = w / 2;
+    var cy = h / 2;
+    var logoSize = Math.round(Math.min(w, h) * 0.16);
 
-    pages.push(TRANSPARENT_PX);
-    transparentSet[0] = true;
+    var logoMarkup = logoDataUri
+      ? '<image x="' + (cx - logoSize) + '" y="' + (cy - logoSize * 1.6) + '" width="' + (logoSize * 2) + '" height="' + (logoSize * 2) + '" preserveAspectRatio="xMidYMid meet" href="' + logoDataUri + '"/>'
+      : '';
 
-    for (var i = 1; i <= total; i++) pages.push(url(i));
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+        '<rect width="' + w + '" height="' + h + '" fill="#F5F7FF"/>' +
+        logoMarkup +
+        '<text x="' + cx + '" y="' + (cy + logoSize * 1.1) + '" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="' + Math.round(logoSize * 0.22) + '" letter-spacing="4" fill="#0241c4" fill-opacity="0.55">EPSF ALEX PE MAGAZINE</text>' +
+      '</svg>';
 
-    /* back cover must land on an EVEN index (left slot of its spread) */
-    backIdx = total + 1;
-    if (backIdx % 2 === 1) {
-      pages.push(TRANSPARENT_PX);
-      transparentSet[pages.length - 1] = true;
-      backIdx = total + 2;
-    }
-    pages.push(backCoverSrc);
-
-    pages.push(TRANSPARENT_PX);
-    transparentSet[pages.length - 1] = true;
-
-    if (pages.length % 2 === 1) {
-      pages.push(TRANSPARENT_PX);
-      transparentSet[pages.length - 1] = true;
-    }
-
-    P = pages.length;
-    maxSpread = Math.max(0, (backIdx - 2) / 2);
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
-
-  function isTransparentIdx(i) { return !!transparentSet[i]; }
 
   function computeLayout() {
     var narrow = window.innerWidth < 900;
@@ -2037,42 +2038,63 @@ main {
       bookWrap.style.width = (pageW * 2) + "px";
       bookWrap.style.height = pageH + "px";
     }
-
-    applyShift(shiftPct, 0);
   }
 
-  /* ---------- book sliding (centering the closed covers) ---------- */
-  function applyShift(pct, ms) {
-    shiftPct = pct;
+  /* ---------- state helpers ---------- */
+  function isCoverState() {
+    if (!bookPages.length) return true;
+    return isPortrait ? currentIdx <= 1 : currentIdx <= 0;
+  }
 
-    if (!flipEl) return;
+  function isBackState() {
+    if (!bookPages.length) return false;
+    return currentIdx >= BACK_IDX;
+  }
 
-    var px = (pct / 100) * (pageW * 2);
-
-    flipEl.style.transitionDuration = (RM ? 0 : ms) + "ms";
-    flipEl.style.transform = "translateX(" + px + "px)";
-
-    if (bookShadow) {
-      bookShadow.style.transitionDuration = (RM ? 0 : ms) + "ms";
-      bookShadow.style.transform = "translateX(calc(-50% + " + px + "px))";
-      bookShadow.classList.toggle("half", pct !== 0);
+  function normalizeIdx(idx) {
+    if (!bookPages.length) return 0;
+    if (isPortrait) {
+      return Math.max(1, Math.min(BACK_IDX, idx));
     }
+    idx = Math.max(0, Math.min(BACK_IDX, idx));
+    return idx - (idx % 2); /* landscape spreads always sit on even indices */
   }
 
-  function shiftForIndex(idx) {
-    if (isPortrait) return 0;
-    if (idx === 0) return -25;
-    if (idx === backIdx) return 25;
-    return 0;
-  }
+  /*
+    Centering shift:
+      cover      -> translateX(-25%) (cover is the right page; slide left to center it)
+      back cover -> translateX(+25%)  (back cover is the left page; slide right to center it)
+      spreads    -> 0
+    The transform transition is synced with flippingTime, so the book glides
+    into two-page mode as the cover swings open. Nothing moves while a corner
+    is merely folded — only when the flip actually commits.
+  */
+  function applyBookShift(idx) {
+    if (!bookWrap) return;
 
-  function syncShift(idx, ms) {
-    var target = shiftForIndex(idx);
-    if (target === shiftPct) {
-      if (ms === 0) applyShift(target, 0);
-      return;
+    var s = 0;
+    if (!isPortrait && bookPages.length) {
+      if (idx <= 0) s = -25;
+      else if (idx >= BACK_IDX) s = 25;
     }
-    applyShift(target, ms);
+
+    bookWrap.style.transform = "translateX(" + s + "%)";
+    bookWrap.classList.toggle("at-front", s === -25);
+    bookWrap.classList.toggle("at-back", s === 25);
+  }
+
+  function snapShift(idx) {
+    bookWrap.classList.add("snap");
+    applyBookShift(idx);
+    void bookWrap.offsetWidth;
+    bookWrap.classList.remove("snap");
+  }
+
+  function updateUIAll() {
+    updateStacks();
+    updateDock();
+    updateHint();
+    updateEnd();
   }
 
   /* ---------- stacks ---------- */
@@ -2092,19 +2114,26 @@ main {
     stackRVisible = [];
     stackLVisible = [];
 
-    for (var s = 1; s <= maxSpread; s++) {
+    /* extra sheet representing the folded cover itself */
+    coverSheetEl = document.createElement("div");
+    coverSheetEl.className = "sheet";
+    coverSheetEl.dataset.target = "0";
+    coverSheetEl.dataset.label = "Cover";
+    stackL.appendChild(coverSheetEl);
+
+    for (var s = 1; s <= contentSpreads; s++) {
       var sheetClass = "sheet" + (s % 2 === 0 ? " sheet-gray" : "");
 
       var rSheet = document.createElement("div");
       rSheet.className = sheetClass;
-      rSheet.dataset.spread = String(s);
+      rSheet.dataset.target = String(2 * s);
       rSheet.dataset.label = spreadLabel(s);
       stackR.appendChild(rSheet);
       stackRSheets.push(rSheet);
 
       var lSheet = document.createElement("div");
       lSheet.className = sheetClass;
-      lSheet.dataset.spread = String(s);
+      lSheet.dataset.target = String(2 * s);
       lSheet.dataset.label = spreadLabel(s);
       stackL.appendChild(lSheet);
       stackLSheets.push(lSheet);
@@ -2121,41 +2150,16 @@ main {
     updateStacks();
   }
 
-  function spreadFromIndex(idx) {
-    if (idx <= 0) return 0;
-    if (idx >= backIdx) return maxSpread + 1;
-    return Math.max(1, Math.min(maxSpread, idx / 2));
-  }
-
-  function indexFromSpread(s) {
-    var idx = 2 * s;
-    if (idx > backIdx - 2) idx = backIdx - 2;
-    if (idx < 2) idx = 2;
-    return idx;
-  }
-
   function updateStacks() {
-    var open = !isPortrait && currentIdx > 0 && currentIdx < backIdx;
-    var currentSpread = spreadFromIndex(currentIdx);
-    var unread = open ? Math.max(0, (maxSpread + 1) - currentSpread) : 0;
-    var read = open ? Math.max(0, currentSpread - 1) : 0;
-
-    var wR = (open && unread > 0) ? Math.min(STACK_MAX, Math.max(14, unread * 2)) : 0;
-    var wL = (open && read > 0) ? Math.min(STACK_MAX, Math.max(14, read * 2)) : 0;
-
-    stackR.style.width = wR + "px";
-    stackL.style.width = wL + "px";
-    stackR.style.opacity = (open && unread > 0) ? "1" : "0";
-    stackL.style.opacity = (open && read > 0) ? "1" : "0";
-    stackR.style.pointerEvents = (open && unread > 0) ? "auto" : "none";
-    stackL.style.pointerEvents = (open && read > 0) ? "auto" : "none";
+    var ready = !isPortrait && bookPages.length > 0;
+    var k = ready ? currentIdx / 2 : 0; /* current spread number (0 = closed cover) */
 
     stackRVisible = [];
     stackLVisible = [];
 
     stackRSheets.forEach(function (sheet) {
-      var s = parseInt(sheet.dataset.spread, 10);
-      if (open && s >= currentSpread) {
+      var s = parseInt(sheet.dataset.target, 10) / 2;
+      if (ready && s > k && s <= contentSpreads) {
         sheet.style.display = "";
         stackRVisible.push(sheet);
       } else {
@@ -2163,15 +2167,34 @@ main {
       }
     });
 
+    if (coverSheetEl) {
+      if (ready && k >= 1) {
+        coverSheetEl.style.display = "";
+        stackLVisible.push(coverSheetEl);
+      } else {
+        coverSheetEl.style.display = "none";
+      }
+    }
+
     stackLSheets.forEach(function (sheet) {
-      var s = parseInt(sheet.dataset.spread, 10);
-      if (open && s < currentSpread) {
+      var s = parseInt(sheet.dataset.target, 10) / 2;
+      if (ready && s < k && s <= contentSpreads) {
         sheet.style.display = "";
         stackLVisible.push(sheet);
       } else {
         sheet.style.display = "none";
       }
     });
+
+    var wR = stackRVisible.length ? Math.min(STACK_MAX, Math.max(14, stackRVisible.length * 2)) : 0;
+    var wL = stackLVisible.length ? Math.min(STACK_MAX, Math.max(14, stackLVisible.length * 2)) : 0;
+
+    stackR.style.width = wR + "px";
+    stackL.style.width = wL + "px";
+    stackR.style.opacity = stackRVisible.length ? "1" : "0";
+    stackL.style.opacity = stackLVisible.length ? "1" : "0";
+    stackR.style.pointerEvents = stackRVisible.length ? "auto" : "none";
+    stackL.style.pointerEvents = stackLVisible.length ? "auto" : "none";
 
     if (stackRHover) stackRHover.style.opacity = "0";
     if (stackLHover) stackLHover.style.opacity = "0";
@@ -2188,26 +2211,28 @@ main {
     }
   }
 
-  function clampIdx(idx) {
-    var min = isPortrait ? 1 : 0;
-    var max = backIdx;
-    idx = Math.max(min, Math.min(max, idx));
-    if (!isPortrait && idx > 0 && idx < backIdx) idx -= (idx % 2);
-    return idx;
-  }
-
   function updateDock() {
-    if (currentIdx <= 0) {
+    if (!bookPages.length) {
       dPages.textContent = "Cover";
-      dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
+      dFill.style.width = "0%";
       dPrev.disabled = true;
-      dNext.disabled = P < 2;
+      dNext.disabled = true;
       edgeL.classList.add("off");
-      edgeR.classList.toggle("off", P < 2);
+      edgeR.classList.add("off");
       return;
     }
 
-    if (currentIdx >= backIdx) {
+    if (isCoverState()) {
+      dPages.textContent = "Cover";
+      dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
+      dPrev.disabled = true;
+      dNext.disabled = false;
+      edgeL.classList.add("off");
+      edgeR.classList.remove("off");
+      return;
+    }
+
+    if (isBackState()) {
       dPages.textContent = "Back Cover";
       dFill.style.width = "100%";
       dPrev.disabled = false;
@@ -2218,19 +2243,19 @@ main {
     }
 
     if (isPortrait) {
-      var pn = currentIdx;
-      if (pn > total) pn = total;
-      dPages.textContent = "Page " + pn + " / " + total;
-      dFill.style.width = Math.round((pn / Math.max(total, 1)) * 100) + "%";
+      var pageNum = Math.min(currentIdx, total);
+      dPages.textContent = "Page " + pageNum + " / " + total;
+      dFill.style.width = Math.round((pageNum / Math.max(total, 1)) * 100) + "%";
     } else {
-      var leftOrig = currentIdx;
-      var rightOrig = currentIdx + 1;
+      var leftImg = currentIdx;
+      var rightImg = currentIdx + 1;
 
-      if (leftOrig > total) leftOrig = total;
-      if (rightOrig > total || isTransparentIdx(rightOrig)) rightOrig = 0;
+      if (leftImg > total) leftImg = total;
+      if (rightImg > total) rightImg = 0;
 
-      dPages.textContent = (rightOrig ? leftOrig + "–" + rightOrig : leftOrig) + " / " + total;
-      var lastVisible = rightOrig || leftOrig;
+      dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
+
+      var lastVisible = rightImg || leftImg;
       dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
     }
 
@@ -2241,25 +2266,16 @@ main {
   }
 
   function updateHint() {
-    if (currentIdx === 0) {
-      showHint(isPortrait ? "Swipe or tap to flip" : "Drag a corner or click to flip");
+    if (isCoverState()) {
+      showHint(isPortrait ? "Swipe or tap to open" : "Drag a corner or click to open");
     } else {
       hideHint();
     }
   }
 
   function updateEnd() {
-    if (currentIdx >= backIdx) showEnd();
+    if (isBackState()) showEnd();
     else hideEnd();
-  }
-
-  function updateFromPageFlip(idx) {
-    if (idx === undefined) idx = getCurrentIndex();
-    currentIdx = clampIdx(idx);
-    updateStacks();
-    updateDock();
-    updateHint();
-    updateEnd();
   }
 
   function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
@@ -2346,7 +2362,6 @@ main {
       try { pageFlip.destroy(); } catch (e) {}
       pageFlip = null;
     }
-    flipEl = null;
     if (mount) mount.innerHTML = "";
     isInitializing = false;
   }
@@ -2363,7 +2378,7 @@ main {
       return;
     }
 
-    if (!pages.length) {
+    if (!bookPages.length) {
       failLoad("No pages to display.");
       return;
     }
@@ -2372,11 +2387,11 @@ main {
     suppressLoader = !!hideLoader;
     sfState = "read";
 
-    flipEl = document.createElement("div");
+    startIndex = normalizeIdx(startIndex);
+
+    var flipEl = document.createElement("div");
     flipEl.id = "flipbook";
     mount.appendChild(flipEl);
-
-    var start = clampIdx(startIndex);
 
     try {
       pageFlip = new St.PageFlip(flipEl, {
@@ -2386,9 +2401,9 @@ main {
         showCover: false,
         usePortrait: isPortrait,
         flippingTime: RM ? 1 : 700,
-        maxShadowOpacity: 0.75,
+        maxShadowOpacity: 0.5,
         mobileScrollSupport: false,
-        startPage: start,
+        startPage: startIndex,
         startZIndex: 0,
         autoSize: false,
         clickEventForward: true,
@@ -2402,83 +2417,66 @@ main {
 
     pageFlip.on("init", function () {
       isInitializing = false;
-      currentIdx = start;
-      restIdx = start;
+      currentIdx = normalizeIdx(startIndex);
 
       if (!suppressLoader) loader.classList.add("gone");
       bookWrap.classList.add("visible");
       reader.classList.add("is-open");
-
-      syncShift(currentIdx, 0);
-      updateFromPageFlip(start);
+      snapShift(currentIdx);
+      updateUIAll();
     });
 
     pageFlip.on("flip", function (e) {
-      var idx = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
-      updateFromPageFlip(idx);
+      var raw = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
+      var idx = normalizeIdx(raw);
+
+      /* self-heal portrait boundary overshoots (invisible padding pages) */
+      if (idx !== raw) {
+        try { pageFlip.turnToPage(idx); } catch (err) {}
+      }
+
+      currentIdx = idx;
+      applyBookShift(idx);
+      updateUIAll();
     });
 
     pageFlip.on("changeState", function (e) {
       sfState = (e && e.data) ? e.data : "read";
 
+      /*
+        The shift starts the moment the flip commits (state -> "flipping"),
+        so the book glides into two-page mode together with the cover flip.
+        While a corner is only folded, nothing moves — no twitch.
+      */
       if (sfState === "flipping") {
-        var dir = pendingDir;
-        if (!dir) dir = pointerSide;
-
-        if (restIdx === 0 && dir >= 0) {
-          /* opening the cover: hold the centered slide during the flip */
-          syncShift(0, 0);
-        } else if (restIdx === backIdx && dir <= 0) {
-          /* opening the back cover: hold */
-          syncShift(backIdx, 0);
-        } else if (restIdx === 2 && dir < 0) {
-          /* closing back to the front cover: slide while the leaf turns */
-          syncShift(0, RM ? 1 : 700);
-        } else if (restIdx === backIdx - 2 && dir > 0) {
-          /* closing to the back cover: slide while the leaf turns */
-          syncShift(backIdx, RM ? 1 : 700);
+        var rawCi = getCurrentIndex();
+        var ci = normalizeIdx(rawCi);
+        if (ci !== rawCi) {
+          try { pageFlip.turnToPage(ci); } catch (err) {}
         }
+        applyBookShift(ci);
       }
 
-      if (sfState === "read") {
-        var idx = getCurrentIndex();
-        var settle = (restIdx === 0 || restIdx === backIdx) ? 450 : 0;
-        restIdx = idx;
-        syncShift(idx, settle);
-        updateFromPageFlip(idx);
-
-        if (heldLoopRunning) setTimeout(heldLoop, 30);
+      if (sfState === "read" && heldLoopRunning) {
+        setTimeout(heldLoop, 30);
       }
-
-      pendingDir = 0;
     });
 
-    pageFlip.loadFromImages(pages);
-  }
-
-  /* guess intent for direct mouse flips on the canvas */
-  if (mount) {
-    mount.addEventListener("pointerdown", function (e) {
-      var rect = mount.getBoundingClientRect();
-      pointerSide = (e.clientX - rect.left) < rect.width / 2 ? -1 : 1;
-    }, { passive: true });
-    mount.addEventListener("pointerup", function () {
-      setTimeout(function () { pointerSide = 0; }, 0);
-    }, { passive: true });
+    pageFlip.loadFromImages(bookPages);
   }
 
   function requestFlip(dir) {
-    if (!pageFlip || isJumping) return;
+    if (!pageFlip || isJumping || !bookPages.length) return;
     hideHint();
 
     if (dir > 0) {
-      if (currentIdx >= backIdx) return;
-      pendingDir = 1;
-      try { pageFlip.flipNext("bottom"); } catch (e) { pendingDir = 0; }
+      if (isBackState()) return;
+      applyBookShift(currentIdx + (isPortrait ? 1 : 2));
+      try { pageFlip.flipNext("bottom"); } catch (e) {}
     } else {
-      if (isPortrait ? currentIdx <= 1 : currentIdx <= 0) return;
-      pendingDir = -1;
-      try { pageFlip.flipPrev("bottom"); } catch (e) { pendingDir = 0; }
+      if (isCoverState()) return;
+      applyBookShift(currentIdx - (isPortrait ? 1 : 2));
+      try { pageFlip.flipPrev("bottom"); } catch (e) {}
     }
   }
 
@@ -2486,15 +2484,15 @@ main {
     if (token !== jumpToken) return;
     isJumping = false;
     hideSparks();
-    if (idx !== undefined) updateFromPageFlip(idx);
-    else updateFromPageFlip();
+    if (idx !== undefined) currentIdx = normalizeIdx(idx);
+    updateUIAll();
   }
 
   function jumpToIndex(target, sparks) {
-    if (!pageFlip) return;
-    target = clampIdx(target);
-    var cur = getCurrentIndex();
-    if (target === cur) return;
+    if (!pageFlip || !bookPages.length) return;
+    target = normalizeIdx(target);
+
+    if (target === currentIdx) return;
 
     stopHeld();
     hideHint();
@@ -2502,26 +2500,22 @@ main {
     var token = ++jumpToken;
     isJumping = true;
 
-    if (sparks) showSparks(target > cur ? 1 : -1);
+    if (sparks) showSparks(target > currentIdx ? 1 : -1);
+    applyBookShift(target);
 
-    syncShift(target, 450);
-
-    var dist = Math.abs(target - cur);
+    var dist = Math.abs(target - currentIdx);
 
     if (RM || dist > JUMP_ANIMATE_THRESHOLD) {
       try { pageFlip.turnToPage(target); } catch (e) {}
-      restIdx = target;
+      currentIdx = target;
       setTimeout(function () { finishJump(token, target); }, 30);
       return;
     }
 
-    pendingDir = target > cur ? 1 : -1;
     try {
       pageFlip.flip(target, "bottom");
     } catch (e) {
       try { pageFlip.turnToPage(target); } catch (_) {}
-      pendingDir = 0;
-      restIdx = target;
       finishJump(token, target);
       return;
     }
@@ -2529,15 +2523,9 @@ main {
     setTimeout(function () { finishJump(token); }, Math.min(1600, 700 + dist * 120));
   }
 
-  function jumpToSpread(targetSpread, sparks) {
-    if (maxSpread < 1) return;
-    targetSpread = Math.max(1, Math.min(maxSpread, targetSpread));
-    jumpToIndex(indexFromSpread(targetSpread), sparks);
-  }
-
   /* ---------- held-key rapid flipping ---------- */
   function startHeld(dir) {
-    if (isJumping || !pageFlip) return;
+    if (isJumping || !pageFlip || !bookPages.length) return;
     if (heldDir === dir && heldLoopRunning) return;
     heldDir = dir;
     if (!heldLoopRunning) {
@@ -2562,13 +2550,13 @@ main {
     }
 
     if (heldDir > 0) {
-      if (currentIdx >= backIdx) {
+      if (isBackState()) {
         stopHeld();
         return;
       }
       requestFlip(1);
     } else {
-      if (currentIdx <= (isPortrait ? 1 : 0)) {
+      if (isCoverState()) {
         stopHeld();
         return;
       }
@@ -2602,22 +2590,20 @@ main {
   }
 
   function getZoomSources() {
-    if (!pages.length) return [];
+    if (!bookPages.length) return [];
 
-    if (currentIdx <= 0) return [pages[0 + 1] ? url(1) : ""];
-    if (currentIdx >= backIdx) return [backCoverSrc];
+    if (isCoverState()) return [bookPages[1]];       /* original cover image */
+    if (isBackState()) return [bookPages[BACK_IDX]]; /* back cover */
 
-    var arr = [pages[currentIdx]];
-    var right = currentIdx + 1;
-    if (!isPortrait && right < P && !isTransparentIdx(right)) arr.push(pages[right]);
+    var arr = [bookPages[currentIdx]];
+    if (!isPortrait && bookPages[currentIdx + 1]) arr.push(bookPages[currentIdx + 1]);
     return arr;
   }
 
   function getZoomLabel() {
-    if (!pages.length) return "Zoom";
-
-    if (currentIdx <= 0) return "Cover";
-    if (currentIdx >= backIdx) return "Back Cover";
+    if (!bookPages.length) return "Zoom";
+    if (isCoverState()) return "Cover";
+    if (isBackState()) return "Back Cover";
 
     if (isPortrait) {
       return "Page " + Math.min(currentIdx, total);
@@ -2626,7 +2612,7 @@ main {
     var left = currentIdx;
     var right = currentIdx + 1;
     if (left > total) left = total;
-    if (right > total || isTransparentIdx(right)) right = 0;
+    if (right > total) right = 0;
 
     return right ? "Pages " + left + "–" + right : "Page " + left;
   }
@@ -2676,7 +2662,7 @@ main {
   }
 
   function openZoom() {
-    if (!pages.length || !zoomOverlay || !zoomPages || !zoomStage) return;
+    if (!zoomOverlay || !zoomPages || !zoomStage) return;
 
     var srcs = getZoomSources();
     if (!srcs.length) return;
@@ -2908,17 +2894,13 @@ main {
     rDl.href = card.dataset.pdfUrl;
 
     total = 1;
-    pages = [];
-    P = 0;
-    backIdx = 0;
-    maxSpread = 0;
+    bookPages = [];
+    BACK_IDX = 0;
+    contentSpreads = 0;
     currentIdx = 0;
-    restIdx = 0;
     jumpToken++;
     isJumping = false;
     sfState = "read";
-    pendingDir = 0;
-    pointerSide = 0;
 
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
@@ -2929,7 +2911,8 @@ main {
     hideHint();
     hideEnd();
     hideTip();
-    bookWrap.classList.remove("visible");
+    bookWrap.classList.remove("visible", "at-front", "at-back");
+    snapShift(0);
 
     loadImage(url(1)).then(function (im) {
       if (!im.naturalWidth || !im.naturalHeight) throw new Error("bad first page");
@@ -2950,11 +2933,23 @@ main {
     }).then(function (t) {
       total = Math.max(1, t);
 
-      var bcW = 1200;
-      var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
-      backCoverSrc = makeBackCoverDataUrl(bcW, bcH);
+      /*
+        Build the padded page list:
+        [transparent] [cover .. last page] [colophon?] [back cover] [transparent]
+      */
+      bookPages = [TRANSPARENT_PAGE];
+      for (var i = 1; i <= total; i++) bookPages.push(url(i));
 
-      buildPageList();
+      /* keep total length even so spreads stay aligned */
+      if ((bookPages.length + 2) % 2 !== 0) {
+        bookPages.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
+      }
+
+      bookPages.push(makeBackCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
+      bookPages.push(TRANSPARENT_PAGE);
+
+      BACK_IDX = bookPages.length - 2;
+      contentSpreads = Math.max(0, BACK_IDX / 2 - 1);
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
@@ -2962,7 +2957,7 @@ main {
       return ensurePageFlip().then(function () {
         buildStacks();
         computeLayout();
-        createFlipbook(0, false);
+        createFlipbook(isPortrait ? 1 : 0, false);
       });
     }).catch(function (e) {
       var msg = (e && e.message) ? e.message : String(e);
@@ -2996,7 +2991,8 @@ main {
 
     reader.classList.add("is-closing");
     reader.classList.remove("idle");
-    bookWrap.classList.remove("visible");
+    bookWrap.classList.remove("visible", "at-front", "at-back");
+    snapShift(0);
 
     setTimeout(function () {
       reader.hidden = true;
@@ -3065,7 +3061,7 @@ main {
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (isPortrait || currentIdx <= 0 || currentIdx >= backIdx) {
+      if (isPortrait) {
         hideTip();
         var m0 = hoverMarkerFor(container);
         if (m0) m0.style.opacity = "0";
@@ -3094,7 +3090,7 @@ main {
     });
 
     container.addEventListener("click", function (e) {
-      if (isPortrait || currentIdx <= 0 || currentIdx >= backIdx || isJumping) return;
+      if (isPortrait || isJumping || !bookPages.length) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -3103,8 +3099,8 @@ main {
       var sheet = arr[idx];
       if (!sheet) return;
 
-      var target = parseInt(sheet.dataset.spread, 10);
-      if (!isNaN(target)) jumpToSpread(target, true);
+      var target = parseInt(sheet.dataset.target, 10);
+      if (!isNaN(target)) jumpToIndex(target, true);
     });
   }
 
@@ -3118,32 +3114,32 @@ main {
   edgeL.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
 
   dTrack.addEventListener("click", function (e) {
-    if (isJumping) return;
+    if (isJumping || !bookPages.length) return;
 
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
+    var target;
     if (isPortrait) {
-      var targetIdx = Math.round(1 + frac * (backIdx - 1));
-      jumpToIndex(targetIdx, true);
+      target = 1 + Math.round(frac * (BACK_IDX - 1));
     } else {
-      if (frac <= 0.02) { jumpToIndex(0, true); return; }
-      if (frac >= 0.98) { jumpToIndex(backIdx, true); return; }
-      if (maxSpread < 1) return;
-      var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
-      jumpToSpread(target, true);
+      target = 2 * Math.round(frac * (BACK_IDX / 2));
     }
+
+    jumpToIndex(target, true);
   });
 
   dPages.addEventListener("click", function () {
-    if (isJumping) return;
+    if (isJumping || !bookPages.length) return;
 
     var input = document.createElement("input");
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
     input.max = String(total + 1);
-    input.value = String(currentIdx <= 0 ? 1 : (currentIdx >= backIdx ? total + 1 : Math.min(total, currentIdx)));
+    input.value = isCoverState()
+      ? "1"
+      : (isBackState() ? String(total + 1) : String(Math.min(total, currentIdx)));
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -3160,15 +3156,16 @@ main {
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        var targetIdx;
-        if (val <= 1) targetIdx = 0;
-        else if (val > total) targetIdx = backIdx;
-        else targetIdx = val;
-
-        jumpToIndex(targetIdx, true);
+        if (val <= 1) {
+          jumpToIndex(0, true);              /* cover */
+        } else if (val > total) {
+          jumpToIndex(BACK_IDX, true);       /* back cover */
+        } else {
+          jumpToIndex(val, true);            /* normalizeIdx fixes landscape parity */
+        }
       }
 
-      updateFromPageFlip();
+      updateUIAll();
     }
 
     input.addEventListener("keydown", function (e) {
@@ -3187,7 +3184,7 @@ main {
   document.getElementById("end-again").addEventListener("click", function () {
     if (!pageFlip || isJumping) return;
     hideEnd();
-    jumpToIndex(0, false);
+    jumpToIndex(0, false); /* normalizeIdx maps this to the cover in both modes */
   });
 
   document.getElementById("end-close").addEventListener("click", closeReader);
@@ -3228,9 +3225,15 @@ main {
     if (reader.hidden) return;
     if (e.target && (e.target.tagName === "INPUT" || e.target.isContentEditable)) return;
 
-    if (e.key === "Escape") { closeReader(); return; }
+    if (e.key === "Escape") {
+      closeReader();
+      return;
+    }
 
-    if (e.key === "z" || e.key === "Z") { openZoom(); return; }
+    if (e.key === "z" || e.key === "Z") {
+      openZoom();
+      return;
+    }
 
     var dir = 0;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") dir = 1;
@@ -3259,7 +3262,7 @@ main {
 
   var resizeTimer = null;
   function handleResize() {
-    if (reader.hidden || isInitializing || !pageFlip || !pages.length) return;
+    if (reader.hidden || isInitializing || !pageFlip || !bookPages.length) return;
 
     var oldW = pageW;
     var oldH = pageH;
@@ -3272,11 +3275,11 @@ main {
       Math.abs(oldW - pageW) >= 2 ||
       Math.abs(oldH - pageH) >= 2
     ) {
-      var start = getCurrentIndex();
+      var start = normalizeIdx(getCurrentIndex());
       createFlipbook(start, true);
     } else {
-      updateStacks();
-      updateDock();
+      snapShift(currentIdx);
+      updateUIAll();
     }
 
     if (zoom.open) fitZoom();
