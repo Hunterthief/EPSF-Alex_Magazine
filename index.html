@@ -678,9 +678,10 @@ main {
     0 30px 60px -12px rgba(0,0,0,0.55);
   cursor: pointer;
   touch-action: none;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
   transform-origin: left center;
-  transition: transform 0.75s var(--ease-book), opacity 0.55s ease;
+  transform: perspective(2200px) translateZ(0px) rotateY(0deg) scale(1);
+  transition: transform 0.75s var(--ease-book), opacity 0.55s ease, filter 0.75s var(--ease-book);
 }
 .cover-layer[hidden] { display: none; }
 .cover-layer img {
@@ -694,6 +695,7 @@ main {
 }
 .cover-layer.back {
   transform-origin: right center;
+  transform: perspective(2200px) translateZ(0px) rotateY(0deg) scale(1);
   cursor: pointer;
 }
 .cover-layer.no-anim { transition: none; }
@@ -1485,7 +1487,7 @@ main {
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
-  var COVER_ANIM_MS = RM ? 0 : 760;
+  var COVER_ANIM_MS = RM ? 0 : 1200;
 
   /* ===================== LOGO ASSET (for back cover) ===================== */
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
@@ -2083,19 +2085,6 @@ main {
     });
   }
 
-  /* ---------- cover layer swing helpers ---------- */
-  var SWING_FRONT = "perspective(2200px) rotateY(-172deg)";
-  var SWING_BACK  = "perspective(2200px) rotateY(172deg)";
-
-  function setLayerSwung(el, swing) {
-    el.style.transform = swing;
-    el.style.opacity = "0";
-  }
-  function setLayerSettled(el) {
-    el.style.transform = "perspective(2200px) rotateY(0deg)";
-    el.style.opacity = "1";
-  }
-
   function updateUIAll() {
     updateStacks();
     updateDock();
@@ -2120,15 +2109,59 @@ main {
     viewMode = "book";
     hideHint();
 
-    frontLayer.classList.remove("no-anim");
-    setLayerSwung(frontLayer, SWING_FRONT);
     bookWrap.classList.remove("cover-mode");
 
-    setTimeout(function () {
+    if (RM) {
       frontLayer.hidden = true;
+      frontLayer.style.transform = "";
+      frontLayer.style.opacity = "";
+      frontLayer.style.filter = "";
       finishCoverAnim(token);
       wake();
-    }, COVER_ANIM_MS);
+      return;
+    }
+
+    var currentTransform = frontLayer.style.transform;
+    if (!currentTransform) currentTransform = "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)";
+    var currentOpacity = frontLayer.style.opacity;
+    if (!currentOpacity) currentOpacity = "1";
+    var currentFilter = frontLayer.style.filter;
+    if (!currentFilter) currentFilter = "drop-shadow(0px 0px 0px rgba(0,0,0,0))";
+
+    var anim = frontLayer.animate([
+      { 
+        transform: currentTransform, 
+        opacity: parseFloat(currentOpacity), 
+        filter: currentFilter,
+        offset: 0 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(45px) rotateY(-90deg) scale(1.02)", 
+        opacity: 1, 
+        filter: "drop-shadow(-35px 25px 35px rgba(0,0,0,0.55))",
+        offset: 0.5 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(0px) rotateY(-172deg) scale(1)", 
+        opacity: 0, 
+        filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))",
+        offset: 1 
+      }
+    ], {
+      duration: COVER_ANIM_MS,
+      easing: "cubic-bezier(0.3, 0.8, 0.3, 1)",
+      fill: "forwards"
+    });
+
+    anim.onfinish = function() {
+      frontLayer.hidden = true;
+      frontLayer.style.transform = "";
+      frontLayer.style.opacity = "";
+      frontLayer.style.filter = "";
+      anim.cancel();
+      finishCoverAnim(token);
+      wake();
+    };
 
     updateUIAll();
   }
@@ -2143,19 +2176,57 @@ main {
     hideHint();
 
     frontLayer.hidden = false;
-    /* start swung (no transition), then settle with transition */
-    frontLayer.classList.add("no-anim");
-    setLayerSwung(frontLayer, SWING_FRONT);
-    void frontLayer.offsetWidth;
-    frontLayer.classList.remove("no-anim");
-    setLayerSettled(frontLayer);
-
     bookWrap.classList.add("cover-mode");
 
-    setTimeout(function () {
+    if (RM) {
+      frontLayer.style.transform = "";
+      frontLayer.style.opacity = "";
+      frontLayer.style.filter = "";
       finishCoverAnim(token);
       wake();
-    }, COVER_ANIM_MS);
+      return;
+    }
+
+    var currentTransform = frontLayer.style.transform;
+    if (!currentTransform) currentTransform = "perspective(2200px) translateZ(0px) rotateY(-172deg) scale(1)";
+    var currentOpacity = frontLayer.style.opacity;
+    if (!currentOpacity) currentOpacity = "0";
+    var currentFilter = frontLayer.style.filter;
+    if (!currentFilter) currentFilter = "drop-shadow(0px 0px 0px rgba(0,0,0,0))";
+
+    var anim = frontLayer.animate([
+      { 
+        transform: currentTransform, 
+        opacity: parseFloat(currentOpacity), 
+        filter: currentFilter,
+        offset: 0 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(45px) rotateY(-90deg) scale(1.02)", 
+        opacity: 1, 
+        filter: "drop-shadow(-35px 25px 35px rgba(0,0,0,0.55))",
+        offset: 0.5 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)", 
+        opacity: 1, 
+        filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))",
+        offset: 1 
+      }
+    ], {
+      duration: COVER_ANIM_MS,
+      easing: "cubic-bezier(0.3, 0.8, 0.3, 1)",
+      fill: "forwards"
+    });
+
+    anim.onfinish = function() {
+      frontLayer.style.transform = "";
+      frontLayer.style.opacity = "";
+      frontLayer.style.filter = "";
+      anim.cancel();
+      finishCoverAnim(token);
+      wake();
+    };
 
     updateUIAll();
   }
@@ -2171,18 +2242,57 @@ main {
     hideHint();
 
     backLayer.hidden = false;
-    backLayer.classList.add("no-anim");
-    setLayerSwung(backLayer, SWING_BACK);
-    void backLayer.offsetWidth;
-    backLayer.classList.remove("no-anim");
-    setLayerSettled(backLayer);
-
     bookWrap.classList.add("back-mode");
 
-    setTimeout(function () {
+    if (RM) {
+      backLayer.style.transform = "";
+      backLayer.style.opacity = "";
+      backLayer.style.filter = "";
       finishCoverAnim(token);
       wake();
-    }, COVER_ANIM_MS);
+      return;
+    }
+
+    var currentTransform = backLayer.style.transform;
+    if (!currentTransform) currentTransform = "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)";
+    var currentOpacity = backLayer.style.opacity;
+    if (!currentOpacity) currentOpacity = "1";
+    var currentFilter = backLayer.style.filter;
+    if (!currentFilter) currentFilter = "drop-shadow(0px 0px 0px rgba(0,0,0,0))";
+
+    var anim = backLayer.animate([
+      { 
+        transform: currentTransform, 
+        opacity: parseFloat(currentOpacity), 
+        filter: currentFilter,
+        offset: 0 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(45px) rotateY(90deg) scale(1.02)", 
+        opacity: 1, 
+        filter: "drop-shadow(35px 25px 35px rgba(0,0,0,0.55))",
+        offset: 0.5 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(0px) rotateY(172deg) scale(1)", 
+        opacity: 0, 
+        filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))",
+        offset: 1 
+      }
+    ], {
+      duration: COVER_ANIM_MS,
+      easing: "cubic-bezier(0.3, 0.8, 0.3, 1)",
+      fill: "forwards"
+    });
+
+    anim.onfinish = function() {
+      backLayer.style.transform = "";
+      backLayer.style.opacity = "";
+      backLayer.style.filter = "";
+      anim.cancel();
+      finishCoverAnim(token);
+      wake();
+    };
 
     updateUIAll();
   }
@@ -2196,15 +2306,57 @@ main {
     viewMode = "book";
     hideEnd();
 
-    backLayer.classList.remove("no-anim");
-    setLayerSwung(backLayer, SWING_BACK);
-    bookWrap.classList.remove("back-mode");
-
-    setTimeout(function () {
+    if (RM) {
       backLayer.hidden = true;
+      backLayer.style.transform = "";
+      backLayer.style.opacity = "";
+      backLayer.style.filter = "";
       finishCoverAnim(token);
       wake();
-    }, COVER_ANIM_MS);
+      return;
+    }
+
+    var currentTransform = backLayer.style.transform;
+    if (!currentTransform) currentTransform = "perspective(2200px) translateZ(0px) rotateY(172deg) scale(1)";
+    var currentOpacity = backLayer.style.opacity;
+    if (!currentOpacity) currentOpacity = "0";
+    var currentFilter = backLayer.style.filter;
+    if (!currentFilter) currentFilter = "drop-shadow(0px 0px 0px rgba(0,0,0,0))";
+
+    var anim = backLayer.animate([
+      { 
+        transform: currentTransform, 
+        opacity: parseFloat(currentOpacity), 
+        filter: currentFilter,
+        offset: 0 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(45px) rotateY(90deg) scale(1.02)", 
+        opacity: 1, 
+        filter: "drop-shadow(35px 25px 35px rgba(0,0,0,0.55))",
+        offset: 0.5 
+      },
+      { 
+        transform: "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)", 
+        opacity: 1, 
+        filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))",
+        offset: 1 
+      }
+    ], {
+      duration: COVER_ANIM_MS,
+      easing: "cubic-bezier(0.3, 0.8, 0.3, 1)",
+      fill: "forwards"
+    });
+
+    anim.onfinish = function() {
+      backLayer.hidden = true;
+      backLayer.style.transform = "";
+      backLayer.style.opacity = "";
+      backLayer.style.filter = "";
+      anim.cancel();
+      finishCoverAnim(token);
+      wake();
+    };
 
     updateUIAll();
   }
@@ -2218,7 +2370,9 @@ main {
     backLayer.hidden = true;
     frontLayer.hidden = false;
     frontLayer.classList.add("no-anim");
-    setLayerSettled(frontLayer);
+    frontLayer.style.transform = "";
+    frontLayer.style.opacity = "";
+    frontLayer.style.filter = "";
     void frontLayer.offsetWidth;
     frontLayer.classList.remove("no-anim");
     updateUIAll();
@@ -2233,7 +2387,9 @@ main {
     frontLayer.hidden = true;
     backLayer.hidden = false;
     backLayer.classList.add("no-anim");
-    setLayerSettled(backLayer);
+    backLayer.style.transform = "";
+    backLayer.style.opacity = "";
+    backLayer.style.filter = "";
     void backLayer.offsetWidth;
     backLayer.classList.remove("no-anim");
     updateUIAll();
@@ -2246,6 +2402,8 @@ main {
     bookWrap.classList.remove("cover-mode", "back-mode");
     frontLayer.hidden = true;
     backLayer.hidden = true;
+    frontLayer.style.transform = ""; frontLayer.style.opacity = ""; frontLayer.style.filter = "";
+    backLayer.style.transform = ""; backLayer.style.opacity = ""; backLayer.style.filter = "";
 
     if (pageFlip && N > 0) {
       var t = clampInner(idx);
@@ -2275,7 +2433,10 @@ main {
       coverDrag.y0 = e.clientY;
       coverDrag.moved = false;
       coverDrag.p = 0;
+      
+      // Disable CSS transition while dragging
       frontLayer.classList.add("no-anim");
+      
       try { frontLayer.setPointerCapture(e.pointerId); } catch (err) {}
     });
 
@@ -2284,13 +2445,23 @@ main {
 
       var dx = e.clientX - coverDrag.x0;
       var dy = e.clientY - coverDrag.y0;
-      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) coverDrag.moved = true;
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) coverDrag.moved = true;
 
-      var p = Math.max(0, Math.min(1, -dx / Math.max(pageW, 1)));
-      coverDrag.p = p;
+      // Only drag to open if moving left
+      if (dx < 0) {
+        var p = Math.min(1, -dx / Math.max(pageW, 1));
+        coverDrag.p = p;
 
-      frontLayer.style.transform = "perspective(2200px) rotateY(" + (-172 * p).toFixed(2) + "deg)";
-      frontLayer.style.opacity = String(1 - p * 0.85);
+        var rot = -172 * p;
+        var tz = 45 * p;
+        var sc = 1 + (0.02 * p);
+        var sh = 35 * p;
+        var op = 1 - (p * 0.5); // don't fade out completely during drag
+
+        frontLayer.style.transform = "perspective(2200px) translateZ(" + tz + "px) rotateY(" + rot.toFixed(2) + "deg) scale(" + sc.toFixed(3) + ")";
+        frontLayer.style.opacity = String(op);
+        frontLayer.style.filter = "drop-shadow(" + (-sh) + "px " + (sh*0.7) + "px " + sh + "px rgba(0,0,0," + (0.55 * p) + "))";
+      }
     });
 
     function endFrontDrag(e) {
@@ -2299,10 +2470,43 @@ main {
       try { frontLayer.releasePointerCapture(coverDrag.id); } catch (err) {}
       frontLayer.classList.remove("no-anim");
 
-      if (!coverDrag.moved || coverDrag.p > 0.3) {
+      var dx = (e ? e.clientX : 0) - coverDrag.x0;
+      var threshold = pageW * 0.25;
+
+      if (!coverDrag.moved || dx < -threshold || coverDrag.p > 0.25) {
+        // Commit to open
         openCover();
       } else {
-        setLayerSettled(frontLayer);
+        // Snap back
+        var currentTransform = frontLayer.style.transform || "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)";
+        var currentOpacity = frontLayer.style.opacity || "1";
+        var currentFilter = frontLayer.style.filter || "drop-shadow(0px 0px 0px rgba(0,0,0,0))";
+
+        var anim = frontLayer.animate([
+          { 
+            transform: currentTransform, 
+            opacity: parseFloat(currentOpacity), 
+            filter: currentFilter,
+            offset: 0 
+          },
+          { 
+            transform: "perspective(2200px) translateZ(0px) rotateY(0deg) scale(1)", 
+            opacity: 1, 
+            filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))",
+            offset: 1 
+          }
+        ], {
+          duration: 600,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "forwards"
+        });
+        
+        anim.onfinish = function() {
+          frontLayer.style.transform = "";
+          frontLayer.style.opacity = "";
+          frontLayer.style.filter = "";
+          anim.cancel();
+        };
       }
     }
 
@@ -3215,13 +3419,17 @@ main {
         /* cover settled & visible, back swung & hidden */
         frontLayer.hidden = false;
         frontLayer.classList.add("no-anim");
-        setLayerSettled(frontLayer);
+        frontLayer.style.transform = "";
+        frontLayer.style.opacity = "";
+        frontLayer.style.filter = "";
         void frontLayer.offsetWidth;
         frontLayer.classList.remove("no-anim");
 
         backLayer.hidden = true;
         backLayer.classList.add("no-anim");
-        setLayerSwung(backLayer, SWING_BACK);
+        backLayer.style.transform = "";
+        backLayer.style.opacity = "";
+        backLayer.style.filter = "";
         void backLayer.offsetWidth;
         backLayer.classList.remove("no-anim");
 
