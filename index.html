@@ -214,11 +214,7 @@ main { position: relative; z-index: 2; }
   background: linear-gradient(90deg, var(--accent), var(--accent-soft));
   border-radius: 2px;
 }
-.section-head .note {
-  font-size: 0.82rem;
-  color: var(--muted);
-  font-weight: 700;
-}
+.section-head .note { font-size: 0.82rem; color: var(--muted); font-weight: 700; }
 
 .featured-slot { margin-bottom: 92px; }
 .card-featured {
@@ -318,18 +314,8 @@ main { position: relative; z-index: 2; }
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.issue-meta .dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-.issue-desc {
-  color: var(--muted);
-  font-size: 0.97rem;
-  max-width: 46ch;
-  line-height: 1.7;
-}
+.issue-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.issue-desc { color: var(--muted); font-size: 0.97rem; max-width: 46ch; line-height: 1.7; }
 .cta {
   display: inline-flex;
   align-items: center;
@@ -346,10 +332,7 @@ main { position: relative; z-index: 2; }
   text-transform: uppercase;
   transition: background 0.35s var(--ease-out), gap 0.35s var(--ease-out);
 }
-.card-featured:hover .cta, .card:hover .cta {
-  background: var(--primary);
-  gap: 18px;
-}
+.card-featured:hover .cta, .card:hover .cta { background: var(--primary); gap: 18px; }
 
 .grid {
   display: grid;
@@ -442,12 +425,7 @@ main { position: relative; z-index: 2; }
   color: var(--accent-soft);
   font-weight: 800;
 }
-.fallback-title {
-  font-family: var(--display);
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1.25;
-}
+.fallback-title { font-family: var(--display); font-size: 1.35rem; font-weight: 800; line-height: 1.25; }
 .empty-state {
   text-align: center;
   padding: 90px 20px;
@@ -480,13 +458,7 @@ main { position: relative; z-index: 2; }
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
 }
-.site-footer .f-logo {
-  font-family: var(--display);
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 8px;
-}
+.site-footer .f-logo { font-family: var(--display); font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
 .site-footer p { font-size: 0.8rem; }
 
 /* ============ READER ============ */
@@ -544,12 +516,7 @@ main { position: relative; z-index: 2; }
   transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
 }
 .r-top-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.r-brand-logo {
-  height: 28px;
-  width: auto;
-  display: block;
-  flex-shrink: 0;
-}
+.r-brand-logo { height: 28px; width: auto; display: block; flex-shrink: 0; }
 .r-brand-fallback { display: none; }
 .r-brand {
   font-family: var(--display);
@@ -614,17 +581,13 @@ main { position: relative; z-index: 2; }
   perspective-origin: 50% 46%;
 }
 
-/* Turn.js handles the shifting and centering natively via autoCenter: true */
 .book-wrap {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 0;
+  height: 0;
   opacity: 0;
   transition: opacity 0.5s ease;
   transform-style: preserve-3d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .book-wrap.visible { opacity: 1; }
 
@@ -633,30 +596,16 @@ main { position: relative; z-index: 2; }
   width: 100%;
   height: 100%;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 #flipbook {
   position: relative;
-}
-
-#flipbook div {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  background: #fff;
+  touch-action: none;
 }
 
-#flipbook img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-}
+#flipbook canvas { display: block; }
 
 .book-shadow {
   position: absolute;
@@ -670,6 +619,7 @@ main { position: relative; z-index: 2; }
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 70%);
   filter: blur(14px);
   z-index: 0;
+  transition: width 0.45s var(--ease-out);
 }
 
 .page-stack {
@@ -896,10 +846,7 @@ main { position: relative; z-index: 2; }
 
 .reader.idle .r-top,
 .reader.idle .dock,
-.reader.idle .edge {
-  opacity: 0;
-  pointer-events: none;
-}
+.reader.idle .edge { opacity: 0; pointer-events: none; }
 .reader.idle .r-top { transform: translateY(-14px); }
 .reader.idle .dock { transform: translateX(-50%) translateY(18px); }
 .reader.idle .edge { transform: translateY(-50%) scale(0.9); }
@@ -1044,12 +991,7 @@ main { position: relative; z-index: 2; }
   background: linear-gradient(180deg, rgba(2,8,20,0.92), rgba(2,8,20,0.35), transparent);
 }
 
-.zoom-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
+.zoom-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
 .zoom-title .r-title {
   font-family: var(--display);
@@ -1061,12 +1003,7 @@ main { position: relative; z-index: 2; }
   text-overflow: ellipsis;
 }
 
-.zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
+.zoom-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 .zoom-btn {
   min-width: 38px;
@@ -1094,15 +1031,8 @@ main { position: relative; z-index: 2; }
   border-color: rgba(110,155,255,0.6);
   transform: translateY(-1px);
 }
-.zoom-btn.percent {
-  min-width: 72px;
-  cursor: default;
-  font-variant-numeric: tabular-nums;
-}
-.zoom-btn.close:hover {
-  background: rgba(220,60,60,0.24);
-  border-color: rgba(255,110,110,0.55);
-}
+.zoom-btn.percent { min-width: 72px; cursor: default; font-variant-numeric: tabular-nums; }
+.zoom-btn.close:hover { background: rgba(220,60,60,0.24); border-color: rgba(255,110,110,0.55); }
 
 .zoom-stage {
   position: relative;
@@ -1427,7 +1357,6 @@ main { position: relative; z-index: 2; }
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
 
-  /* ===================== LOGO ASSET (for back cover) ===================== */
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
   var logoDataUri = null;
 
@@ -1453,14 +1382,90 @@ main { position: relative; z-index: 2; }
     }
   })();
 
-  /* ===================== SCRIPT LOADER ===================== */
-  function loadScript(src) {
+  var PAGE_FLIP_ESM_URLS = [
+    '{{ "/assets/vendor/page-flip.esm.js" | relative_url }}',
+    "https://esm.sh/page-flip@2.0.7",
+    "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/+esm",
+    "https://esm.run/page-flip@2.0.7"
+  ];
+
+  var PAGE_FLIP_SCRIPT_URLS = [
+    '{{ "/assets/vendor/page-flip.browser.js" | relative_url }}'
+  ];
+
+  var pageFlipLoadPromise = null;
+  var pageFlipLastError = null;
+
+  function hasPageFlip() {
+    return (
+      typeof window.St !== "undefined" &&
+      window.St &&
+      typeof window.St.PageFlip === "function"
+    );
+  }
+
+  function dynamicImport(url) {
+    try {
+      return Function("u", "return import(u)")(url);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  function pickPageFlipConstructor(mod) {
+    return (
+      mod &&
+      (
+        mod.PageFlip ||
+        (mod.default && (mod.default.PageFlip || mod.default)) ||
+        (mod.st && mod.st.PageFlip)
+      )
+    );
+  }
+
+  function setGlobalPageFlip(Ctor) {
+    if (typeof Ctor !== "function") {
+      throw new Error("PageFlip constructor not found");
+    }
+
+    window.St = window.St || {};
+    window.St.PageFlip = Ctor;
+  }
+
+  function loadPageFlipEsm(src) {
+    if (!src) return Promise.reject(new Error("empty ESM url"));
+
+    return dynamicImport(src).then(function (mod) {
+      var Ctor = pickPageFlipConstructor(mod);
+
+      if (!Ctor) {
+        throw new Error("No PageFlip export found in: " + src);
+      }
+
+      setGlobalPageFlip(Ctor);
+    });
+  }
+
+  function loadPageFlipScript(src) {
+    if (!src) return Promise.reject(new Error("empty script url"));
+
     return new Promise(function (resolve, reject) {
       var s = document.createElement("script");
       s.src = src;
       s.async = true;
-      s.onload = resolve;
-      s.onerror = reject;
+
+      s.onload = function () {
+        if (hasPageFlip()) {
+          resolve();
+        } else {
+          reject(new Error("Script loaded but St.PageFlip is missing: " + src));
+        }
+      };
+
+      s.onerror = function () {
+        reject(new Error("Script failed to load: " + src));
+      };
+
       document.head.appendChild(s);
     });
   }
@@ -1473,51 +1478,30 @@ main { position: relative; z-index: 2; }
     }, Promise.reject(new Error("no urls configured")));
   }
 
-  function ensureJQueryAndTurn() {
-    var p = Promise.resolve();
-    if (!window.jQuery) {
-      p = p.then(function() {
-        return loadScript("https://code.jquery.com/jquery-3.7.1.min.js");
+  function ensurePageFlip() {
+    if (hasPageFlip()) return Promise.resolve();
+    if (pageFlipLoadPromise) return pageFlipLoadPromise;
+
+    pageFlipLoadPromise = tryEach(PAGE_FLIP_ESM_URLS, loadPageFlipEsm)
+      .catch(function (esmError) {
+        pageFlipLastError = esmError;
+        return tryEach(PAGE_FLIP_SCRIPT_URLS, loadPageFlipScript);
+      })
+      .then(function () {
+        if (!hasPageFlip()) {
+          throw new Error("Page flip library did not register St.PageFlip");
+        }
+
+        pageFlipLoadPromise = null;
+        pageFlipLastError = null;
+      })
+      .catch(function (err) {
+        pageFlipLoadPromise = null;
+        pageFlipLastError = err;
+        throw err;
       });
-    }
-    p = p.then(function() {
-      // Polyfill $.browser for Turn.js compatibility with jQuery 3.x
-      if (window.jQuery && !window.jQuery.browser) {
-        var matched, browser;
-        window.jQuery.uaMatch = function( ua ) {
-          ua = ua.toLowerCase();
-          var match = /(msie)\s?([\w.]+)/.exec( ua ) ||
-                      /(trident).*rv:([\w.]+)/.exec( ua ) ||
-                      /(edge)\/([\w.]+)/.exec( ua ) ||
-                      /(chrome)\/([\w.]+)/.exec( ua ) ||
-                      /(webkit)\/([\w.]+)/.exec( ua ) ||
-                      /(opera)(?:.*version)?[\/\s]([\w.]+)/.exec( ua ) ||
-                      /(mozilla)(?:.*? rv:([\w.]+))?/.exec( ua ) || [];
-          return { browser: match[ 1 ] || "", version: match[ 2 ] || "0" };
-        };
-        matched = window.jQuery.uaMatch( navigator.userAgent );
-        browser = {};
-        if ( matched.browser ) {
-          browser[ matched.browser ] = true;
-          browser.version = matched.version;
-        }
-        if ( browser.chrome ) {
-          browser.webkit = true;
-        } else if ( browser.webkit ) {
-          browser.safari = true;
-        }
-        window.jQuery.browser = browser;
-      }
-    });
-    p = p.then(function() {
-      if (window.jQuery && window.jQuery.fn.turn) return;
-      return tryEach([
-        '{{ "/assets/vendor/turn.min.js" | relative_url }}',
-        'https://cdn.jsdelivr.net/gh/blasten/turn.js@master/turn.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js'
-      ], loadScript);
-    });
-    return p;
+
+    return pageFlipLoadPromise;
   }
 
   function parseIssueName(fileName) {
@@ -1592,7 +1576,6 @@ main { position: relative; z-index: 2; }
     });
   }
 
-  /* ===================== SPARK AUDIO ONLY ===================== */
   var audioCtx = null;
   var soundsInitialized = false;
   var sparkBuffer = null;
@@ -1716,7 +1699,6 @@ main { position: relative; z-index: 2; }
     synthSpark();
   }
 
-  /* ===================== READER ELEMENTS ===================== */
   var reader     = document.getElementById("reader");
   var stage      = document.getElementById("r-stage");
   var bookWrap   = document.getElementById("book-wrap");
@@ -1747,10 +1729,10 @@ main { position: relative; z-index: 2; }
   var aspect = 0.72;
   var pageW = 0;
   var pageH = 0;
-  var backCoverSrc = "";
 
   var pageFlip = null;
-  var currentIdx = 1;
+  var currentIdx = 0;
+  var sfState = "read";
   var isInitializing = false;
   var suppressLoader = false;
 
@@ -1763,7 +1745,6 @@ main { position: relative; z-index: 2; }
 
   var stackRSheets = [];
   var stackLSheets = [];
-  var coverSheetEl = null;
   var stackRVisible = [];
   var stackLVisible = [];
   var stackRHover = null;
@@ -1921,6 +1902,9 @@ main { position: relative; z-index: 2; }
 
       pageW = Math.floor(w);
       pageH = Math.floor(h);
+
+      bookWrap.style.width = pageW + "px";
+      bookWrap.style.height = pageH + "px";
     } else {
       var ratio = (aspect || 0.72) * 2;
 
@@ -1934,29 +1918,25 @@ main { position: relative; z-index: 2; }
 
       pageW = Math.floor(w2 / 2);
       pageH = Math.floor(h2);
+
+      bookWrap.style.width = (pageW * 2) + "px";
+      bookWrap.style.height = pageH + "px";
     }
   }
 
   function isCoverState() {
-    return currentIdx <= 1;
+    return currentIdx === 0;
   }
 
   function isBackState() {
-    return currentIdx >= bookPages.length;
-  }
-
-  function updateUIAll() {
-    updateStacks();
-    updateDock();
-    updateHint();
-    updateEnd();
+    return bookPages.length > 0 && currentIdx === bookPages.length - 1;
   }
 
   function spreadLabel(s) {
-    var left = (s - 1) * 2;
-    var right = left + 1;
-    if (left <= 0) return "Cover";
-    if (right > bookPages.length) return "Page " + left;
+    var left = s * 2;
+    var right = s * 2 + 1;
+    if (left > total) return "Page " + total;
+    if (right > total) return "Page " + left;
     return "Pages " + left + "–" + right;
   }
 
@@ -1968,14 +1948,9 @@ main { position: relative; z-index: 2; }
     stackRVisible = [];
     stackLVisible = [];
 
-    coverSheetEl = document.createElement("div");
-    coverSheetEl.className = "sheet";
-    coverSheetEl.dataset.spread = "1";
-    coverSheetEl.dataset.label = "Cover";
-    stackL.appendChild(coverSheetEl);
+    var innerSpreads = Math.max(0, (bookPages.length - 2) / 2);
 
-    var totalSpreads = Math.ceil(bookPages.length / 2);
-    for (var s = 2; s <= totalSpreads; s++) {
+    for (var s = 1; s <= innerSpreads; s++) {
       var sheetClass = "sheet" + (s % 2 === 0 ? " sheet-gray" : "");
 
       var rSheet = document.createElement("div");
@@ -2006,15 +1981,19 @@ main { position: relative; z-index: 2; }
 
   function updateStacks() {
     var ready = !isPortrait && bookPages.length > 0;
-    var k = ready ? Math.ceil(currentIdx / 2) : 0;
-    var totalSpreads = Math.ceil(bookPages.length / 2);
+    var innerSpreads = Math.max(0, (bookPages.length - 2) / 2);
+    
+    var currentSpread = 0;
+    if (isCoverState()) currentSpread = 0;
+    else if (isBackState()) currentSpread = innerSpreads + 1;
+    else currentSpread = Math.ceil(currentIdx / 2);
 
     stackRVisible = [];
     stackLVisible = [];
 
     stackRSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      if (ready && s > k && s <= totalSpreads) {
+      if (ready && s > currentSpread && s <= innerSpreads) {
         sheet.style.display = "";
         stackRVisible.push(sheet);
       } else {
@@ -2022,18 +2001,9 @@ main { position: relative; z-index: 2; }
       }
     });
 
-    if (coverSheetEl) {
-      if (ready && k >= 2) {
-        coverSheetEl.style.display = "";
-        stackLVisible.push(coverSheetEl);
-      } else {
-        coverSheetEl.style.display = "none";
-      }
-    }
-
     stackLSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
-      if (ready && s < k && s <= totalSpreads) {
+      if (ready && s < currentSpread && s <= innerSpreads) {
         sheet.style.display = "";
         stackLVisible.push(sheet);
       } else {
@@ -2056,6 +2026,16 @@ main { position: relative; z-index: 2; }
     hideTip();
   }
 
+  function getCurrentIndex() {
+    if (!pageFlip) return currentIdx;
+    try {
+      var i = pageFlip.getCurrentPageIndex();
+      return typeof i === "number" ? i : currentIdx;
+    } catch (e) {
+      return currentIdx;
+    }
+  }
+
   function updateDock() {
     if (!bookPages.length) {
       dPages.textContent = "Cover";
@@ -2069,7 +2049,7 @@ main { position: relative; z-index: 2; }
 
     if (isCoverState()) {
       dPages.textContent = "Cover";
-      dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
+      dFill.style.width = Math.round((1 / Math.max(total + 1, 1)) * 100) + "%";
       dPrev.disabled = true;
       dNext.disabled = false;
       edgeL.classList.add("off");
@@ -2088,21 +2068,20 @@ main { position: relative; z-index: 2; }
     }
 
     if (isPortrait) {
-      var pageNum = currentIdx;
-      dPages.textContent = "Page " + pageNum + " / " + bookPages.length;
-      dFill.style.width = Math.round((pageNum / bookPages.length) * 100) + "%";
+      var pageNum = currentIdx + 1;
+      dPages.textContent = "Page " + pageNum + " / " + total;
+      dFill.style.width = Math.round((pageNum / Math.max(total, 1)) * 100) + "%";
     } else {
-      var view = pageFlip ? pageFlip.turn("view") : [currentIdx];
-      var leftImg = view[0];
-      var rightImg = view[1];
+      var leftImg = currentIdx + 1;
+      var rightImg = currentIdx + 2;
 
-      if (leftImg > bookPages.length) leftImg = bookPages.length;
-      if (rightImg > bookPages.length) rightImg = 0;
+      if (leftImg > total) leftImg = total;
+      if (rightImg > total) rightImg = 0;
 
-      dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + bookPages.length;
+      dPages.textContent = (rightImg ? leftImg + "–" + rightImg : leftImg) + " / " + total;
 
       var lastVisible = rightImg || leftImg;
-      dFill.style.width = Math.round(Math.min(100, (lastVisible / bookPages.length) * 100)) + "%";
+      dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
     }
 
     dPrev.disabled = false;
@@ -2122,6 +2101,13 @@ main { position: relative; z-index: 2; }
   function updateEnd() {
     if (isBackState()) showEnd();
     else hideEnd();
+  }
+
+  function updateUIAll() {
+    updateStacks();
+    updateDock();
+    updateHint();
+    updateEnd();
   }
 
   function showHint(txt) { hintTxt.textContent = txt; hint.classList.add("show"); }
@@ -2203,18 +2189,22 @@ main { position: relative; z-index: 2; }
 
   function destroyFlipbook() {
     if (pageFlip) {
-      try { pageFlip.turn("destroy"); } catch (e) {}
+      try { pageFlip.destroy(); } catch (e) {}
       pageFlip = null;
     }
     if (mount) mount.innerHTML = "";
     isInitializing = false;
   }
 
-  function createFlipbook(startPage, hideLoader) {
+  function createFlipbook(startIndex, hideLoader) {
     destroyFlipbook();
 
-    if (!window.jQuery || !window.jQuery.fn.turn) {
-      failLoad("Turn.js is not available.");
+    if (!hasPageFlip()) {
+      var detail = pageFlipLastError && pageFlipLastError.message
+        ? pageFlipLastError.message
+        : "St.PageFlip is not available.";
+
+      failLoad("Page flip library is not ready. " + detail);
       return;
     }
 
@@ -2225,65 +2215,58 @@ main { position: relative; z-index: 2; }
 
     isInitializing = true;
     suppressLoader = !!hideLoader;
+    sfState = "read";
 
     var flipEl = document.createElement("div");
     flipEl.id = "flipbook";
     mount.appendChild(flipEl);
 
-    bookPages.forEach(function(src, i) {
-      var pageDiv = document.createElement("div");
-      if (i === 0 || i === bookPages.length - 1) {
-        pageDiv.className = "hard";
-      }
-      var img = document.createElement("img");
-      img.src = src;
-      img.draggable = false;
-      pageDiv.appendChild(img);
-      flipEl.appendChild(pageDiv);
-    });
-
-    var $flipbook = window.jQuery(flipEl);
-
-    var turnOpts = {
-      width: isPortrait ? pageW : pageW * 2,
-      height: pageH,
-      display: isPortrait ? "single" : "double",
-      autoCenter: true,
-      acceleration: true,
-      gradients: !RM,
-      elevation: 50,
-      duration: RM ? 1 : 800,
-      when: {
-        turning: function(event, page, view) {
-          currentIdx = page;
-          updateUIAll();
-        },
-        turned: function(event, page, view) {
-          currentIdx = page;
-          updateUIAll();
-        }
-      }
-    };
-
     try {
-      $flipbook.turn(turnOpts);
-      if (startPage > 1) {
-        $flipbook.turn("page", startPage);
-      }
+      pageFlip = new St.PageFlip(flipEl, {
+        width: pageW,
+        height: pageH,
+        size: "fixed",
+        showCover: true,
+        usePortrait: isPortrait,
+        flippingTime: RM ? 1 : 700,
+        maxShadowOpacity: 0.5,
+        mobileScrollSupport: false,
+        startPage: startIndex,
+        startZIndex: 0,
+        autoSize: false,
+        clickEventForward: true,
+        disableFlipByClick: false
+      });
     } catch (e) {
       isInitializing = false;
-      failLoad("Could not start turn.js: " + (e && e.message ? e.message : e));
+      failLoad("Could not start page flip: " + (e && e.message ? e.message : e));
       return;
     }
 
-    pageFlip = $flipbook;
-    currentIdx = startPage || 1;
+    pageFlip.on("init", function () {
+      isInitializing = false;
+      currentIdx = startIndex;
 
-    isInitializing = false;
-    if (!suppressLoader) loader.classList.add("gone");
-    bookWrap.classList.add("visible");
-    reader.classList.add("is-open");
-    updateUIAll();
+      if (!suppressLoader) loader.classList.add("gone");
+      bookWrap.classList.add("visible");
+      reader.classList.add("is-open");
+      updateUIAll();
+    });
+
+    pageFlip.on("flip", function (e) {
+      var idx = (e && typeof e.data === "number") ? e.data : getCurrentIndex();
+      currentIdx = idx;
+      updateUIAll();
+    });
+
+    pageFlip.on("changeState", function (e) {
+      sfState = (e && e.data) ? e.data : "read";
+      if (sfState === "read" && heldLoopRunning) {
+        setTimeout(heldLoop, 30);
+      }
+    });
+
+    pageFlip.loadFromImages(bookPages);
   }
 
   function requestFlip(dir) {
@@ -2292,10 +2275,10 @@ main { position: relative; z-index: 2; }
 
     if (dir > 0) {
       if (isBackState()) return;
-      try { pageFlip.turn("next"); } catch (e) {}
+      try { pageFlip.flipNext("bottom"); } catch (e) {}
     } else {
       if (isCoverState()) return;
-      try { pageFlip.turn("previous"); } catch (e) {}
+      try { pageFlip.flipPrev("bottom"); } catch (e) {}
     }
   }
 
@@ -2309,7 +2292,7 @@ main { position: relative; z-index: 2; }
 
   function jumpToIndex(target, sparks) {
     if (!pageFlip || !bookPages.length) return;
-    target = Math.max(1, Math.min(bookPages.length, target));
+    target = Math.max(0, Math.min(bookPages.length - 1, target));
 
     if (target === currentIdx) return;
 
@@ -2321,11 +2304,24 @@ main { position: relative; z-index: 2; }
 
     if (sparks) showSparks(target > currentIdx ? 1 : -1);
 
-    try {
-      pageFlip.turn("page", target);
-    } catch (e) {}
+    var dist = Math.abs(target - currentIdx);
 
-    setTimeout(function () { finishJump(token, target); }, RM ? 30 : 800);
+    if (RM || dist > JUMP_ANIMATE_THRESHOLD) {
+      try { pageFlip.turnToPage(target); } catch (e) {}
+      currentIdx = target;
+      setTimeout(function () { finishJump(token, target); }, 30);
+      return;
+    }
+
+    try {
+      pageFlip.flip(target, "bottom");
+    } catch (e) {
+      try { pageFlip.turnToPage(target); } catch (_) {}
+      finishJump(token, target);
+      return;
+    }
+
+    setTimeout(function () { finishJump(token); }, Math.min(1600, 700 + dist * 120));
   }
 
   function startHeld(dir) {
@@ -2347,6 +2343,11 @@ main { position: relative; z-index: 2; }
 
   function heldLoop() {
     if (!heldLoopRunning || heldDir === 0 || !pageFlip || isJumping) return;
+
+    if (sfState !== "read") {
+      setTimeout(heldLoop, 60);
+      return;
+    }
 
     if (heldDir > 0) {
       if (isBackState()) {
@@ -2389,11 +2390,12 @@ main { position: relative; z-index: 2; }
 
   function getZoomSources() {
     if (!bookPages.length) return [];
+
     if (isCoverState()) return [bookPages[0]];
     if (isBackState()) return [bookPages[bookPages.length - 1]];
 
-    var arr = [bookPages[currentIdx - 1]];
-    if (!isPortrait && bookPages[currentIdx]) arr.push(bookPages[currentIdx]);
+    var arr = [bookPages[currentIdx]];
+    if (!isPortrait && bookPages[currentIdx + 1]) arr.push(bookPages[currentIdx + 1]);
     return arr;
   }
 
@@ -2403,13 +2405,13 @@ main { position: relative; z-index: 2; }
     if (isBackState()) return "Back Cover";
 
     if (isPortrait) {
-      return "Page " + currentIdx;
+      return "Page " + Math.min(currentIdx, total);
     }
 
-    var left = currentIdx;
-    var right = currentIdx + 1;
-    if (left > bookPages.length) left = bookPages.length;
-    if (right > bookPages.length) right = 0;
+    var left = currentIdx + 1;
+    var right = currentIdx + 2;
+    if (left > total) left = total;
+    if (right > total) right = 0;
 
     return right ? "Pages " + left + "–" + right : "Page " + left;
   }
@@ -2692,9 +2694,10 @@ main { position: relative; z-index: 2; }
 
     total = 1;
     bookPages = [];
-    currentIdx = 1;
+    currentIdx = 0;
     jumpToken++;
     isJumping = false;
+    sfState = "read";
 
     loader.classList.remove("err", "gone");
     loaderTxt.textContent = "Preparing issue";
@@ -2730,27 +2733,26 @@ main { position: relative; z-index: 2; }
       bookPages.push(url(1));
       for (var i = 2; i <= total; i++) bookPages.push(url(i));
 
-      if ((total + 1) % 2 !== 0) {
+      if ((total - 1) % 2 !== 0) {
         bookPages.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
       }
-      
-      backCoverSrc = makeBackCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72))));
-      bookPages.push(backCoverSrc);
+
+      bookPages.push(makeBackCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-      return ensureJQueryAndTurn().then(function () {
+      return ensurePageFlip().then(function () {
         buildStacks();
         computeLayout();
-        createFlipbook(1, false);
+        createFlipbook(0, false);
       });
     }).catch(function (e) {
       var msg = (e && e.message) ? e.message : String(e);
 
-      if (/jQuery|turn/i.test(msg)) {
+      if (/PageFlip|page-flip|St\.PageFlip|import|ESM|Script/i.test(msg)) {
         failLoad(
-          "Turn.js could not be loaded. Add a compiled bundle at assets/vendor/turn.min.js, or allow CDN access to turn.js. Details: " +
+          "Page flip library could not be loaded. Add a compiled bundle at assets/vendor/page-flip.esm.js or assets/vendor/page-flip.browser.js, or allow CDN access to page-flip. Details: " +
           msg
         );
       } else {
@@ -2885,9 +2887,8 @@ main { position: relative; z-index: 2; }
 
       var targetSpread = parseInt(sheet.dataset.spread, 10);
       if (!isNaN(targetSpread)) {
-        var targetPage = (targetSpread - 1) * 2;
-        if (targetPage < 1) targetPage = 1;
-        jumpToIndex(targetPage, true);
+        var targetIdx = targetSpread * 2 - 1;
+        jumpToIndex(targetIdx, true);
       }
     });
   }
@@ -2907,16 +2908,7 @@ main { position: relative; z-index: 2; }
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
-    var target;
-    if (isPortrait) {
-      target = 1 + Math.round(frac * (bookPages.length - 1));
-    } else {
-      var totalSpreads = Math.ceil(bookPages.length / 2);
-      var targetSpread = Math.max(1, Math.min(totalSpreads, Math.round(frac * totalSpreads)));
-      target = (targetSpread - 1) * 2;
-      if (target < 1) target = 1;
-    }
-
+    var target = Math.round(frac * (bookPages.length - 1));
     jumpToIndex(target, true);
   });
 
@@ -2927,10 +2919,10 @@ main { position: relative; z-index: 2; }
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
-    input.max = String(bookPages.length);
+    input.max = String(total + 1);
     input.value = isCoverState()
       ? "1"
-      : (isBackState() ? String(bookPages.length) : String(currentIdx));
+      : (isBackState() ? String(total + 1) : String(currentIdx + 1));
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -2947,7 +2939,13 @@ main { position: relative; z-index: 2; }
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        jumpToIndex(val, true);
+        if (val <= 1) {
+          jumpToIndex(0, true);
+        } else if (val > total) {
+          jumpToIndex(bookPages.length - 1, true);
+        } else {
+          jumpToIndex(val - 1, true);
+        }
       }
 
       updateUIAll();
@@ -2969,7 +2967,7 @@ main { position: relative; z-index: 2; }
   document.getElementById("end-again").addEventListener("click", function () {
     if (!pageFlip || isJumping) return;
     hideEnd();
-    jumpToIndex(1, false);
+    jumpToIndex(0, false);
   });
 
   document.getElementById("end-close").addEventListener("click", closeReader);
@@ -3060,7 +3058,7 @@ main { position: relative; z-index: 2; }
       Math.abs(oldW - pageW) >= 2 ||
       Math.abs(oldH - pageH) >= 2
     ) {
-      var start = currentIdx;
+      var start = getCurrentIndex();
       createFlipbook(start, true);
     } else {
       updateUIAll();
