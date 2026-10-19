@@ -8,7 +8,6 @@ title: Home
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EPSF Alex PE Magazine</title>
 
-<!-- Favicon -->
 <link rel="icon" type="image/png" sizes="192x192" href="{{ '/assets/images/favicon.png' | relative_url }}">
 <link rel="icon" type="image/png" sizes="512x512" href="{{ '/assets/images/favicon.png' | relative_url }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ '/assets/images/favicon.png' | relative_url }}">
@@ -2116,6 +2115,7 @@ main {
   var isJumping = false;
   var idleTimer = null;
   var isPortrait = false;
+  var isMobile = false;  /* NEW: true = simple page-flip mode (no custom cover) */
 
   var rZoom        = document.getElementById("r-zoom");
   var zoomOverlay  = document.getElementById("zoom-overlay");
@@ -2243,9 +2243,38 @@ main {
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
 
+  /* Build the inner[] page list according to the current mode.
+     Mobile: cover image + interior pages + back cover (+ colophon pad).
+     Desktop: interior pages + colophon pad; cover/back handled by custom layers. */
+  function rebuildInner() {
+    inner = [];
+    var bcW = 1200;
+    var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
+    backCoverSrc = makeBackCoverDataUrl(bcW, bcH);
+
+    if (isMobile) {
+      inner.push(url(1));                       /* cover is page 1 */
+      for (var i = 2; i <= total; i++) inner.push(url(i));
+      inner.push(backCoverSrc);                 /* back cover is the last page */
+      if (inner.length % 2 === 1) {
+        inner.push(makeColophonDataUrl(bcW, bcH));
+      }
+    } else {
+      for (var i = 2; i <= total; i++) inner.push(url(i));
+      if (inner.length % 2 === 1) {
+        inner.push(makeColophonDataUrl(bcW, bcH));
+      }
+    }
+
+    N = inner.length;
+    lastSpreadIdx = Math.max(0, N - 2);
+    maxSpread = Math.max(0, N / 2);
+  }
+
   function computeLayout() {
     var narrow = window.innerWidth < 900;
     isPortrait = narrow;
+    isMobile = narrow;
 
     var padX = narrow ? 24 : 140;
     var padY = narrow ? 96 : 140;
@@ -2286,6 +2315,15 @@ main {
     }
 
     positionCoverLayers();
+
+    /* On mobile, custom cover layers must stay hidden — cover is just a page. */
+    if (isMobile) {
+      frontLayer.hidden = true;
+      backLayer.hidden = true;
+      if (spineShadow) spineShadow.style.display = "none";
+    } else {
+      if (spineShadow) spineShadow.style.display = "";
+    }
   }
 
   function positionCoverLayers() {
@@ -2339,7 +2377,7 @@ main {
       mount.style.opacity = m.toFixed(3);
       mount.style.transform = "scale(" + (0.984 + 0.016 * m).toFixed(4) + ")";
     }
-    if (spineShadow) {
+    if (spineShadow && !isMobile) {
       spineShadow.style.opacity = (Math.pow(s, 1.25) * 0.9).toFixed(3);
     }
   }
@@ -2412,7 +2450,7 @@ main {
   }
 
   function peekCover() {
-    if (RM || reader.hidden || coverAnimating || coverDrag.active) return;
+    if (RM || isMobile || reader.hidden || coverAnimating || coverDrag.active) return;
     var el = (viewMode === "front") ? frontLayer : (viewMode === "back" ? backLayer : null);
     if (!el || el.hidden) return;
     el.classList.remove("peek");
@@ -2422,7 +2460,7 @@ main {
 
   function peekCoverSoon(delay) {
     stopPeek();
-    if (RM) return;
+    if (RM || isMobile) return;
     peekTimer = setTimeout(peekCover, delay == null ? 1000 : delay);
   }
 
@@ -2431,7 +2469,7 @@ main {
     el.addEventListener("animationend", function (ev) {
       if (ev.animationName !== "coverPeek" && ev.animationName !== "coverPeekBack") return;
       el.classList.remove("peek");
-      if (!reader.hidden && !coverAnimating && viewMode !== "book") peekCoverSoon(5400);
+      if (!reader.hidden && !coverAnimating && !isMobile && viewMode !== "book") peekCoverSoon(5400);
     });
   });
 
@@ -2449,6 +2487,7 @@ main {
   }
 
   function openCover() {
+    if (isMobile) return;
     if (viewMode !== "front" || coverAnimating) return;
     ensureAudio();
     playSparkSound();
@@ -2481,6 +2520,7 @@ main {
   }
 
   function closeToCover() {
+    if (isMobile) return;
     if (viewMode !== "book" || coverAnimating || currentIdx !== 0) return;
     stopPeek();
 
@@ -2510,6 +2550,7 @@ main {
   }
 
   function showBack() {
+    if (isMobile) return;
     if (viewMode !== "book" || coverAnimating) return;
     ensureAudio();
     playSparkSound();
@@ -2541,6 +2582,7 @@ main {
   }
 
   function closeBack() {
+    if (isMobile) return;
     if (viewMode !== "back" || coverAnimating) return;
     ensureAudio();
     playSparkSound();
@@ -2573,6 +2615,7 @@ main {
   }
 
   function forceFront() {
+    if (isMobile) { forceBook(0); return; }
     coverAnimToken++;
     coverAnimating = false;
     stopFlipAnim();
@@ -2589,6 +2632,7 @@ main {
   }
 
   function forceBack() {
+    if (isMobile) { forceBook(N - 1); return; }
     coverAnimToken++;
     coverAnimating = false;
     stopFlipAnim();
@@ -2698,51 +2742,60 @@ main {
     });
   }
 
+  /* Desktop-only cover layer interactions */
   if (frontLayer) {
     frontLayer.addEventListener("pointerdown", function (e) {
-      if (viewMode !== "front") return;
+      if (isMobile || viewMode !== "front") return;
       e.preventDefault();
       beginCoverDrag(FRONT_CFG, e);
     });
     frontLayer.addEventListener("pointermove", function (e) {
+      if (isMobile) return;
       moveCoverDrag(FRONT_CFG, e, -1);
     });
     frontLayer.addEventListener("pointerup", function (e) {
+      if (isMobile) return;
       endCoverDrag(FRONT_CFG, e, openCover, null);
     });
     frontLayer.addEventListener("pointercancel", function (e) {
+      if (isMobile) return;
       endCoverDrag(FRONT_CFG, e, openCover, null);
     });
     frontLayer.addEventListener("click", function () {
-      if (viewMode === "front" && !coverAnimating && !coverDrag.active) openCover();
+      if (isMobile || viewMode !== "front" || coverAnimating || coverDrag.active) return;
+      openCover();
     });
   }
 
   if (backLayer) {
     backLayer.addEventListener("pointerdown", function (e) {
-      if (viewMode !== "back") return;
+      if (isMobile || viewMode !== "back") return;
       e.preventDefault();
       beginCoverDrag(BACK_CFG, e);
     });
     backLayer.addEventListener("pointermove", function (e) {
+      if (isMobile) return;
       moveCoverDrag(BACK_CFG, e, 1);
     });
     backLayer.addEventListener("pointerup", function (e) {
+      if (isMobile) return;
       endCoverDrag(BACK_CFG, e, closeBack, null);
     });
     backLayer.addEventListener("pointercancel", function (e) {
+      if (isMobile) return;
       endCoverDrag(BACK_CFG, e, closeBack, null);
     });
     backLayer.addEventListener("click", function () {
-      if (viewMode === "back" && !coverAnimating && !coverDrag.active) closeBack();
+      if (isMobile || viewMode !== "back" || coverAnimating || coverDrag.active) return;
+      closeBack();
     });
   }
 
-  /* ============ FIX: Intercept clicks on pageFlip to allow flipping back to cover ============ */
+  /* Desktop-only: intercept clicks on first/last page edges to force cover transitions */
   var bookWrapPointer = { active: false, x0: 0, y0: 0, moved: false };
 
   bookWrap.addEventListener("pointerdown", function (e) {
-    if (coverAnimating || isJumping) return;
+    if (isMobile || coverAnimating || isJumping) return;
     if (viewMode !== "book" || !pageFlip || N <= 0) return;
 
     bookWrapPointer.active = true;
@@ -2752,7 +2805,7 @@ main {
   }, true);
 
   bookWrap.addEventListener("pointermove", function (e) {
-    if (!bookWrapPointer.active) return;
+    if (isMobile || !bookWrapPointer.active) return;
     var dx = e.clientX - bookWrapPointer.x0;
     var dy = e.clientY - bookWrapPointer.y0;
     if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
@@ -2761,7 +2814,7 @@ main {
   }, true);
 
   bookWrap.addEventListener("pointerup", function (e) {
-    if (!bookWrapPointer.active || bookWrapPointer.moved) {
+    if (isMobile || !bookWrapPointer.active || bookWrapPointer.moved) {
       bookWrapPointer.active = false;
       return;
     }
@@ -2771,7 +2824,6 @@ main {
     var midX = rect.left + rect.width / 2;
     var isLeft = e.clientX < midX;
 
-    /* If clicking left side at index 0, close to cover */
     if (isLeft && currentIdx <= 0) {
       e.preventDefault();
       e.stopPropagation();
@@ -2779,7 +2831,6 @@ main {
       return;
     }
 
-    /* If clicking right side at last page, show back cover */
     if (!isLeft && (isPortrait ? (currentIdx >= N - 1) : (currentIdx >= lastSpreadIdx))) {
       e.preventDefault();
       e.stopPropagation();
@@ -2899,6 +2950,20 @@ main {
   }
 
   function updateDock() {
+    /* Mobile: flat page 1..N (cover is page 1, back cover is page N) */
+    if (isMobile) {
+      var pageNum = currentIdx + 1;
+      if (pageNum > N) pageNum = N;
+      dPages.textContent = "Page " + pageNum + " / " + N;
+      dFill.style.width = Math.round((pageNum / Math.max(N, 1)) * 100) + "%";
+      dPrev.disabled = currentIdx <= 0;
+      dNext.disabled = currentIdx >= N - 1;
+      edgeL.classList.toggle("off", currentIdx <= 0);
+      edgeR.classList.toggle("off", currentIdx >= N - 1);
+      return;
+    }
+
+    /* Desktop: distinct Cover / Back Cover / Pages states */
     if (viewMode === "front") {
       dPages.textContent = "Cover";
       dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
@@ -2953,17 +3018,19 @@ main {
 
   function updateHint() {
     if (coverAnimating) { hideHint(); return; }
+    if (isMobile) { hideHint(); return; }  /* no custom hints on mobile */
 
     if (viewMode === "front") {
-      showHint(isPortrait ? "Tap the cover to open" : "Click or drag the cover to open");
+      showHint("Click or drag the cover to open");
     } else if (viewMode === "book" && currentIdx === 0) {
-      showHint(isPortrait ? "Swipe or tap to flip" : "Click left edge to return to cover");
+      showHint("Click left edge to return to cover");
     } else {
       hideHint();
     }
   }
 
   function updateEnd() {
+    if (isMobile) { hideEnd(); return; }   /* no end card on mobile */
     if (viewMode === "back" && !coverAnimating) showEnd();
     else hideEnd();
   }
@@ -3109,7 +3176,7 @@ main {
       bookWrap.classList.add("visible");
       reader.classList.add("is-open");
       updateUIAll();
-      if (viewMode === "front") peekCoverSoon(1300);
+      if (!isMobile && viewMode === "front") peekCoverSoon(1300);
     });
 
     pageFlip.on("flip", function (e) {
@@ -3131,6 +3198,21 @@ main {
   function requestFlip(dir) {
     if (coverAnimating || isJumping) return;
 
+    /* Mobile: everything is just a page in the flipbook */
+    if (isMobile) {
+      if (!pageFlip || N <= 0) return;
+      hideHint();
+      if (dir > 0) {
+        if (currentIdx >= N - 1) return;
+        pageFlip.flipNext("bottom");
+      } else {
+        if (currentIdx <= 0) return;
+        pageFlip.flipPrev("bottom");
+      }
+      return;
+    }
+
+    /* Desktop: custom cover transitions */
     if (viewMode === "front") {
       if (dir > 0) openCover();
       return;
@@ -3168,15 +3250,13 @@ main {
 
   function jumpToInner(target, sparks) {
     if (N <= 0) return;
-    target = clampInner(target);
 
-    if (viewMode === "front") {
-      forceBook(target);
-      return;
-    }
-    if (viewMode === "back") {
-      forceBook(target);
-      return;
+    if (!isMobile) {
+      target = clampInner(target);
+      if (viewMode === "front") { forceBook(target); return; }
+      if (viewMode === "back") { forceBook(target); return; }
+    } else {
+      target = Math.max(0, Math.min(N - 1, target));
     }
 
     if (!pageFlip) return;
@@ -3242,6 +3322,24 @@ main {
       return;
     }
 
+    /* Mobile: just flip through the page list */
+    if (isMobile) {
+      if (!pageFlip || sfState !== "read") {
+        setTimeout(heldLoop, 60);
+        return;
+      }
+      if (heldDir > 0) {
+        if (currentIdx >= N - 1) { stopHeld(); return; }
+        requestFlip(1);
+      } else {
+        if (currentIdx <= 0) { stopHeld(); return; }
+        requestFlip(-1);
+      }
+      setTimeout(heldLoop, 90);
+      return;
+    }
+
+    /* Desktop: cover-aware */
     if (viewMode === "front") {
       if (heldDir > 0) {
         openCover();
@@ -3310,19 +3408,22 @@ main {
   }
 
   function getZoomSources() {
-    if (viewMode === "front") return total >= 1 ? [url(1)] : [];
-    if (viewMode === "back") return backCoverSrc ? [backCoverSrc] : [];
     if (!inner.length) return [];
-
     var arr = [inner[currentIdx]];
     if (!isPortrait && inner[currentIdx + 1]) arr.push(inner[currentIdx + 1]);
     return arr;
   }
 
   function getZoomLabel() {
+    if (!inner.length) return "Zoom";
+
+    if (isMobile) {
+      /* inner[0] = cover (page 1), inner[N-1] = back cover (page N) */
+      return "Page " + (currentIdx + 1);
+    }
+
     if (viewMode === "front") return "Cover";
     if (viewMode === "back") return "Back Cover";
-    if (!inner.length) return "Zoom";
 
     if (isPortrait) {
       var o = currentIdx + 2;
@@ -3661,46 +3762,44 @@ main {
     }).then(function (t) {
       total = Math.max(1, t);
 
-      inner = [];
-      for (var i = 2; i <= total; i++) inner.push(url(i));
-      if (inner.length % 2 === 1) {
-        inner.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
-      }
-
-      N = inner.length;
-      lastSpreadIdx = Math.max(0, N - 2);
-      maxSpread = Math.max(0, N / 2);
-
-      var bcW = 1200;
-      var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
-      backCoverSrc = makeBackCoverDataUrl(bcW, bcH);
-
-      frontLayerImg.src = url(1);
-      backLayerImg.src = backCoverSrc;
-
-      var sp = document.getElementById("stat-pages");
-      if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
-
       return ensurePageFlip().then(function () {
+        computeLayout();     /* sets isMobile / isPortrait / pageW / pageH */
+        rebuildInner();      /* builds inner[] based on current isMobile */
         buildStacks();
-        computeLayout();
 
-        frontLayer.hidden = false;
-        renderFlipState(FRONT_CFG, 0);
+        var sp = document.getElementById("stat-pages");
+        if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
-        backLayer.hidden = true;
-        renderFlipState(BACK_CFG, 1);
-
-        clearFlipInline();
-
-        if (N > 0) {
+        if (isMobile) {
+          /* Mobile: cover and back cover are just pages in the flipbook */
+          bookWrap.classList.remove("cover-mode", "back-mode");
+          frontLayer.hidden = true;
+          backLayer.hidden = true;
+          viewMode = "book";
+          currentIdx = 0;
           createFlipbook(0, false);
         } else {
-          loader.classList.add("gone");
-          bookWrap.classList.add("visible");
-          reader.classList.add("is-open");
-          updateUIAll();
-          peekCoverSoon(1200);
+          /* Desktop: custom cover layers handle front/back */
+          frontLayerImg.src = url(1);
+          backLayerImg.src = backCoverSrc;
+
+          frontLayer.hidden = false;
+          renderFlipState(FRONT_CFG, 0);
+
+          backLayer.hidden = true;
+          renderFlipState(BACK_CFG, 1);
+
+          clearFlipInline();
+
+          if (N > 0) {
+            createFlipbook(0, false);
+          } else {
+            loader.classList.add("gone");
+            bookWrap.classList.add("visible");
+            reader.classList.add("is-open");
+            updateUIAll();
+            peekCoverSoon(1200);
+          }
         }
       });
     }).catch(function (e) {
@@ -3874,13 +3973,23 @@ main {
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
+    /* Mobile: full 0..N-1 range (cover is page 1, back is page N) */
+    if (isMobile) {
+      var targetIdx = Math.round(frac * (N - 1));
+      jumpToInner(targetIdx, true);
+      return;
+    }
+
+    /* Desktop: cover/back are separate modes */
     if (viewMode === "front") {
       if (frac <= 0.02) return;
       forceBook(0);
+      return;
     }
     if (viewMode === "back") {
       if (frac >= 0.98) return;
       forceBook(lastSpreadIdx);
+      return;
     }
 
     if (isPortrait) {
@@ -3900,8 +4009,10 @@ main {
     input.type = "number";
     input.className = "page-input";
     input.min = "1";
-    input.max = String(total + 1);
-    input.value = viewMode === "front" ? "1" : (viewMode === "back" ? String(total + 1) : String(Math.min(total, currentIdx + 2)));
+    input.max = String(isMobile ? N : (total + 1));
+    input.value = isMobile
+      ? String(currentIdx + 1)
+      : (viewMode === "front" ? "1" : (viewMode === "back" ? String(total + 1) : String(Math.min(total, currentIdx + 2))));
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -3918,14 +4029,21 @@ main {
       dPages.style.display = "";
 
       if (jump && !isNaN(val)) {
-        if (val <= 1) {
-          if (viewMode === "book") closeToCover();
-          else if (viewMode === "back") { forceBook(0); closeToCover(); }
-        } else if (val > total) {
-          if (viewMode === "book") showBack();
-          else if (viewMode === "front") { forceBook(lastSpreadIdx); showBack(); }
+        if (isMobile) {
+          /* Mobile: val is 1..N directly (1 = cover, N = back cover) */
+          var target = Math.max(0, Math.min(N - 1, val - 1));
+          jumpToInner(target, true);
         } else {
-          jumpToInner(val - 2, true);
+          /* Desktop: 1 = cover, 2..total = interior, total+1 = back cover */
+          if (val <= 1) {
+            if (viewMode === "book") closeToCover();
+            else if (viewMode === "back") { forceBook(0); closeToCover(); }
+          } else if (val > total) {
+            if (viewMode === "book") showBack();
+            else if (viewMode === "front") { forceBook(lastSpreadIdx); showBack(); }
+          } else {
+            jumpToInner(val - 2, true);
+          }
         }
       }
 
@@ -3948,6 +4066,11 @@ main {
   document.getElementById("end-again").addEventListener("click", function () {
     if (coverAnimating) return;
     hideEnd();
+
+    if (isMobile) {
+      jumpToInner(0, false);
+      return;
+    }
 
     if (viewMode === "back") {
       closeBack();
@@ -4037,14 +4160,68 @@ main {
   function handleResize() {
     if (reader.hidden || isInitializing || coverAnimating) return;
 
+    var oldMobile = isMobile;
     var oldW = pageW;
     var oldH = pageH;
     var oldPortrait = isPortrait;
 
     computeLayout();
 
-    if (viewMode === "front" && !frontLayer.hidden) renderFlipState(FRONT_CFG, 0);
-    if (viewMode === "back" && !backLayer.hidden) renderFlipState(BACK_CFG, 0);
+    /* If the mobile/desktop mode changed, rebuild inner[] and restart */
+    if (oldMobile !== isMobile && N > 0) {
+      /* Map current logical page (1..total+1) across the mode change */
+      var currentOrigPage;
+      if (oldMobile) {
+        currentOrigPage = currentIdx + 1;
+      } else {
+        if (viewMode === "front") currentOrigPage = 1;
+        else if (viewMode === "back") currentOrigPage = total + 1;
+        else currentOrigPage = currentIdx + 2;
+      }
+
+      rebuildInner();
+      buildStacks();
+
+      var targetIdx;
+      if (isMobile) {
+        targetIdx = Math.max(0, Math.min(N - 1, currentOrigPage - 1));
+        viewMode = "book";
+        bookWrap.classList.remove("cover-mode", "back-mode");
+        frontLayer.hidden = true;
+        backLayer.hidden = true;
+      } else {
+        frontLayerImg.src = url(1);
+        backLayerImg.src = backCoverSrc;
+
+        if (currentOrigPage <= 1) {
+          viewMode = "front";
+          bookWrap.classList.add("cover-mode");
+          bookWrap.classList.remove("back-mode");
+          frontLayer.hidden = false;
+          backLayer.hidden = true;
+          renderFlipState(FRONT_CFG, 0);
+          targetIdx = 0;
+        } else if (currentOrigPage > total) {
+          viewMode = "back";
+          bookWrap.classList.add("back-mode");
+          bookWrap.classList.remove("cover-mode");
+          frontLayer.hidden = true;
+          backLayer.hidden = false;
+          renderFlipState(BACK_CFG, 0);
+          targetIdx = lastSpreadIdx;
+        } else {
+          viewMode = "book";
+          bookWrap.classList.remove("cover-mode", "back-mode");
+          frontLayer.hidden = true;
+          backLayer.hidden = true;
+          targetIdx = currentOrigPage - 2;
+        }
+      }
+
+      clearFlipInline();
+      createFlipbook(clampInner(targetIdx), true);
+      return;
+    }
 
     if (
       oldPortrait !== isPortrait ||
@@ -4054,6 +4231,8 @@ main {
       var start = getCurrentIndex();
       if (N > 0) createFlipbook(start, true);
     } else {
+      if (!isMobile && viewMode === "front" && !frontLayer.hidden) renderFlipState(FRONT_CFG, 0);
+      if (!isMobile && viewMode === "back" && !backLayer.hidden) renderFlipState(BACK_CFG, 0);
       updateUIAll();
     }
 
