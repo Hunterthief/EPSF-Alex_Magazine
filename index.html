@@ -2764,16 +2764,20 @@ main { position: relative; z-index: 2; }
 
       bookPages = [];
       bookPages.push(url(1)); // Front Cover
-      bookPages.push(makeInsideCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72))))); // Welcome Page
 
-      for (var i = 3; i <= total; i++) bookPages.push(url(i));
+      for (var i = 2; i <= total; i++) {
+        bookPages.push(url(i)); // Content pages
+      }
 
-      var innerCount = bookPages.length - 1;
-      if (innerCount % 2 !== 0) {
+      // Add the "Happy Reading" page before the back cover
+      bookPages.push(makeInsideCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
+
+      // Ensure the array length is odd before adding the back cover, so the final length is even
+      if (bookPages.length % 2 === 0) {
         bookPages.push(makeColophonDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
       }
 
-      bookPages.push(makeBackCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72)))));
+      bookPages.push(makeBackCoverDataUrl(1200, Math.max(1, Math.round(1200 / (aspect || 0.72))))); // Back Cover
 
       var sp = document.getElementById("stat-pages");
       if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
