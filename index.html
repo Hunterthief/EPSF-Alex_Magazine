@@ -49,7 +49,6 @@ body {
   min-height: 100vh;
 }
 
-/* ============ BACKGROUND WATERMARK ============ */
 .bg-watermark {
   position: absolute;
   inset: 0;
@@ -63,7 +62,6 @@ body {
   mix-blend-mode: multiply;
 }
 
-/* ============ SINGLE PAGE OVERLAY ============ */
 .page-veil {
   position: absolute;
   inset: 0;
@@ -494,7 +492,6 @@ main {
 }
 .site-footer p { font-size: 0.8rem; }
 
-/* ============ READER ============ */
 .reader {
   position: fixed;
   inset: 0;
@@ -661,7 +658,6 @@ main {
   display: block;
 }
 
-/* Cover / back-cover modes hide the spread engine completely (no blank halves ever) */
 .book-wrap.cover-mode #flipbook-mount,
 .book-wrap.back-mode #flipbook-mount {
   opacity: 0;
@@ -677,7 +673,6 @@ main {
   width: 52%;
 }
 
-/* ============ CUSTOM COVER LAYERS (true 3D leaves) ============ */
 .cover-layer {
   position: absolute;
   top: 0;
@@ -722,7 +717,6 @@ main {
 }
 .cover-layer:hover .cover-face--front img { transform: scale(1.018); }
 
-/* printed-gloss on the artwork */
 .cover-gloss {
   position: absolute;
   inset: 0;
@@ -734,7 +728,6 @@ main {
 }
 .cover-layer:hover .cover-gloss { opacity: 1; }
 
-/* moving turn shading + specular sweep (driven by --shade / --glow / --sheen) */
 .cover-face::after {
   content: "";
   position: absolute;
@@ -768,7 +761,6 @@ main {
   transform: translateX(calc(var(--sheen, 0) * -44%));
 }
 
-/* inside of the leaf */
 .inside-cover {
   position: absolute;
   inset: 0;
@@ -815,7 +807,6 @@ main {
   color: var(--muted);
 }
 
-/* grab-able corner */
 .cover-peel {
   position: absolute;
   right: 0;
@@ -839,7 +830,6 @@ main {
 .cover-layer:hover .cover-peel,
 .cover-layer.peek .cover-peel { opacity: 1; transform: translate(0, 0); }
 
-/* invitation peek */
 .cover-layer.peek { animation: coverPeek 1.5s var(--ease-book) 1 both; }
 @keyframes coverPeek {
   0%   { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
@@ -855,7 +845,6 @@ main {
   100% { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
 }
 
-/* shadow cast into the gutter while a leaf is in the air */
 .spine-shadow {
   position: absolute;
   top: 0;
@@ -889,7 +878,6 @@ main {
   transition: width 0.55s var(--ease-out), opacity 0.55s var(--ease-out);
 }
 
-/* Vertical page sheets, same height as pages */
 .page-stack {
   position: absolute;
   top: 0;
@@ -959,7 +947,6 @@ main {
 }
 .sheet-tip.show { opacity: 1; transform: translateY(0); }
 
-/* electric sparks on the EDGES + flash */
 .sparks {
   position: absolute;
   inset: -40px;
@@ -1249,7 +1236,6 @@ main {
   line-height: 1.6;
 }
 
-/* ============ ZOOM VIEWER ============ */
 .zoom-overlay {
   position: fixed;
   inset: 0;
@@ -1688,13 +1674,11 @@ main {
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
 
-  /* ---- cover flip timing ---- */
-  var FLIP_MS       = RM ? 1 : 880;   /* full cover turn          */
-  var SNAP_MS       = RM ? 1 : 430;   /* release below threshold  */
+  var FLIP_MS       = RM ? 1 : 880;
+  var SNAP_MS       = RM ? 1 : 430;
   var COVER_ANIM_MS = RM ? 0 : FLIP_MS + 70;
-  var MAX_ANGLE     = 176;            /* deg – avoids flat z-fight */
+  var MAX_ANGLE     = 176;
 
-  /* ===================== SMALL MATH / EASING HELPERS ===================== */
   function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
   function smoothstep(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
   function windowed(v, a, b) { return clamp01((v - a) / (b - a || 1)); }
@@ -1718,10 +1702,9 @@ main {
     };
   }
 
-  var FLIP_EASE = bezierEase(0.30, 0.02, 0.16, 1);   /* page turn: quick lift, long settle */
-  var SNAP_EASE = bezierEase(0.34, 0.00, 0.20, 1);   /* spring back closed                */
+  var FLIP_EASE = bezierEase(0.30, 0.02, 0.16, 1);
+  var SNAP_EASE = bezierEase(0.34, 0.00, 0.20, 1);
 
-  /* ===================== LOGO ASSET (for back cover) ===================== */
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
   var logoDataUri = null;
 
@@ -1747,7 +1730,6 @@ main {
     }
   })();
 
-  /* ===================== PAGE FLIP LOADER ===================== */
   var PAGE_FLIP_ESM_URLS = [
     '{{ "/assets/vendor/page-flip.esm.js" | relative_url }}',
     "https://esm.sh/page-flip@2.0.7",
@@ -1942,7 +1924,6 @@ main {
     });
   }
 
-  /* ===================== SPARK AUDIO ONLY ===================== */
   var audioCtx = null;
   var soundsInitialized = false;
   var sparkBuffer = null;
@@ -2066,7 +2047,6 @@ main {
     synthSpark();
   }
 
-  /* ===================== READER ELEMENTS ===================== */
   var reader     = document.getElementById("reader");
   var stage      = document.getElementById("r-stage");
   var bookWrap   = document.getElementById("book-wrap");
@@ -2098,10 +2078,10 @@ main {
   var backLayerImg  = document.getElementById("cover-back-img");
 
   var pagesUrl = "";
-  var total = 1;          /* original page images (1.jpg .. total.jpg) */
-  var inner = [];         /* flipbook pages: originals 2..total (+ colophon if needed) */
-  var N = 0;              /* inner.length */
-  var lastSpreadIdx = 0;  /* landscape: index of left page of last spread */
+  var total = 1;
+  var inner = [];
+  var N = 0;
+  var lastSpreadIdx = 0;
   var maxSpread = 0;
   var aspect = 0.72;
   var pageW = 0;
@@ -2114,7 +2094,7 @@ main {
   var isInitializing = false;
   var suppressLoader = false;
 
-  var viewMode = "front";   /* front | book | back */
+  var viewMode = "front";
   var coverAnimating = false;
   var coverAnimToken = 0;
 
@@ -2324,11 +2304,6 @@ main {
     }
   }
 
-  /* ==================================================================
-     COVER FLIP ENGINE
-     turn = 0  -> leaf closed / settled (visible)
-     turn = 1  -> leaf fully swung away (invisible)
-     ================================================================== */
   var FRONT_CFG = { el: frontLayer, sign: -1, mountA: 0.05, mountB: 0.56 };
   var BACK_CFG  = { el: backLayer,  sign:  1, mountA: 0.36, mountB: 0.92 };
 
@@ -2345,7 +2320,7 @@ main {
     turn = clamp01(turn);
 
     var el = cfg.el;
-    var s = Math.sin(Math.PI * turn);                 /* 0 at both ends, 1 mid-flight */
+    var s = Math.sin(Math.PI * turn);
     var angle = cfg.sign * MAX_ANGLE * turn;
     var lift = s * 34;
     var scale = 1 + s * 0.016;
@@ -2428,7 +2403,6 @@ main {
     }, at + Math.min(480, Math.round(dur * 0.55)));
   }
 
-  /* ---------- invitation peek ---------- */
   var peekTimer = null;
 
   function stopPeek() {
@@ -2656,7 +2630,6 @@ main {
     return idx;
   }
 
-  /* ---------- cover drag / click ---------- */
   var coverDrag = { active: false, id: null, x0: 0, y0: 0, moved: false, turn: 0, sparked: false, cfg: null };
 
   function beginCoverDrag(cfg, e) {
@@ -2684,7 +2657,7 @@ main {
     if (Math.abs(dx) > 5 || Math.abs(dy) > 5) coverDrag.moved = true;
 
     var raw = clamp01((dx * signForDrag) / Math.max(pageW * 0.82, 1));
-    var t = Math.pow(raw, 0.86);          /* slight resistance, like paper */
+    var t = Math.pow(raw, 0.86);
     coverDrag.turn = t;
     dragTurn = t;
 
@@ -2707,14 +2680,12 @@ main {
     coverDrag.sparked = false;
     coverDrag.cfg = null;
 
-    /* A plain click (no movement) always flips the cover open/closed. */
     if (!coverDrag.moved || t >= 0.16) {
       dragTurn = t;
       openFn();
       return;
     }
 
-    /* below threshold: spring back */
     dragTurn = 0;
     coverAnimating = true;
     var token = ++coverAnimToken;
@@ -2734,7 +2705,7 @@ main {
       beginCoverDrag(FRONT_CFG, e);
     });
     frontLayer.addEventListener("pointermove", function (e) {
-      moveCoverDrag(FRONT_CFG, e, -1);       /* drag left to open */
+      moveCoverDrag(FRONT_CFG, e, -1);
     });
     frontLayer.addEventListener("pointerup", function (e) {
       endCoverDrag(FRONT_CFG, e, openCover, null);
@@ -2742,7 +2713,6 @@ main {
     frontLayer.addEventListener("pointercancel", function (e) {
       endCoverDrag(FRONT_CFG, e, openCover, null);
     });
-    /* safety net: a plain click always turns the page */
     frontLayer.addEventListener("click", function () {
       if (viewMode === "front" && !coverAnimating && !coverDrag.active) openCover();
     });
@@ -2755,7 +2725,7 @@ main {
       beginCoverDrag(BACK_CFG, e);
     });
     backLayer.addEventListener("pointermove", function (e) {
-      moveCoverDrag(BACK_CFG, e, 1);         /* drag right to close */
+      moveCoverDrag(BACK_CFG, e, 1);
     });
     backLayer.addEventListener("pointerup", function (e) {
       endCoverDrag(BACK_CFG, e, closeBack, null);
@@ -2768,7 +2738,56 @@ main {
     });
   }
 
-  /* ---------- stacks ---------- */
+  /* ============ FIX: Intercept clicks on pageFlip to allow flipping back to cover ============ */
+  var bookWrapPointer = { active: false, x0: 0, y0: 0, moved: false };
+
+  bookWrap.addEventListener("pointerdown", function (e) {
+    if (coverAnimating || isJumping) return;
+    if (viewMode !== "book" || !pageFlip || N <= 0) return;
+
+    bookWrapPointer.active = true;
+    bookWrapPointer.x0 = e.clientX;
+    bookWrapPointer.y0 = e.clientY;
+    bookWrapPointer.moved = false;
+  }, true);
+
+  bookWrap.addEventListener("pointermove", function (e) {
+    if (!bookWrapPointer.active) return;
+    var dx = e.clientX - bookWrapPointer.x0;
+    var dy = e.clientY - bookWrapPointer.y0;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      bookWrapPointer.moved = true;
+    }
+  }, true);
+
+  bookWrap.addEventListener("pointerup", function (e) {
+    if (!bookWrapPointer.active || bookWrapPointer.moved) {
+      bookWrapPointer.active = false;
+      return;
+    }
+    bookWrapPointer.active = false;
+
+    var rect = bookWrap.getBoundingClientRect();
+    var midX = rect.left + rect.width / 2;
+    var isLeft = e.clientX < midX;
+
+    /* If clicking left side at index 0, close to cover */
+    if (isLeft && currentIdx <= 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      requestFlip(-1);
+      return;
+    }
+
+    /* If clicking right side at last page, show back cover */
+    if (!isLeft && (isPortrait ? (currentIdx >= N - 1) : (currentIdx >= lastSpreadIdx))) {
+      e.preventDefault();
+      e.stopPropagation();
+      requestFlip(1);
+      return;
+    }
+  }, true);
+
   function spreadLabel(s) {
     var left = s * 2;
     var right = s * 2 + 1;
@@ -2938,7 +2957,7 @@ main {
     if (viewMode === "front") {
       showHint(isPortrait ? "Tap the cover to open" : "Click or drag the cover to open");
     } else if (viewMode === "book" && currentIdx === 0) {
-      showHint(isPortrait ? "Swipe or tap to flip" : "Drag a corner or click to flip");
+      showHint(isPortrait ? "Swipe or tap to flip" : "Click left edge to return to cover");
     } else {
       hideHint();
     }
@@ -2972,7 +2991,6 @@ main {
     sheetTip.style.top = y + "px";
   }
 
-  /* ---------- sparks ---------- */
   function showSparks(dir) {
     flashEl.classList.remove("side-l", "side-r", "side-b");
     flashEl.classList.add(dir < 0 ? "side-l" : (dir > 0 ? "side-r" : "side-b"));
@@ -3027,7 +3045,6 @@ main {
     }
   }
 
-  /* ---------- StPageFlip lifecycle (inner pages only) ---------- */
   function destroyFlipbook() {
     if (pageFlip) {
       try { pageFlip.destroy(); } catch (e) {}
@@ -3199,7 +3216,6 @@ main {
     jumpToInner(indexFromSpread(targetSpread), sparks);
   }
 
-  /* ---------- held-key rapid flipping ---------- */
   function startHeld(dir) {
     if (isJumping || coverAnimating) return;
     if (viewMode !== "book" && !pageFlip) return;
@@ -3289,7 +3305,6 @@ main {
     loaderTxt.textContent = msg;
   }
 
-  /* ---------- zoom viewer ---------- */
   function clampNum(v, min, max) {
     return Math.max(min, Math.min(max, v));
   }
@@ -3646,7 +3661,6 @@ main {
     }).then(function (t) {
       total = Math.max(1, t);
 
-      /* Inner book = originals 2..total; pad with a colophon page if odd */
       inner = [];
       for (var i = 2; i <= total; i++) inner.push(url(i));
       if (inner.length % 2 === 1) {
@@ -3671,7 +3685,6 @@ main {
         buildStacks();
         computeLayout();
 
-        /* cover settled & visible, back swung & hidden */
         frontLayer.hidden = false;
         renderFlipState(FRONT_CFG, 0);
 
@@ -3737,7 +3750,6 @@ main {
     }, 380);
   }
 
-  /* ---------- events ---------- */
   cards.forEach(function (card) {
     card.addEventListener("click", function () { openReader(card); });
     card.addEventListener("keydown", function (ev) {
@@ -3848,7 +3860,6 @@ main {
   edgeR.addEventListener("click", function () { stopHeld(); requestFlip(1); });
   edgeL.addEventListener("click", function () { stopHeld(); requestFlip(-1); });
 
-  /* clicking the dark area beside an open book also turns the page */
   stage.addEventListener("click", function (e) {
     if (coverAnimating || isJumping) return;
     if (e.target !== stage && e.target !== bookWrap) return;
@@ -4032,7 +4043,6 @@ main {
 
     computeLayout();
 
-    /* keep the settled/swung leaf geometry in sync with the new size */
     if (viewMode === "front" && !frontLayer.hidden) renderFlipState(FRONT_CFG, 0);
     if (viewMode === "back" && !backLayer.hidden) renderFlipState(BACK_CFG, 0);
 
