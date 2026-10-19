@@ -672,178 +672,6 @@ main {
   width: 52%;
 }
 
-.cover-layer {
-  position: absolute;
-  top: 0;
-  z-index: 25;
-  border-radius: 5px;
-  cursor: pointer;
-  touch-action: none;
-  will-change: transform, opacity;
-  transform-style: preserve-3d;
-  transform-origin: left center;
-  transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1);
-  --shade: 0;
-  --glow: 0;
-  --sheen: 0;
-}
-.cover-layer[hidden] { display: none; }
-.cover-layer.back { transform-origin: right center; }
-
-.cover-face {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: 5px;
-  background: #0A192F;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.28),
-    0 30px 60px -12px rgba(0,0,0,0.58);
-}
-.cover-face--back { transform: rotateY(180deg); }
-
-.cover-face img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-  transition: transform 0.5s var(--ease-out);
-}
-.cover-layer:hover .cover-face--front img { transform: scale(1.018); }
-
-.cover-gloss {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(126deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.06) 24%, rgba(255,255,255,0) 46%);
-  mix-blend-mode: screen;
-  opacity: 0.7;
-  transition: opacity 0.4s var(--ease-out);
-}
-.cover-layer:hover .cover-gloss { opacity: 1; }
-
-.cover-face::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: var(--shade, 0);
-  background: linear-gradient(96deg,
-    rgba(2,8,22,0.92) 0%,
-    rgba(2,8,22,0.55) 26%,
-    rgba(2,8,22,0.16) 55%,
-    rgba(255,255,255,0.10) 100%);
-}
-.cover-face::before {
-  content: "";
-  position: absolute;
-  inset: -25%;
-  pointer-events: none;
-  opacity: var(--glow, 0);
-  mix-blend-mode: screen;
-  background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
-  transform: translateX(calc(var(--sheen, 0) * 44%));
-}
-.cover-layer.back .cover-face::after {
-  background: linear-gradient(264deg,
-    rgba(2,8,22,0.92) 0%,
-    rgba(2,8,22,0.55) 26%,
-    rgba(2,8,22,0.16) 55%,
-    rgba(255,255,255,0.10) 100%);
-}
-.cover-layer.back .cover-face::before {
-  transform: translateX(calc(var(--sheen, 0) * -44%));
-}
-
-.inside-cover {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 26px;
-  text-align: center;
-  background:
-    radial-gradient(120% 82% at 50% 0%, #FFFFFF 0%, #EEF2FB 46%, #D9E1F1 100%);
-}
-.inside-cover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: repeating-linear-gradient(180deg, rgba(10,25,47,0.035) 0 1px, transparent 1px 8px);
-  opacity: 0.55;
-}
-.inside-mark {
-  position: relative;
-  font-family: var(--display);
-  font-size: 0.86rem;
-  font-weight: 900;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--primary);
-}
-.inside-rule {
-  position: relative;
-  width: 46px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
-}
-.inside-sub {
-  position: relative;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.cover-peel {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 88px;
-  height: 88px;
-  pointer-events: none;
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  background: linear-gradient(315deg, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.15) 34%, rgba(255,255,255,0) 60%);
-  opacity: 0;
-  transform: translate(8px, 8px);
-  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
-}
-.cover-layer.back .cover-peel {
-  right: auto;
-  left: 0;
-  clip-path: polygon(0 0, 100% 100%, 0 100%);
-  background: linear-gradient(225deg, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.15) 34%, rgba(255,255,255,0) 60%);
-  transform: translate(-8px, 8px);
-}
-.cover-layer:hover .cover-peel,
-.cover-layer.peek .cover-peel { opacity: 1; transform: translate(0, 0); }
-
-.cover-layer.peek { animation: coverPeek 1.5s var(--ease-book) 1 both; }
-@keyframes coverPeek {
-  0%   { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
-  34%  { transform: perspective(2400px) translateZ(20px) rotateY(-8.5deg) scale(1.008); }
-  62%  { transform: perspective(2400px) translateZ(9px) rotateY(-3.4deg) scale(1.003); }
-  100% { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
-}
-.cover-layer.back.peek { animation-name: coverPeekBack; }
-@keyframes coverPeekBack {
-  0%   { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
-  34%  { transform: perspective(2400px) translateZ(20px) rotateY(8.5deg) scale(1.008); }
-  62%  { transform: perspective(2400px) translateZ(9px) rotateY(3.4deg) scale(1.003); }
-  100% { transform: perspective(2400px) translateZ(0px) rotateY(0deg) scale(1); }
-}
-
 .spine-shadow {
   position: absolute;
   top: 0;
@@ -1356,6 +1184,63 @@ main {
   color: rgba(255,255,255,0.58);
 }
 
+/* ============ TURN.JS COVER BRIDGE ============ */
+.turn-cover {
+  position: absolute;
+  top: 0;
+  z-index: 28;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  touch-action: none;
+}
+.turn-cover[hidden] { display: none !important; }
+
+/* Before Turn.js is initialized, show a static front cover fallback */
+.turn-cover:not(.turn-ready) .turn-cover-front {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #0A192F;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.28),
+    0 30px 60px -12px rgba(0,0,0,0.58);
+}
+.turn-cover:not(.turn-ready) .turn-cover-inside {
+  display: none;
+}
+
+.turn-cover .turn-page {
+  background: transparent;
+}
+.turn-cover .turn-cover-front {
+  overflow: hidden;
+  border-radius: 5px;
+  background: #0A192F;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.28),
+    0 30px 60px -12px rgba(0,0,0,0.58);
+}
+.turn-cover .turn-cover-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.turn-cover .turn-cover-inside {
+  background: transparent;
+}
+
+/* While the Turn.js cover is animating, reveal the St.PageFlip layer underneath */
+.book-wrap.cover-mode.turning-cover #flipbook-mount {
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
 @media (max-width: 900px) {
   .card-featured { grid-template-columns: 1fr; }
   .card-featured .cover { aspect-ratio: 4/3; }
@@ -1381,7 +1266,6 @@ main {
   .end-card { top: 72px; padding: 12px 16px; }
   .page-stack { display: none; }
   .spine-shadow { width: 84px; }
-  .cover-peel { width: 64px; height: 64px; }
   .zoom-top { padding: 12px 14px; }
   .zoom-controls { gap: 6px; }
   .zoom-btn { min-width: 34px; height: 34px; padding: 0 10px; font-size: 0.76rem; }
@@ -1564,34 +1448,11 @@ main {
       <div class="spine-shadow" id="spine-shadow" aria-hidden="true"></div>
       <div class="book-shadow"></div>
 
-      <div class="cover-layer front" id="cover-front" hidden>
-        <div class="cover-face cover-face--front">
-          <img id="cover-front-img" alt="Magazine cover" draggable="false">
-          <span class="cover-gloss" aria-hidden="true"></span>
-          <span class="cover-peel" aria-hidden="true"></span>
+      <div class="turn-cover" id="turn-cover" hidden>
+        <div class="turn-page turn-cover-front hard">
+          <img id="turn-cover-front-img" alt="Magazine cover" draggable="false">
         </div>
-        <div class="cover-face cover-face--back" aria-hidden="true">
-          <div class="inside-cover">
-            <span class="inside-mark">EPSF Alex</span>
-            <span class="inside-rule"></span>
-            <span class="inside-sub">PE Magazine</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="cover-layer back" id="cover-back" hidden>
-        <div class="cover-face cover-face--front">
-          <img id="cover-back-img" alt="Magazine back cover" draggable="false">
-          <span class="cover-gloss" aria-hidden="true"></span>
-          <span class="cover-peel" aria-hidden="true"></span>
-        </div>
-        <div class="cover-face cover-face--back" aria-hidden="true">
-          <div class="inside-cover">
-            <span class="inside-mark">Thank You</span>
-            <span class="inside-rule"></span>
-            <span class="inside-sub">For Reading</span>
-          </div>
-        </div>
+        <div class="turn-page turn-cover-inside"></div>
       </div>
 
       <div class="rapid-flash" id="rapid-flash"></div>
@@ -1672,37 +1533,6 @@ main {
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var STACK_MAX = 96;
   var JUMP_ANIMATE_THRESHOLD = 10;
-
-  var FLIP_MS       = RM ? 1 : 880;
-  var SNAP_MS       = RM ? 1 : 430;
-  var COVER_ANIM_MS = RM ? 0 : FLIP_MS + 70;
-  var MAX_ANGLE     = 176;
-
-  function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
-  function smoothstep(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
-  function windowed(v, a, b) { return clamp01((v - a) / (b - a || 1)); }
-
-  function bezierEase(mX1, mY1, mX2, mY2) {
-    function A(a1, a2) { return 1.0 - 3.0 * a2 + 3.0 * a1; }
-    function B(a1, a2) { return 3.0 * a2 - 6.0 * a1; }
-    function C(a1) { return 3.0 * a1; }
-    function calc(t, a1, a2) { return ((A(a1, a2) * t + B(a1, a2)) * t + C(a1)) * t; }
-    function slope(t, a1, a2) { return 3.0 * A(a1, a2) * t * t + 2.0 * B(a1, a2) * t + C(a1); }
-    return function (x) {
-      if (x <= 0) return 0;
-      if (x >= 1) return 1;
-      var t = x;
-      for (var i = 0; i < 8; i++) {
-        var s = slope(t, mX1, mX2);
-        if (Math.abs(s) < 1e-6) break;
-        t -= (calc(t, mX1, mX2) - x) / s;
-      }
-      return calc(Math.min(1, Math.max(0, t)), mY1, mY2);
-    };
-  }
-
-  var FLIP_EASE = bezierEase(0.30, 0.02, 0.16, 1);
-  var SNAP_EASE = bezierEase(0.34, 0.00, 0.20, 1);
 
   var LOGO_URL = '{{ "/assets/images/logo-mark.png" | relative_url }}';
   var logoDataUri = null;
@@ -1849,6 +1679,57 @@ main {
       });
 
     return pageFlipLoadPromise;
+  }
+
+  /* ===================== TURN.JS LOADER (COVER ONLY) ===================== */
+  var JQUERY_URLS = [
+    '{{ "/assets/vendor/jquery-1.12.4.min.js" | relative_url }}',
+    "https://code.jquery.com/jquery-1.12.4.min.js"
+  ];
+  var TURN_JS_URLS = [
+    '{{ "/assets/vendor/turn.min.js" | relative_url }}',
+    "https://cdnjs.cloudflare.com/ajax/libs/turn.js/4/turn.min.js",
+    "https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"
+  ];
+  var TQ = null;
+  var turnLoadPromise = null;
+
+  function loadTurnScript(src) {
+    if (!src) return Promise.reject(new Error("empty script url"));
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("Script failed to load: " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function ensureTurnJS() {
+    if (TQ && TQ.fn && TQ.fn.turn) return Promise.resolve();
+    if (turnLoadPromise) return turnLoadPromise;
+
+    turnLoadPromise = tryEach(JQUERY_URLS, loadTurnScript)
+      .then(function () {
+        if (!window.jQuery) {
+          throw new Error("jQuery did not register");
+        }
+        return tryEach(TURN_JS_URLS, loadTurnScript);
+      })
+      .then(function () {
+        if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.turn) {
+          throw new Error("Turn.js did not register jQuery.fn.turn");
+        }
+        // Keep jQuery isolated so it does not collide with anything else.
+        TQ = window.jQuery.noConflict(true);
+      })
+      .catch(function (err) {
+        turnLoadPromise = null;
+        throw err;
+      });
+
+    return turnLoadPromise;
   }
 
   function parseIssueName(fileName) {
@@ -2071,10 +1952,8 @@ main {
   var dFill      = document.getElementById("d-fill");
   var spineShadow = document.getElementById("spine-shadow");
 
-  var frontLayer    = document.getElementById("cover-front");
-  var frontLayerImg = document.getElementById("cover-front-img");
-  var backLayer     = document.getElementById("cover-back");
-  var backLayerImg  = document.getElementById("cover-back-img");
+  var turnCoverEl   = document.getElementById("turn-cover");
+  var turnCoverImg  = document.getElementById("turn-cover-front-img");
 
   var pagesUrl = "";
   var total = 1;
@@ -2096,6 +1975,7 @@ main {
   var viewMode = "front";
   var coverAnimating = false;
   var coverAnimToken = 0;
+  var dragTurn = 0;
 
   var heldDir = 0;
   var heldLoopRunning = false;
@@ -2243,27 +2123,36 @@ main {
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
 
-  /* Build the inner[] page list according to the current mode.
-     Mobile: cover image + interior pages + back cover (+ colophon pad).
-     Desktop: interior pages + colophon pad; cover/back handled by custom layers. */
   function rebuildInner() {
     inner = [];
     var bcW = 1200;
     var bcH = Math.max(1, Math.round(bcW / (aspect || 0.72)));
     backCoverSrc = makeBackCoverDataUrl(bcW, bcH);
+    var colophonSrc = makeColophonDataUrl(bcW, bcH);
 
     if (isMobile) {
-      inner.push(url(1));                       /* cover is page 1 */
+      // Mobile: cover + interiors + back cover, padded if needed.
+      inner.push(url(1));
       for (var i = 2; i <= total; i++) inner.push(url(i));
-      inner.push(backCoverSrc);                 /* back cover is the last page */
+
+      // Keep back cover last, but ensure even count if possible.
+      if ((inner.length + 1) % 2 === 1) {
+        inner.push(colophonSrc);
+      }
+      inner.push(backCoverSrc);
       if (inner.length % 2 === 1) {
-        inner.push(makeColophonDataUrl(bcW, bcH));
+        inner.push(colophonSrc);
       }
     } else {
-      for (var i = 2; i <= total; i++) inner.push(url(i));
-      if (inner.length % 2 === 1) {
-        inner.push(makeColophonDataUrl(bcW, bcH));
+      // Desktop: Turn.js owns front cover only.
+      // St.PageFlip owns interiors + back cover.
+      for (var j = 2; j <= total; j++) inner.push(url(j));
+
+      // Ensure back cover stays last and page count is even when possible.
+      if ((inner.length + 1) % 2 === 1) {
+        inner.push(colophonSrc);
       }
+      inner.push(backCoverSrc);
     }
 
     N = inner.length;
@@ -2314,356 +2203,26 @@ main {
       bookWrap.style.height = pageH + "px";
     }
 
-    positionCoverLayers();
+    positionTurnCoverLayers();
 
-    /* On mobile, custom cover layers must stay hidden — cover is just a page. */
     if (isMobile) {
-      frontLayer.hidden = true;
-      backLayer.hidden = true;
+      if (turnCoverEl) turnCoverEl.hidden = true;
       if (spineShadow) spineShadow.style.display = "none";
     } else {
       if (spineShadow) spineShadow.style.display = "";
+      if (turnCoverEl && viewMode === "front") turnCoverEl.hidden = false;
     }
   }
 
-  function positionCoverLayers() {
-    [frontLayer, backLayer].forEach(function (el) {
-      if (!el) return;
-      el.style.height = pageH + "px";
-      el.style.width = pageW + "px";
-      el.style.top = "0px";
-      el.style.left = (isPortrait ? 0 : pageW / 2) + "px";
-    });
-
-    if (spineShadow) {
-      spineShadow.style.height = pageH + "px";
-      spineShadow.style.top = "0px";
-      spineShadow.style.left = (isPortrait ? 0 : pageW) + "px";
-    }
+  function positionTurnCoverLayers() {
+    positionTurnCover();
   }
-
-  var FRONT_CFG = { el: frontLayer, sign: -1, mountA: 0.05, mountB: 0.56 };
-  var BACK_CFG  = { el: backLayer,  sign:  1, mountA: 0.36, mountB: 0.92 };
-
-  var flipRaf = 0;
-  var flipActive = false;
-  var dragTurn = 0;
-
-  function coverOpacity(t) {
-    return 1 - smoothstep(windowed(t, 0.20, 0.76));
-  }
-
-  function renderFlipState(cfg, turn) {
-    if (!cfg || !cfg.el) return;
-    turn = clamp01(turn);
-
-    var el = cfg.el;
-    var s = Math.sin(Math.PI * turn);
-    var angle = cfg.sign * MAX_ANGLE * turn;
-    var lift = s * 34;
-    var scale = 1 + s * 0.016;
-
-    el.style.transform =
-      "perspective(2400px) translateZ(" + lift.toFixed(2) + "px) rotateY(" +
-      angle.toFixed(2) + "deg) scale(" + scale.toFixed(4) + ")";
-    el.style.opacity = coverOpacity(turn).toFixed(3);
-
-    el.style.setProperty("--shade", (s * 0.72).toFixed(3));
-    el.style.setProperty("--glow", (Math.pow(s, 1.7) * 0.85).toFixed(3));
-    el.style.setProperty("--sheen", ((turn - 0.5) * 2).toFixed(3));
-
-    var m = smoothstep(windowed(turn, cfg.mountA, cfg.mountB));
-    if (mount) {
-      mount.style.opacity = m.toFixed(3);
-      mount.style.transform = "scale(" + (0.984 + 0.016 * m).toFixed(4) + ")";
-    }
-    if (spineShadow && !isMobile) {
-      spineShadow.style.opacity = (Math.pow(s, 1.25) * 0.9).toFixed(3);
-    }
-  }
-
-  function clearFlipInline() {
-    if (mount) { mount.style.opacity = ""; mount.style.transform = ""; }
-    if (spineShadow) spineShadow.style.opacity = "0";
-    if (bookWrap) bookWrap.classList.remove("is-flipping");
-  }
-
-  function stopFlipAnim() {
-    if (flipRaf) cancelAnimationFrame(flipRaf);
-    flipRaf = 0;
-    flipActive = false;
-  }
-
-  function runFlip(cfg, from, to, dur, ease, onDone) {
-    stopFlipAnim();
-    from = clamp01(from);
-    to = clamp01(to);
-
-    if (RM || dur <= 1 || from === to) {
-      renderFlipState(cfg, to);
-      if (onDone) onDone();
-      return;
-    }
-
-    var easeFn = ease || FLIP_EASE;
-    var t0 = 0;
-    flipActive = true;
-    renderFlipState(cfg, from);
-
-    function frame(now) {
-      if (!t0) t0 = now;
-      var p = Math.min(1, (now - t0) / dur);
-      var turn = from + (to - from) * easeFn(p);
-      renderFlipState(cfg, turn);
-
-      if (p < 1) {
-        flipRaf = requestAnimationFrame(frame);
-      } else {
-        flipRaf = 0;
-        flipActive = false;
-        if (onDone) onDone();
-      }
-    }
-
-    flipRaf = requestAnimationFrame(frame);
-  }
-
-  function scheduleSparks(token, cfg, dur) {
-    if (RM) return;
-    var at = Math.round(dur * 0.30);
-    setTimeout(function () {
-      if (token !== coverAnimToken) return;
-      showSparks(cfg.sign);
-    }, at);
-    setTimeout(function () {
-      if (token !== coverAnimToken) return;
-      hideSparks();
-    }, at + Math.min(480, Math.round(dur * 0.55)));
-  }
-
-  var peekTimer = null;
-
-  function stopPeek() {
-    if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
-    if (frontLayer) frontLayer.classList.remove("peek");
-    if (backLayer) backLayer.classList.remove("peek");
-  }
-
-  function peekCover() {
-    if (RM || isMobile || reader.hidden || coverAnimating || coverDrag.active) return;
-    var el = (viewMode === "front") ? frontLayer : (viewMode === "back" ? backLayer : null);
-    if (!el || el.hidden) return;
-    el.classList.remove("peek");
-    void el.offsetWidth;
-    el.classList.add("peek");
-  }
-
-  function peekCoverSoon(delay) {
-    stopPeek();
-    if (RM || isMobile) return;
-    peekTimer = setTimeout(peekCover, delay == null ? 1000 : delay);
-  }
-
-  [frontLayer, backLayer].forEach(function (el) {
-    if (!el) return;
-    el.addEventListener("animationend", function (ev) {
-      if (ev.animationName !== "coverPeek" && ev.animationName !== "coverPeekBack") return;
-      el.classList.remove("peek");
-      if (!reader.hidden && !coverAnimating && !isMobile && viewMode !== "book") peekCoverSoon(5400);
-    });
-  });
 
   function updateUIAll() {
     updateStacks();
     updateDock();
     updateHint();
     updateEnd();
-  }
-
-  function finishCoverAnim(token) {
-    if (token !== coverAnimToken) return;
-    coverAnimating = false;
-    updateUIAll();
-  }
-
-  function openCover() {
-    if (isMobile) return;
-    if (viewMode !== "front" || coverAnimating) return;
-    ensureAudio();
-    playSparkSound();
-    stopPeek();
-
-    coverAnimating = true;
-    var token = ++coverAnimToken;
-
-    viewMode = "book";
-    hideHint();
-
-    var cfg = FRONT_CFG;
-    var from = dragTurn;
-    dragTurn = 0;
-    var dur = Math.round(FLIP_MS * (0.42 + 0.58 * (1 - from)));
-
-    bookWrap.classList.remove("cover-mode");
-    bookWrap.classList.add("is-flipping");
-
-    runFlip(cfg, from, 1, dur, FLIP_EASE, function () {
-      if (token !== coverAnimToken) return;
-      frontLayer.hidden = true;
-      clearFlipInline();
-      finishCoverAnim(token);
-      wake();
-    });
-
-    scheduleSparks(token, cfg, dur);
-    updateUIAll();
-  }
-
-  function closeToCover() {
-    if (isMobile) return;
-    if (viewMode !== "book" || coverAnimating || currentIdx !== 0) return;
-    stopPeek();
-
-    coverAnimating = true;
-    var token = ++coverAnimToken;
-
-    viewMode = "front";
-    hideHint();
-
-    var cfg = FRONT_CFG;
-    frontLayer.hidden = false;
-    renderFlipState(cfg, 1);
-
-    bookWrap.classList.add("cover-mode");
-    bookWrap.classList.add("is-flipping");
-
-    runFlip(cfg, 1, 0, FLIP_MS, FLIP_EASE, function () {
-      if (token !== coverAnimToken) return;
-      clearFlipInline();
-      finishCoverAnim(token);
-      peekCoverSoon(1400);
-      wake();
-    });
-
-    scheduleSparks(token, cfg, FLIP_MS);
-    updateUIAll();
-  }
-
-  function showBack() {
-    if (isMobile) return;
-    if (viewMode !== "book" || coverAnimating) return;
-    ensureAudio();
-    playSparkSound();
-    stopPeek();
-
-    coverAnimating = true;
-    var token = ++coverAnimToken;
-
-    viewMode = "back";
-    hideHint();
-
-    var cfg = BACK_CFG;
-    backLayer.hidden = false;
-    renderFlipState(cfg, 1);
-
-    bookWrap.classList.add("back-mode");
-    bookWrap.classList.add("is-flipping");
-
-    runFlip(cfg, 1, 0, FLIP_MS, FLIP_EASE, function () {
-      if (token !== coverAnimToken) return;
-      clearFlipInline();
-      finishCoverAnim(token);
-      peekCoverSoon(2200);
-      wake();
-    });
-
-    scheduleSparks(token, cfg, FLIP_MS);
-    updateUIAll();
-  }
-
-  function closeBack() {
-    if (isMobile) return;
-    if (viewMode !== "back" || coverAnimating) return;
-    ensureAudio();
-    playSparkSound();
-    stopPeek();
-
-    coverAnimating = true;
-    var token = ++coverAnimToken;
-
-    viewMode = "book";
-    hideEnd();
-
-    var cfg = BACK_CFG;
-    var from = dragTurn;
-    dragTurn = 0;
-    var dur = Math.round(FLIP_MS * (0.42 + 0.58 * (1 - from)));
-
-    bookWrap.classList.remove("back-mode");
-    bookWrap.classList.add("is-flipping");
-
-    runFlip(cfg, from, 1, dur, FLIP_EASE, function () {
-      if (token !== coverAnimToken) return;
-      backLayer.hidden = true;
-      clearFlipInline();
-      finishCoverAnim(token);
-      wake();
-    });
-
-    scheduleSparks(token, cfg, dur);
-    updateUIAll();
-  }
-
-  function forceFront() {
-    if (isMobile) { forceBook(0); return; }
-    coverAnimToken++;
-    coverAnimating = false;
-    stopFlipAnim();
-    stopPeek();
-    viewMode = "front";
-    bookWrap.classList.add("cover-mode");
-    bookWrap.classList.remove("back-mode");
-    backLayer.hidden = true;
-    frontLayer.hidden = false;
-    renderFlipState(FRONT_CFG, 0);
-    clearFlipInline();
-    updateUIAll();
-    peekCoverSoon(1200);
-  }
-
-  function forceBack() {
-    if (isMobile) { forceBook(N - 1); return; }
-    coverAnimToken++;
-    coverAnimating = false;
-    stopFlipAnim();
-    stopPeek();
-    viewMode = "back";
-    bookWrap.classList.add("back-mode");
-    bookWrap.classList.remove("cover-mode");
-    frontLayer.hidden = true;
-    backLayer.hidden = false;
-    renderFlipState(BACK_CFG, 0);
-    clearFlipInline();
-    updateUIAll();
-  }
-
-  function forceBook(idx) {
-    coverAnimToken++;
-    coverAnimating = false;
-    stopFlipAnim();
-    stopPeek();
-    viewMode = "book";
-    bookWrap.classList.remove("cover-mode", "back-mode");
-    frontLayer.hidden = true;
-    backLayer.hidden = true;
-    clearFlipInline();
-
-    if (pageFlip && N > 0) {
-      var t = clampInner(idx);
-      try { pageFlip.turnToPage(t); } catch (e) {}
-      currentIdx = t;
-    }
-    updateUIAll();
   }
 
   function clampInner(idx) {
@@ -2674,120 +2233,258 @@ main {
     return idx;
   }
 
-  var coverDrag = { active: false, id: null, x0: 0, y0: 0, moved: false, turn: 0, sparked: false, cfg: null };
+  /* ===================== TURN.JS COVER BRIDGE ===================== */
+  var TURN_COVER_TEMPLATE =
+    '<div class="turn-page turn-cover-front hard">' +
+      '<img id="turn-cover-front-img" alt="Magazine cover" draggable="false">' +
+    '</div>' +
+    '<div class="turn-page turn-cover-inside"></div>';
 
-  function beginCoverDrag(cfg, e) {
-    if (coverAnimating) return false;
-    coverDrag.active = true;
-    coverDrag.id = e.pointerId;
-    coverDrag.x0 = e.clientX;
-    coverDrag.y0 = e.clientY;
-    coverDrag.moved = false;
-    coverDrag.turn = 0;
-    coverDrag.sparked = false;
-    coverDrag.cfg = cfg;
-    dragTurn = 0;
-    stopPeek();
-    bookWrap.classList.add("is-flipping");
-    try { cfg.el.setPointerCapture(e.pointerId); } catch (err) {}
-    return true;
+  var turnCoverJQ = null;
+  var turnCoverReady = false;
+
+  function positionTurnCover() {
+    if (!turnCoverEl) return;
+    turnCoverEl.style.width = pageW + "px";
+    turnCoverEl.style.height = pageH + "px";
+    turnCoverEl.style.top = "0px";
+    turnCoverEl.style.left = (isPortrait ? 0 : pageW / 2) + "px";
   }
 
-  function moveCoverDrag(cfg, e, signForDrag) {
-    if (!coverDrag.active || e.pointerId !== coverDrag.id || coverDrag.cfg !== cfg) return;
-
-    var dx = e.clientX - coverDrag.x0;
-    var dy = e.clientY - coverDrag.y0;
-    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) coverDrag.moved = true;
-
-    var raw = clamp01((dx * signForDrag) / Math.max(pageW * 0.82, 1));
-    var t = Math.pow(raw, 0.86);
-    coverDrag.turn = t;
-    dragTurn = t;
-
-    renderFlipState(cfg, t);
-
-    if (!coverDrag.sparked && t > 0.1) {
-      coverDrag.sparked = true;
-      ensureAudio();
-      playSparkSound();
+  function destroyCoverTurn(hide) {
+    if (turnCoverJQ) {
+      try { turnCoverJQ.turn("destroy"); } catch (e) {}
+      turnCoverJQ = null;
+    }
+    turnCoverReady = false;
+    if (turnCoverEl) {
+      turnCoverEl.classList.remove("turn-ready");
+      if (hide !== false) turnCoverEl.hidden = true;
     }
   }
 
-  function endCoverDrag(cfg, e, openFn, closeFn) {
-    if (!coverDrag.active || (e && e.pointerId !== coverDrag.id) || coverDrag.cfg !== cfg) return;
-    coverDrag.active = false;
-    try { cfg.el.releasePointerCapture(coverDrag.id); } catch (err) {}
+  function buildCoverTurn() {
+    if (!turnCoverEl || isMobile || !TQ || !TQ.fn || !TQ.fn.turn) return false;
 
-    var t = coverDrag.turn;
-    coverDrag.turn = 0;
-    coverDrag.sparked = false;
-    coverDrag.cfg = null;
+    destroyCoverTurn(false);
+    turnCoverEl.innerHTML = TURN_COVER_TEMPLATE;
+    positionTurnCover();
 
-    if (!coverDrag.moved || t >= 0.16) {
-      dragTurn = t;
-      openFn();
+    var img = turnCoverEl.querySelector("#turn-cover-front-img");
+    if (img) img.src = url(1);
+
+    turnCoverEl.hidden = !(viewMode === "front" || coverAnimating);
+
+    try {
+      turnCoverJQ = TQ(turnCoverEl);
+      turnCoverJQ.turn({
+        width: pageW,
+        height: pageH,
+        display: "single",
+        autoCenter: false,
+        direction: "ltr",
+        duration: RM ? 0 : 620,
+        acceleration: true,
+        gradients: true,
+        when: {
+          turning: onCoverTurning,
+          turned: onCoverTurned
+        }
+      });
+      turnCoverEl.classList.add("turn-ready");
+      turnCoverReady = true;
+      return true;
+    } catch (e) {
+      turnCoverJQ = null;
+      turnCoverReady = false;
+      return false;
+    }
+  }
+
+  function setTurnPageInstant(jq, page) {
+    if (!jq) return;
+    // Best effort: many Turn.js builds support direct page setting.
+    try {
+      jq.turn("options", "duration", 0);
+      jq.turn("turn", page, true);
+      jq.turn("options", "duration", RM ? 0 : 620);
       return;
+    } catch (e) {}
+    try {
+      jq.turn("page", page);
+    } catch (e2) {}
+  }
+
+  function onCoverTurning(e, page, obj) {
+    var p = parseInt(page, 10);
+    bookWrap.classList.add("turning-cover");
+    ensureAudio();
+    playSparkSound();
+    if (p === 2) showSparks(-1);
+    else if (p === 1) showSparks(1);
+  }
+
+  function onCoverTurned(e, page, obj) {
+    var p = parseInt(page, 10);
+    hideSparks();
+    if (p === 2) finishCoverOpen();
+    else finishCoverClose();
+  }
+
+  function finishCoverOpen() {
+    viewMode = "book";
+    currentIdx = 0;
+    bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
+    if (turnCoverEl) turnCoverEl.hidden = true;
+    coverAnimating = false;
+    if (pageFlip && N > 0) {
+      try { pageFlip.turnToPage(0); } catch (e) {}
+    }
+    updateUIAll();
+    wake();
+  }
+
+  function finishCoverClose() {
+    viewMode = "front";
+    currentIdx = 0;
+    bookWrap.classList.add("cover-mode");
+    bookWrap.classList.remove("turning-cover", "back-mode");
+    if (turnCoverEl) {
+      turnCoverEl.hidden = false;
+      positionTurnCover();
+    }
+    coverAnimating = false;
+    if (pageFlip && N > 0) {
+      try { pageFlip.turnToPage(0); } catch (e) {}
+    }
+    updateUIAll();
+    wake();
+  }
+
+  function openCover() {
+    if (isMobile || viewMode !== "front" || coverAnimating) return;
+
+    ensureAudio();
+    playSparkSound();
+    coverAnimating = true;
+    hideHint();
+    bookWrap.classList.add("turning-cover");
+
+    ensureTurnJS().then(function () {
+      if (viewMode !== "front" || !coverAnimating) return;
+      if (!turnCoverReady) buildCoverTurn();
+      if (!turnCoverReady) {
+        // Fallback: if Turn.js cannot load, just reveal the St.PageFlip layer instantly.
+        finishCoverOpen();
+        return;
+      }
+
+      turnCoverEl.hidden = false;
+      setTurnPageInstant(turnCoverJQ, 1);
+
+      requestAnimationFrame(function () {
+        if (turnCoverJQ) {
+          turnCoverJQ.turn("turn", 2, true);
+        } else {
+          finishCoverOpen();
+        }
+      });
+    }).catch(function () {
+      finishCoverOpen();
+    });
+  }
+
+  function closeToCover() {
+    if (isMobile || viewMode !== "book" || coverAnimating || currentIdx !== 0) return;
+
+    ensureAudio();
+    playSparkSound();
+    coverAnimating = true;
+    hideHint();
+    bookWrap.classList.add("cover-mode", "turning-cover");
+
+    ensureTurnJS().then(function () {
+      if (viewMode !== "book" || !coverAnimating) return;
+      if (!turnCoverReady) buildCoverTurn();
+      if (!turnCoverReady) {
+        finishCoverClose();
+        return;
+      }
+
+      turnCoverEl.hidden = false;
+      setTurnPageInstant(turnCoverJQ, 2);
+
+      requestAnimationFrame(function () {
+        if (turnCoverJQ) {
+          turnCoverJQ.turn("turn", 1, true);
+        } else {
+          finishCoverClose();
+        }
+      });
+    }).catch(function () {
+      finishCoverClose();
+    });
+  }
+
+  function forceFront() {
+    coverAnimToken++;
+    coverAnimating = false;
+    destroyCoverTurn(false);
+
+    viewMode = "front";
+    currentIdx = 0;
+    bookWrap.classList.add("cover-mode");
+    bookWrap.classList.remove("turning-cover", "back-mode");
+
+    if (turnCoverEl) {
+      turnCoverEl.hidden = false;
+      turnCoverEl.innerHTML = TURN_COVER_TEMPLATE;
+      positionTurnCover();
+      var img = turnCoverEl.querySelector("#turn-cover-front-img");
+      if (img) img.src = url(1);
     }
 
-    dragTurn = 0;
-    coverAnimating = true;
-    var token = ++coverAnimToken;
-    runFlip(cfg, t, 0, Math.round(SNAP_MS * (0.5 + 0.5 * (1 - t))), SNAP_EASE, function () {
-      if (token !== coverAnimToken) return;
-      clearFlipInline();
-      coverAnimating = false;
-      updateUIAll();
-      peekCoverSoon(3000);
-    });
+    if (pageFlip && N > 0) {
+      try { pageFlip.turnToPage(0); } catch (e) {}
+    }
+
+    updateUIAll();
   }
 
-  /* Desktop-only cover layer interactions */
-  if (frontLayer) {
-    frontLayer.addEventListener("pointerdown", function (e) {
-      if (isMobile || viewMode !== "front") return;
-      e.preventDefault();
-      beginCoverDrag(FRONT_CFG, e);
-    });
-    frontLayer.addEventListener("pointermove", function (e) {
-      if (isMobile) return;
-      moveCoverDrag(FRONT_CFG, e, -1);
-    });
-    frontLayer.addEventListener("pointerup", function (e) {
-      if (isMobile) return;
-      endCoverDrag(FRONT_CFG, e, openCover, null);
-    });
-    frontLayer.addEventListener("pointercancel", function (e) {
-      if (isMobile) return;
-      endCoverDrag(FRONT_CFG, e, openCover, null);
-    });
-    frontLayer.addEventListener("click", function () {
-      if (isMobile || viewMode !== "front" || coverAnimating || coverDrag.active) return;
-      openCover();
-    });
+  function forceBook(idx) {
+    coverAnimToken++;
+    coverAnimating = false;
+    destroyCoverTurn(true);
+
+    viewMode = "book";
+    bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
+
+    if (pageFlip && N > 0) {
+      var t = clampInner(idx);
+      try { pageFlip.turnToPage(t); } catch (e) {}
+      currentIdx = t;
+    }
+
+    updateUIAll();
   }
 
-  if (backLayer) {
-    backLayer.addEventListener("pointerdown", function (e) {
-      if (isMobile || viewMode !== "back") return;
-      e.preventDefault();
-      beginCoverDrag(BACK_CFG, e);
-    });
-    backLayer.addEventListener("pointermove", function (e) {
-      if (isMobile) return;
-      moveCoverDrag(BACK_CFG, e, 1);
-    });
-    backLayer.addEventListener("pointerup", function (e) {
-      if (isMobile) return;
-      endCoverDrag(BACK_CFG, e, closeBack, null);
-    });
-    backLayer.addEventListener("pointercancel", function (e) {
-      if (isMobile) return;
-      endCoverDrag(BACK_CFG, e, closeBack, null);
-    });
-    backLayer.addEventListener("click", function () {
-      if (isMobile || viewMode !== "back" || coverAnimating || coverDrag.active) return;
-      closeBack();
+  /* Back cover is now just the last St.PageFlip page on desktop. */
+  function showBack() {
+    forceBook(isPortrait ? (N - 1) : lastSpreadIdx);
+  }
+
+  function closeBack() {
+    forceBook(isPortrait ? (N - 1) : lastSpreadIdx);
+  }
+
+  function forceBack() {
+    forceBook(isPortrait ? (N - 1) : lastSpreadIdx);
+  }
+
+  /* Click anywhere on the Turn.js cover to open it. */
+  if (turnCoverEl) {
+    turnCoverEl.addEventListener("click", function () {
+      if (viewMode === "front" && !coverAnimating) openCover();
     });
   }
 
@@ -2950,7 +2647,6 @@ main {
   }
 
   function updateDock() {
-    /* Mobile: flat page 1..N (cover is page 1, back cover is page N) */
     if (isMobile) {
       var pageNum = currentIdx + 1;
       if (pageNum > N) pageNum = N;
@@ -2963,24 +2659,15 @@ main {
       return;
     }
 
-    /* Desktop: distinct Cover / Back Cover / Pages states */
+    var desktopPages = N + 1; // cover + St.PageFlip pages
+
     if (viewMode === "front") {
       dPages.textContent = "Cover";
-      dFill.style.width = Math.round((1 / Math.max(total, 1)) * 100) + "%";
+      dFill.style.width = Math.round((1 / Math.max(desktopPages, 1)) * 100) + "%";
       dPrev.disabled = true;
       dNext.disabled = N <= 0;
       edgeL.classList.add("off");
       edgeR.classList.toggle("off", N <= 0);
-      return;
-    }
-
-    if (viewMode === "back") {
-      dPages.textContent = "Back Cover";
-      dFill.style.width = "100%";
-      dPrev.disabled = N <= 0;
-      dNext.disabled = true;
-      edgeL.classList.toggle("off", N <= 0);
-      edgeR.classList.add("off");
       return;
     }
 
@@ -2994,20 +2681,33 @@ main {
       return;
     }
 
-    if (isPortrait) {
-      var orig = currentIdx + 2;
-      if (orig > total) orig = total;
-      dPages.textContent = "Page " + orig + " / " + total;
-      dFill.style.width = Math.round((orig / Math.max(total, 1)) * 100) + "%";
-    } else {
-      var leftOrig = currentIdx + 2;
-      var rightOrig = currentIdx + 3;
-      if (leftOrig > total) leftOrig = total;
-      if (rightOrig > total) rightOrig = 0;
+    var atEnd = isPortrait
+      ? (currentIdx >= N - 1)
+      : (currentIdx >= lastSpreadIdx);
 
-      dPages.textContent = (rightOrig ? leftOrig + "–" + rightOrig : leftOrig) + " / " + total;
-      var lastVisible = rightOrig || leftOrig;
-      dFill.style.width = Math.round(Math.min(100, (lastVisible / total) * 100)) + "%";
+    if (atEnd) {
+      dPages.textContent = "Back Cover";
+      dFill.style.width = "100%";
+      dPrev.disabled = false;
+      dNext.disabled = true;
+      edgeL.classList.remove("off");
+      edgeR.classList.add("off");
+      return;
+    }
+
+    if (isPortrait) {
+      var logical = Math.min(desktopPages, currentIdx + 2);
+      dPages.textContent = "Page " + logical + " / " + desktopPages;
+      dFill.style.width = Math.round((logical / desktopPages) * 100) + "%";
+    } else {
+      var leftLogical = currentIdx + 2;
+      var rightLogical = leftLogical + 1;
+      if (leftLogical > desktopPages) leftLogical = desktopPages;
+      if (rightLogical > desktopPages) rightLogical = 0;
+
+      dPages.textContent = (rightLogical ? leftLogical + "–" + rightLogical : leftLogical) + " / " + desktopPages;
+      var lastVisible = rightLogical || leftLogical;
+      dFill.style.width = Math.round(Math.min(100, (lastVisible / desktopPages) * 100)) + "%";
     }
 
     dPrev.disabled = false;
@@ -3017,11 +2717,16 @@ main {
   }
 
   function updateHint() {
-    if (coverAnimating) { hideHint(); return; }
-    if (isMobile) { hideHint(); return; }  /* no custom hints on mobile */
-
+    if (coverAnimating) {
+      hideHint();
+      return;
+    }
+    if (isMobile) {
+      hideHint();
+      return;
+    }
     if (viewMode === "front") {
-      showHint("Click or drag the cover to open");
+      showHint("Click the cover to open");
     } else if (viewMode === "book" && currentIdx === 0) {
       showHint("Click left edge to return to cover");
     } else {
@@ -3030,8 +2735,20 @@ main {
   }
 
   function updateEnd() {
-    if (isMobile) { hideEnd(); return; }   /* no end card on mobile */
-    if (viewMode === "back" && !coverAnimating) showEnd();
+    if (isMobile) {
+      hideEnd();
+      return;
+    }
+    if (viewMode !== "book" || N <= 0) {
+      hideEnd();
+      return;
+    }
+
+    var atEnd = isPortrait
+      ? (currentIdx >= N - 1)
+      : (currentIdx >= lastSpreadIdx);
+
+    if (atEnd) showEnd();
     else hideEnd();
   }
 
@@ -3176,7 +2893,6 @@ main {
       bookWrap.classList.add("visible");
       reader.classList.add("is-open");
       updateUIAll();
-      if (!isMobile && viewMode === "front") peekCoverSoon(1300);
     });
 
     pageFlip.on("flip", function (e) {
@@ -3198,7 +2914,6 @@ main {
   function requestFlip(dir) {
     if (coverAnimating || isJumping) return;
 
-    /* Mobile: everything is just a page in the flipbook */
     if (isMobile) {
       if (!pageFlip || N <= 0) return;
       hideHint();
@@ -3212,28 +2927,21 @@ main {
       return;
     }
 
-    /* Desktop: custom cover transitions */
     if (viewMode === "front") {
       if (dir > 0) openCover();
-      return;
-    }
-
-    if (viewMode === "back") {
-      if (dir < 0) closeBack();
       return;
     }
 
     if (!pageFlip || N <= 0) return;
     hideHint();
 
+    var atEnd = isPortrait
+      ? (currentIdx >= N - 1)
+      : (currentIdx >= lastSpreadIdx);
+
     if (dir > 0) {
-      if (isPortrait) {
-        if (currentIdx >= N - 1) showBack();
-        else pageFlip.flipNext("bottom");
-      } else {
-        if (currentIdx >= lastSpreadIdx) showBack();
-        else pageFlip.flipNext("bottom");
-      }
+      if (atEnd) return;
+      pageFlip.flipNext("bottom");
     } else {
       if (currentIdx <= 0) closeToCover();
       else pageFlip.flipPrev("bottom");
@@ -3251,12 +2959,14 @@ main {
   function jumpToInner(target, sparks) {
     if (N <= 0) return;
 
-    if (!isMobile) {
-      target = clampInner(target);
-      if (viewMode === "front") { forceBook(target); return; }
-      if (viewMode === "back") { forceBook(target); return; }
-    } else {
+    if (isMobile) {
       target = Math.max(0, Math.min(N - 1, target));
+    } else {
+      target = clampInner(target);
+      if (viewMode === "front") {
+        forceBook(target);
+        return;
+      }
     }
 
     if (!pageFlip) return;
@@ -3322,37 +3032,31 @@ main {
       return;
     }
 
-    /* Mobile: just flip through the page list */
     if (isMobile) {
       if (!pageFlip || sfState !== "read") {
         setTimeout(heldLoop, 60);
         return;
       }
       if (heldDir > 0) {
-        if (currentIdx >= N - 1) { stopHeld(); return; }
+        if (currentIdx >= N - 1) {
+          stopHeld();
+          return;
+        }
         requestFlip(1);
       } else {
-        if (currentIdx <= 0) { stopHeld(); return; }
+        if (currentIdx <= 0) {
+          stopHeld();
+          return;
+        }
         requestFlip(-1);
       }
       setTimeout(heldLoop, 90);
       return;
     }
 
-    /* Desktop: cover-aware */
     if (viewMode === "front") {
       if (heldDir > 0) {
         openCover();
-        setTimeout(heldLoop, 80);
-      } else {
-        stopHeld();
-      }
-      return;
-    }
-
-    if (viewMode === "back") {
-      if (heldDir < 0) {
-        closeBack();
         setTimeout(heldLoop, 80);
       } else {
         stopHeld();
@@ -3365,10 +3069,12 @@ main {
       return;
     }
 
+    var atEnd = isPortrait
+      ? (currentIdx >= N - 1)
+      : (currentIdx >= lastSpreadIdx);
+
     if (heldDir > 0) {
-      var atEnd = isPortrait ? (currentIdx >= N - 1) : (currentIdx >= lastSpreadIdx);
       if (atEnd) {
-        showBack();
         stopHeld();
         return;
       }
@@ -3408,6 +3114,7 @@ main {
   }
 
   function getZoomSources() {
+    if (viewMode === "front") return total >= 1 ? [url(1)] : [];
     if (!inner.length) return [];
     var arr = [inner[currentIdx]];
     if (!isPortrait && inner[currentIdx + 1]) arr.push(inner[currentIdx + 1]);
@@ -3415,25 +3122,29 @@ main {
   }
 
   function getZoomLabel() {
+    if (viewMode === "front") return "Cover";
     if (!inner.length) return "Zoom";
 
     if (isMobile) {
-      /* inner[0] = cover (page 1), inner[N-1] = back cover (page N) */
       return "Page " + (currentIdx + 1);
     }
 
-    if (viewMode === "front") return "Cover";
-    if (viewMode === "back") return "Back Cover";
+    var desktopPages = N + 1;
+    var atEnd = isPortrait
+      ? (currentIdx >= N - 1)
+      : (currentIdx >= lastSpreadIdx);
+
+    if (atEnd) return "Back Cover";
 
     if (isPortrait) {
-      var o = currentIdx + 2;
-      return "Page " + (o > total ? total : o);
+      var logical = Math.min(desktopPages, currentIdx + 2);
+      return "Page " + logical;
     }
 
     var left = currentIdx + 2;
-    var right = currentIdx + 3;
-    if (left > total) left = total;
-    if (right > total) right = 0;
+    var right = left + 1;
+    if (left > desktopPages) left = desktopPages;
+    if (right > desktopPages) right = 0;
 
     return right ? "Pages " + left + "–" + right : "Page " + left;
   }
@@ -3706,8 +3417,7 @@ main {
     ensureAudio();
     stopHeld();
     hideSparks();
-    stopPeek();
-    stopFlipAnim();
+    destroyCoverTurn(true);
     if (zoom.open) closeZoom();
     destroyFlipbook();
 
@@ -3739,9 +3449,8 @@ main {
     hideHint();
     hideEnd();
     hideTip();
-    bookWrap.classList.remove("visible", "back-mode", "is-flipping");
+    bookWrap.classList.remove("visible", "back-mode", "turning-cover", "is-flipping");
     bookWrap.classList.add("cover-mode");
-    clearFlipInline();
 
     loadImage(url(1)).then(function (im) {
       if (!im.naturalWidth || !im.naturalHeight) throw new Error("bad first page");
@@ -3763,33 +3472,40 @@ main {
       total = Math.max(1, t);
 
       return ensurePageFlip().then(function () {
-        computeLayout();     /* sets isMobile / isPortrait / pageW / pageH */
-        rebuildInner();      /* builds inner[] based on current isMobile */
+        computeLayout();
+        rebuildInner();
         buildStacks();
 
         var sp = document.getElementById("stat-pages");
         if (sp && cards.indexOf(card) === 0) sp.textContent = String(total).padStart(2, "0");
 
         if (isMobile) {
-          /* Mobile: cover and back cover are just pages in the flipbook */
-          bookWrap.classList.remove("cover-mode", "back-mode");
-          frontLayer.hidden = true;
-          backLayer.hidden = true;
+          destroyCoverTurn(true);
+          bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
           viewMode = "book";
           currentIdx = 0;
           createFlipbook(0, false);
         } else {
-          /* Desktop: custom cover layers handle front/back */
-          frontLayerImg.src = url(1);
-          backLayerImg.src = backCoverSrc;
+          viewMode = "front";
+          currentIdx = 0;
+          bookWrap.classList.add("cover-mode");
+          bookWrap.classList.remove("turning-cover", "back-mode");
 
-          frontLayer.hidden = false;
-          renderFlipState(FRONT_CFG, 0);
+          if (turnCoverEl) {
+            turnCoverEl.hidden = false;
+            turnCoverEl.innerHTML = TURN_COVER_TEMPLATE;
+            positionTurnCover();
+            var img = turnCoverEl.querySelector("#turn-cover-front-img");
+            if (img) img.src = url(1);
+          }
 
-          backLayer.hidden = true;
-          renderFlipState(BACK_CFG, 1);
-
-          clearFlipInline();
+          ensureTurnJS().then(function () {
+            if (!reader.hidden && viewMode === "front") {
+              buildCoverTurn();
+            }
+          }).catch(function () {
+            // Leave static fallback cover visible.
+          });
 
           if (N > 0) {
             createFlipbook(0, false);
@@ -3798,7 +3514,6 @@ main {
             bookWrap.classList.add("visible");
             reader.classList.add("is-open");
             updateUIAll();
-            peekCoverSoon(1200);
           }
         }
       });
@@ -3827,8 +3542,7 @@ main {
     coverAnimating = false;
     dragTurn = 0;
     stopHeld();
-    stopPeek();
-    stopFlipAnim();
+    destroyCoverTurn(true);
     hideSparks();
     hideHint();
     hideEnd();
@@ -3839,7 +3553,7 @@ main {
 
     reader.classList.add("is-closing");
     reader.classList.remove("idle");
-    bookWrap.classList.remove("visible", "is-flipping");
+    bookWrap.classList.remove("visible", "is-flipping", "turning-cover");
 
     setTimeout(function () {
       reader.hidden = true;
@@ -3969,37 +3683,29 @@ main {
 
   dTrack.addEventListener("click", function (e) {
     if (isJumping || coverAnimating) return;
-
     var rect = dTrack.getBoundingClientRect();
     var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
-    /* Mobile: full 0..N-1 range (cover is page 1, back is page N) */
     if (isMobile) {
       var targetIdx = Math.round(frac * (N - 1));
       jumpToInner(targetIdx, true);
       return;
     }
 
-    /* Desktop: cover/back are separate modes */
-    if (viewMode === "front") {
-      if (frac <= 0.02) return;
-      forceBook(0);
-      return;
-    }
-    if (viewMode === "back") {
-      if (frac >= 0.98) return;
-      forceBook(lastSpreadIdx);
+    var desktopPages = N + 1;
+    var targetLogical = Math.max(1, Math.min(desktopPages, Math.round(frac * (desktopPages - 1)) + 1));
+
+    if (targetLogical <= 1) {
+      forceFront();
       return;
     }
 
-    if (isPortrait) {
-      var targetIdx = Math.round(frac * (N - 1));
-      jumpToInner(targetIdx, true);
-    } else {
-      if (maxSpread < 1) return;
-      var target = Math.max(1, Math.min(maxSpread, Math.round(frac * maxSpread)));
-      jumpToSpread(target, true);
+    if (targetLogical > N) {
+      forceBook(isPortrait ? (N - 1) : lastSpreadIdx);
+      return;
     }
+
+    jumpToInner(targetLogical - 2, true);
   });
 
   dPages.addEventListener("click", function () {
@@ -4008,11 +3714,18 @@ main {
     var input = document.createElement("input");
     input.type = "number";
     input.className = "page-input";
+
+    var maxPage = isMobile ? N : (N + 1);
     input.min = "1";
-    input.max = String(isMobile ? N : (total + 1));
-    input.value = isMobile
-      ? String(currentIdx + 1)
-      : (viewMode === "front" ? "1" : (viewMode === "back" ? String(total + 1) : String(Math.min(total, currentIdx + 2))));
+    input.max = String(maxPage);
+
+    if (isMobile) {
+      input.value = String(currentIdx + 1);
+    } else {
+      input.value = viewMode === "front"
+        ? "1"
+        : String(Math.min(maxPage, currentIdx + 2));
+    }
 
     dPages.style.display = "none";
     dPages.parentNode.insertBefore(input, dPages);
@@ -4030,17 +3743,15 @@ main {
 
       if (jump && !isNaN(val)) {
         if (isMobile) {
-          /* Mobile: val is 1..N directly (1 = cover, N = back cover) */
           var target = Math.max(0, Math.min(N - 1, val - 1));
           jumpToInner(target, true);
         } else {
-          /* Desktop: 1 = cover, 2..total = interior, total+1 = back cover */
+          var desktopPages = N + 1;
           if (val <= 1) {
             if (viewMode === "book") closeToCover();
-            else if (viewMode === "back") { forceBook(0); closeToCover(); }
-          } else if (val > total) {
-            if (viewMode === "book") showBack();
-            else if (viewMode === "front") { forceBook(lastSpreadIdx); showBack(); }
+            else forceFront();
+          } else if (val > desktopPages) {
+            forceBook(isPortrait ? (N - 1) : lastSpreadIdx);
           } else {
             jumpToInner(val - 2, true);
           }
@@ -4060,7 +3771,9 @@ main {
       }
     });
 
-    input.addEventListener("blur", function () { cleanup(true); });
+    input.addEventListener("blur", function () {
+      cleanup(true);
+    });
   });
 
   document.getElementById("end-again").addEventListener("click", function () {
@@ -4072,20 +3785,18 @@ main {
       return;
     }
 
-    if (viewMode === "back") {
-      closeBack();
-      setTimeout(function () {
-        jumpToInner(0, false);
-        setTimeout(closeToCoverSafe, COVER_ANIM_MS);
-      }, COVER_ANIM_MS);
+    if (viewMode === "book") {
+      if (currentIdx === 0) {
+        closeToCover();
+      } else {
+        forceBook(0);
+        setTimeout(function () {
+          if (viewMode === "book" && currentIdx === 0) closeToCover();
+          else forceFront();
+        }, 60);
+      }
     } else {
-      forceBook(0);
-      closeToCoverSafe();
-    }
-
-    function closeToCoverSafe() {
-      if (viewMode === "book" && currentIdx === 0) closeToCover();
-      else forceFront();
+      forceFront();
     }
   });
 
@@ -4167,59 +3878,36 @@ main {
 
     computeLayout();
 
-    /* If the mobile/desktop mode changed, rebuild inner[] and restart */
     if (oldMobile !== isMobile && N > 0) {
-      /* Map current logical page (1..total+1) across the mode change */
-      var currentOrigPage;
+      var currentLogicalPage;
       if (oldMobile) {
-        currentOrigPage = currentIdx + 1;
+        currentLogicalPage = currentIdx + 1;
       } else {
-        if (viewMode === "front") currentOrigPage = 1;
-        else if (viewMode === "back") currentOrigPage = total + 1;
-        else currentOrigPage = currentIdx + 2;
+        if (viewMode === "front") currentLogicalPage = 1;
+        else currentLogicalPage = currentIdx + 2;
       }
 
       rebuildInner();
       buildStacks();
 
-      var targetIdx;
       if (isMobile) {
-        targetIdx = Math.max(0, Math.min(N - 1, currentOrigPage - 1));
+        destroyCoverTurn(true);
+        bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
         viewMode = "book";
-        bookWrap.classList.remove("cover-mode", "back-mode");
-        frontLayer.hidden = true;
-        backLayer.hidden = true;
+        var targetIdx = Math.max(0, Math.min(N - 1, currentLogicalPage - 1));
+        createFlipbook(targetIdx, true);
       } else {
-        frontLayerImg.src = url(1);
-        backLayerImg.src = backCoverSrc;
-
-        if (currentOrigPage <= 1) {
-          viewMode = "front";
-          bookWrap.classList.add("cover-mode");
-          bookWrap.classList.remove("back-mode");
-          frontLayer.hidden = false;
-          backLayer.hidden = true;
-          renderFlipState(FRONT_CFG, 0);
-          targetIdx = 0;
-        } else if (currentOrigPage > total) {
-          viewMode = "back";
-          bookWrap.classList.add("back-mode");
-          bookWrap.classList.remove("cover-mode");
-          frontLayer.hidden = true;
-          backLayer.hidden = false;
-          renderFlipState(BACK_CFG, 0);
-          targetIdx = lastSpreadIdx;
+        if (currentLogicalPage <= 1) {
+          forceFront();
         } else {
-          viewMode = "book";
-          bookWrap.classList.remove("cover-mode", "back-mode");
-          frontLayer.hidden = true;
-          backLayer.hidden = true;
-          targetIdx = currentOrigPage - 2;
+          var desktopTargetIdx = Math.max(0, Math.min(N - 1, currentLogicalPage - 2));
+          forceBook(desktopTargetIdx);
         }
-      }
 
-      clearFlipInline();
-      createFlipbook(clampInner(targetIdx), true);
+        ensureTurnJS().then(function () {
+          if (!reader.hidden && viewMode === "front") buildCoverTurn();
+        }).catch(function () {});
+      }
       return;
     }
 
@@ -4228,11 +3916,19 @@ main {
       Math.abs(oldW - pageW) >= 2 ||
       Math.abs(oldH - pageH) >= 2
     ) {
+      if (!isMobile && viewMode === "front") {
+        destroyCoverTurn(false);
+        ensureTurnJS().then(function () {
+          if (!reader.hidden && viewMode === "front") buildCoverTurn();
+        }).catch(function () {});
+      }
+
       var start = getCurrentIndex();
       if (N > 0) createFlipbook(start, true);
     } else {
-      if (!isMobile && viewMode === "front" && !frontLayer.hidden) renderFlipState(FRONT_CFG, 0);
-      if (!isMobile && viewMode === "back" && !backLayer.hidden) renderFlipState(BACK_CFG, 0);
+      if (!isMobile && viewMode === "front") {
+        positionTurnCover();
+      }
       updateUIAll();
     }
 
