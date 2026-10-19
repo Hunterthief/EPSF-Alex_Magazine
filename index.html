@@ -1966,7 +1966,10 @@ main {
 
   function computeLayout() {
     var narrow = window.innerWidth < 900;
-    isPortrait = narrow;
+    
+    // FORCE PC MODE (Landscape / 2-page spread) for the book logic
+    // This ensures the rest of the PDF acts like a desktop spread even on mobile devices
+    isPortrait = false;
 
     var padX = narrow ? 24 : 140;
     var padY = narrow ? 96 : 140;
@@ -1974,37 +1977,21 @@ main {
     var availW = Math.max(180, stage.clientWidth - padX);
     var availH = Math.max(180, stage.clientHeight - padY);
 
-    if (isPortrait) {
-      var w = availW;
-      var h = w / (aspect || 0.72);
+    var ratio = (aspect || 0.72) * 2;
 
-      if (h > availH) {
-        h = availH;
-        w = h * (aspect || 0.72);
-      }
+    var w2 = availW;
+    var h2 = w2 / ratio;
 
-      pageW = Math.floor(w);
-      pageH = Math.floor(h);
-
-      bookWrap.style.width = pageW + "px";
-      bookWrap.style.height = pageH + "px";
-    } else {
-      var ratio = (aspect || 0.72) * 2;
-
-      var w2 = availW;
-      var h2 = w2 / ratio;
-
-      if (h2 > availH) {
-        h2 = availH;
-        w2 = h2 * ratio;
-      }
-
-      pageW = Math.floor(w2 / 2);
-      pageH = Math.floor(h2);
-
-      bookWrap.style.width = (pageW * 2) + "px";
-      bookWrap.style.height = pageH + "px";
+    if (h2 > availH) {
+      h2 = availH;
+      w2 = h2 * ratio;
     }
+
+    pageW = Math.floor(w2 / 2);
+    pageH = Math.floor(h2);
+
+    bookWrap.style.width = (pageW * 2) + "px";
+    bookWrap.style.height = pageH + "px";
   }
 
   function spreadLabel(s) {
@@ -2334,7 +2321,7 @@ main {
         height: pageH,
         size: "fixed",
         showCover: true,
-        usePortrait: isPortrait,
+        usePortrait: false, // FORCE PC MODE (2-page spread)
         flippingTime: RM ? 1 : 700,
         maxShadowOpacity: 0.75,
         mobileScrollSupport: false,
