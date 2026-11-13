@@ -1,0 +1,10 @@
+EPSF.state.zoom
+EPSF.dom.zoomOverlay
+EPSF.dom.zoomStage
+EPSF.dom.zoomPages
+EPSF.dom.zoomLabel
+EPSF.dom.zoomPercent
+EPSF.dom.zoomInBtn
+EPSF.dom.zoomOutBtn
+EPSF.dom.zoomResetBtn
+EPSF.dom.zoomCloseBtn
