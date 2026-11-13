@@ -1,5 +1,5 @@
 <!-- ================= READER ================= -->
-<div class="reader" id="reader" hidden>
+<div class="reader" id="reader" hidden data-sounds-base="{{ '/assets/sounds' | relative_url }}">
   <div class="reader-fade"></div>
 
   <div class="r-top">
@@ -61,11 +61,6 @@
       <div class="spine-shadow" id="spine-shadow" aria-hidden="true"></div>
       <div class="book-shadow"></div>
 
-      <!--
-        IMPORTANT:
-        Turn.js needs children with class="page".
-        Do not use only class="turn-page".
-      -->
       <div class="turn-cover" id="turn-cover" hidden>
         <div class="turn-page page turn-cover-front hard">
           <img id="turn-cover-front-img" alt="Magazine cover" draggable="false">
