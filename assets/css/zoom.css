@@ -1,0 +1,20 @@
+.zoom-overlay { ... }
+.zoom-overlay[hidden] { ... }
+.zoom-overlay.open { ... }
+
+.zoom-top { ... }
+.zoom-title { ... }
+.zoom-title .r-title { ... }
+.zoom-controls { ... }
+.zoom-btn { ... }
+.zoom-btn:hover { ... }
+.zoom-btn.percent { ... }
+.zoom-btn.close:hover { ... }
+
+.zoom-stage { ... }
+.zoom-stage.dragging { ... }
+
+.zoom-pages { ... }
+.zoom-pages img { ... }
+
+.zoom-hint { ... }
