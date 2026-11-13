@@ -1,0 +1,41 @@
+:root { ... }
+
+*, *::before, *::after { ... }
+html { ... }
+body { ... }
+
+.bg-watermark { ... }
+.page-veil { ... }
+
+.site-header { ... }
+.site-header .inner { ... }
+.logo-mark { ... }
+
+.hero { ... }
+.hero-eyebrow { ... }
+.hero h1 { ... }
+.hero h1 em { ... }
+.hero p { ... }
+.hero-stats { ... }
+.hero-stat { ... }
+.hero-stat b { ... }
+.hero-stat span { ... }
+
+@keyframes fadeUp { ... }
+
+.wrap { ... }
+main { ... }
+
+.section { ... }
+.section-head { ... }
+.section-head h2 { ... }
+.section-head h2::after { ... }
+.section-head .note { ... }
+
+.empty-state { ... }
+.empty-state h3 { ... }
+
+.site-footer { ... }
+.site-footer::before { ... }
+.site-footer .f-logo { ... }
+.site-footer p { ... }
