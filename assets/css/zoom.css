@@ -1,20 +1,132 @@
-.zoom-overlay { ... }
-.zoom-overlay[hidden] { ... }
-.zoom-overlay.open { ... }
+.zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(2, 8, 20, 0.97);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
 
-.zoom-top { ... }
-.zoom-title { ... }
-.zoom-title .r-title { ... }
-.zoom-controls { ... }
-.zoom-btn { ... }
-.zoom-btn:hover { ... }
-.zoom-btn.percent { ... }
-.zoom-btn.close:hover { ... }
+.zoom-overlay[hidden] {
+  display: none;
+}
 
-.zoom-stage { ... }
-.zoom-stage.dragging { ... }
+.zoom-overlay.open {
+  opacity: 1;
+}
 
-.zoom-pages { ... }
-.zoom-pages img { ... }
+.zoom-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(2,8,20,0.92), rgba(2,8,20,0.35), transparent);
+}
 
-.zoom-hint { ... }
+.zoom-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.zoom-title .r-title {
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.zoom-btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+  font-family: var(--body);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease-out);
+  user-select: none;
+}
+
+.zoom-btn:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(110,155,255,0.6);
+  transform: translateY(-1px);
+}
+
+.zoom-btn.percent {
+  min-width: 72px;
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+
+.zoom-btn.close:hover {
+  background: rgba(220,60,60,0.24);
+  border-color: rgba(255,110,110,0.55);
+}
+
+.zoom-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  cursor: grab;
+}
+
+.zoom-stage.dragging {
+  cursor: grabbing;
+}
+
+.zoom-pages {
+  display: flex;
+  gap: 12px;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.zoom-pages img {
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.58);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.zoom-hint {
+  padding: 12px 20px 18px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.58);
+}
