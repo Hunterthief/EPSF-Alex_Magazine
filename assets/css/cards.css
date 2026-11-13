@@ -1,0 +1,42 @@
+.featured-slot { ... }
+.card-featured { ... }
+.card-featured:hover { ... }
+.card-featured .cover { ... }
+.card-featured .cover img { ... }
+.card-featured:hover .cover img { ... }
+.card-featured .cover .fallback { ... }
+.card-featured .body { ... }
+
+.badge { ... }
+.badge::before { ... }
+@keyframes pulseDot { ... }
+
+.issue-title { ... }
+.issue-meta { ... }
+.issue-meta .dot { ... }
+.issue-desc { ... }
+.cta { ... }
+.card-featured:hover .cta,
+.card:hover .cta { ... }
+
+.grid { ... }
+
+.card { ... }
+.card.is-visible { ... }
+.card:hover { ... }
+.card .cover { ... }
+.card .cover img { ... }
+.card:hover .cover img { ... }
+.card .cover .fallback { ... }
+.card .cover::after { ... }
+.card:hover .cover::after { ... }
+
+.cover-cta { ... }
+.card:hover .cover-cta { ... }
+
+.card .body { ... }
+.card .issue-title { ... }
+.card .issue-meta { ... }
+
+.fallback-brand { ... }
+.fallback-title { ... }
