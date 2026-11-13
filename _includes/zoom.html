@@ -1,0 +1,32 @@
+<!-- ================= ZOOM VIEWER ================= -->
+<div class="zoom-overlay" id="zoom-overlay" hidden>
+  <div class="zoom-top">
+    <div class="zoom-title">
+      <img
+        class="r-brand-logo"
+        src="{{ '/assets/images/logo-white.png' | relative_url }}"
+        alt="EPSF Alex"
+        onerror="this.style.display='none'; if(this.nextElementSibling)this.nextElementSibling.style.display='inline';"
+      >
+      <span class="r-brand r-brand-fallback">EPSF Alex</span>
+      <span class="r-sep"></span>
+      <span class="r-title" id="zoom-label">Zoom</span>
+    </div>
+
+    <div class="zoom-controls">
+      <button class="zoom-btn" id="zoom-out" aria-label="Zoom out">−</button>
+      <span class="zoom-btn percent" id="zoom-percent">100%</span>
+      <button class="zoom-btn" id="zoom-in" aria-label="Zoom in">+</button>
+      <button class="zoom-btn" id="zoom-reset">Fit</button>
+      <button class="zoom-btn close" id="zoom-close" aria-label="Close zoom">×</button>
+    </div>
+  </div>
+
+  <div class="zoom-stage" id="zoom-stage">
+    <div class="zoom-pages" id="zoom-pages"></div>
+  </div>
+
+  <div class="zoom-hint">
+    Scroll / pinch to zoom • drag to pan • double-tap to toggle • Esc to close
+  </div>
+</div>
