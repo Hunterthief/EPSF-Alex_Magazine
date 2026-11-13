@@ -25,7 +25,7 @@
   function startCoverWatchdog(mode) {
     clearCoverWatchdog();
 
-    var ms = S.RM ? 250 : 1500;
+    var ms = S.RM ? 300 : 2500;
 
     S.coverWatchdogTimer = setTimeout(function () {
       S.coverWatchdogTimer = null;
@@ -72,6 +72,18 @@
         D.turnCover.hidden = true;
       }
     }
+  }
+
+  function showStaticCover() {
+    if (!D.turnCover) return;
+
+    D.turnCover.hidden = false;
+    D.turnCover.innerHTML = TURN_COVER_TEMPLATE;
+
+    positionTurnCover();
+
+    var img = D.turnCover.querySelector("#turn-cover-front-img");
+    if (img) img.src = U.pageUrl(1);
   }
 
   function buildCoverTurn() {
@@ -198,17 +210,7 @@
     D.bookWrap.classList.remove("turning-cover", "back-mode");
 
     destroyCoverTurn(false);
-
-    if (D.turnCover) {
-      D.turnCover.innerHTML = TURN_COVER_TEMPLATE;
-      positionTurnCover();
-
-      var img = D.turnCover.querySelector("#turn-cover-front-img");
-      if (img) img.src = U.pageUrl(1);
-
-      D.turnCover.hidden = false;
-      D.turnCover.style.pointerEvents = "";
-    }
+    showStaticCover();
 
     if (S.pageFlip && S.N > 0) {
       try {
@@ -233,8 +235,6 @@
 
     D.bookWrap.classList.add("turning-cover");
 
-    startCoverWatchdog("open");
-
     L.ensureTurnJS().then(function () {
       if (S.viewMode !== "front" || !S.coverAnimating) return;
 
@@ -249,9 +249,15 @@
       setTurnPageInstant(S.turnCoverJQ, 1);
 
       requestAnimationFrame(function () {
-        if (S.turnCoverJQ) {
-          S.turnCoverJQ.turn("turn", 2, true);
-        } else {
+        startCoverWatchdog("open");
+
+        try {
+          if (S.turnCoverJQ) {
+            S.turnCoverJQ.turn("turn", 2, true);
+          } else {
+            EPSF.cover.finishOpen();
+          }
+        } catch (e) {
           EPSF.cover.finishOpen();
         }
       });
@@ -279,8 +285,6 @@
 
     D.bookWrap.classList.add("cover-mode", "turning-cover");
 
-    startCoverWatchdog("close");
-
     L.ensureTurnJS().then(function () {
       if (S.viewMode !== "book" || !S.coverAnimating) return;
 
@@ -295,9 +299,15 @@
       setTurnPageInstant(S.turnCoverJQ, 2);
 
       requestAnimationFrame(function () {
-        if (S.turnCoverJQ) {
-          S.turnCoverJQ.turn("turn", 1, true);
-        } else {
+        startCoverWatchdog("close");
+
+        try {
+          if (S.turnCoverJQ) {
+            S.turnCoverJQ.turn("turn", 1, true);
+          } else {
+            EPSF.cover.finishClose();
+          }
+        } catch (e) {
           EPSF.cover.finishClose();
         }
       });
@@ -320,14 +330,7 @@
     D.bookWrap.classList.add("cover-mode");
     D.bookWrap.classList.remove("turning-cover", "back-mode");
 
-    if (D.turnCover) {
-      D.turnCover.hidden = false;
-      D.turnCover.innerHTML = TURN_COVER_TEMPLATE;
-      positionTurnCover();
-
-      var img = D.turnCover.querySelector("#turn-cover-front-img");
-      if (img) img.src = U.pageUrl(1);
-    }
+    showStaticCover();
 
     if (S.pageFlip && S.N > 0) {
       try {
@@ -378,5 +381,6 @@
   EPSF.cover.position = positionTurnCover;
   EPSF.cover.destroy = destroyCoverTurn;
   EPSF.cover.build = buildCoverTurn;
+  EPSF.cover.showStatic = showStaticCover;
   EPSF.cover.clearWatchdog = clearCoverWatchdog;
 })();
