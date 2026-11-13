@@ -1,7 +1,6 @@
 (function () {
   "use strict";
 
-  var S = EPSF.state;
   var C = EPSF.config;
 
   EPSF.loaders.tryEach = function (urls, fn) {
@@ -116,6 +115,7 @@
     return EPSF.loaders.pageFlipLoadPromise;
   };
 
+  EPSF.loaders.TQ = null;
   EPSF.loaders.turnLoadPromise = null;
 
   EPSF.loaders.loadTurnScript = function (src) {
