@@ -117,11 +117,7 @@
   }
 
   EPSF.events.bindAll();
-  EPSF.cover.bindClick();
 
-  /*
-    Load logo data URI for generated back cover / colophon.
-  */
   (function loadLogoForBackCover() {
     try {
       fetch(EPSF.config.logoMark, { cache: "force-cache" })
