@@ -1,1 +1,20 @@
-{"title": "2026-10-Test-Mag", "pages": 116}
+{"title": "2026-10-Test-Mag", "pages": 116,
+"media": [
+    {
+      "page": 8,
+      "type": "video",
+      "src": "media/pink-october.mp4",
+      "title": "Pink October",
+      "rect": {
+        "x": 0.15,
+        "y": 0.35,
+        "w": 0.70,
+        "h": 0.30
+      },
+      "controls": true,
+      "autoplay": false,
+      "muted": true,
+      "loop": false
+    }
+  ]
+}
