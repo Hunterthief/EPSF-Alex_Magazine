@@ -1,0 +1,12 @@
+EPSF.util.clampNum
+EPSF.util.clampUnit
+EPSF.util.parseIssueName
+EPSF.util.pageUrl
+EPSF.util.loadImage
+EPSF.util.probeTotal
+EPSF.util.makeBackCoverDataUrl
+EPSF.util.makeColophonDataUrl
+EPSF.util.formatMediaTime
+EPSF.util.resolveMediaSrc
+EPSF.util.normalizeRect
+EPSF.util.normalizeManifest
