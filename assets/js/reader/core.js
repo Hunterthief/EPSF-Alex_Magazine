@@ -3,9 +3,36 @@
 
   window.EPSF = window.EPSF || {};
 
-  EPSF.config = window.EPSF_CONFIG || {};
+  var E = window.EPSF;
 
-  EPSF.state = {
+  E.config = Object.assign({
+    logoMark: "/assets/images/logo-mark.png",
+    soundsBase: "/assets/sounds",
+
+    pageFlipEsmUrls: [
+      "/assets/vendor/page-flip.esm.js",
+      "https://esm.sh/page-flip@2.0.7",
+      "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/+esm",
+      "https://esm.run/page-flip@2.0.7"
+    ],
+
+    pageFlipScriptUrls: [
+      "/assets/vendor/page-flip.browser.js"
+    ],
+
+    jqueryUrls: [
+      "/assets/vendor/jquery-1.12.4.min.js",
+      "https://code.jquery.com/jquery-1.12.4.min.js"
+    ],
+
+    turnJsUrls: [
+      "/assets/vendor/turn.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/turn.js/4/turn.min.js",
+      "https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"
+    ]
+  }, window.EPSF_CONFIG || {});
+
+  E.state = {
     RM: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     STACK_MAX: 96,
     JUMP_ANIMATE_THRESHOLD: 10,
@@ -95,69 +122,69 @@
     }
   };
 
-  EPSF.dom = {};
-  EPSF.util = {};
-  EPSF.loaders = {};
-  EPSF.layout = {};
-  EPSF.ui = {};
-  EPSF.media = {};
-  EPSF.cover = {};
-  EPSF.flip = {};
-  EPSF.zoom = {};
-  EPSF.reader = {};
-  EPSF.events = {};
-  EPSF.main = {};
+  E.dom = {};
+  E.util = {};
+  E.loaders = {};
+  E.layout = {};
+  E.ui = {};
+  E.media = {};
+  E.cover = {};
+  E.flip = {};
+  E.zoom = {};
+  E.reader = {};
+  E.events = {};
+  E.main = {};
 
-  EPSF.cacheDom = function () {
-    EPSF.dom.reader = document.getElementById("reader");
-    EPSF.dom.stage = document.getElementById("r-stage");
-    EPSF.dom.bookWrap = document.getElementById("book-wrap");
-    EPSF.dom.mount = document.getElementById("flipbook-mount");
+  E.cacheDom = function () {
+    E.dom.reader = document.getElementById("reader");
+    E.dom.stage = document.getElementById("r-stage");
+    E.dom.bookWrap = document.getElementById("book-wrap");
+    E.dom.mount = document.getElementById("flipbook-mount");
 
-    EPSF.dom.stackL = document.getElementById("stack-l");
-    EPSF.dom.stackR = document.getElementById("stack-r");
+    E.dom.stackL = document.getElementById("stack-l");
+    E.dom.stackR = document.getElementById("stack-r");
 
-    EPSF.dom.sparks = document.getElementById("sparks");
-    EPSF.dom.flash = document.getElementById("rapid-flash");
-    EPSF.dom.sheetTip = document.getElementById("sheet-tip");
+    E.dom.sparks = document.getElementById("sparks");
+    E.dom.flash = document.getElementById("rapid-flash");
+    E.dom.sheetTip = document.getElementById("sheet-tip");
 
-    EPSF.dom.hint = document.getElementById("hint");
-    EPSF.dom.hintTxt = document.getElementById("hint-txt");
+    E.dom.hint = document.getElementById("hint");
+    E.dom.hintTxt = document.getElementById("hint-txt");
 
-    EPSF.dom.endCard = document.getElementById("end-card");
-    EPSF.dom.loader = document.getElementById("loader");
-    EPSF.dom.loaderTxt = document.getElementById("loader-txt");
+    E.dom.endCard = document.getElementById("end-card");
+    E.dom.loader = document.getElementById("loader");
+    E.dom.loaderTxt = document.getElementById("loader-txt");
 
-    EPSF.dom.rTitle = document.getElementById("r-title");
-    EPSF.dom.rDl = document.getElementById("r-dl");
+    E.dom.rTitle = document.getElementById("r-title");
+    E.dom.rDl = document.getElementById("r-dl");
 
-    EPSF.dom.edgeL = document.getElementById("edge-l");
-    EPSF.dom.edgeR = document.getElementById("edge-r");
+    E.dom.edgeL = document.getElementById("edge-l");
+    E.dom.edgeR = document.getElementById("edge-r");
 
-    EPSF.dom.dPrev = document.getElementById("d-prev");
-    EPSF.dom.dNext = document.getElementById("d-next");
-    EPSF.dom.dPages = document.getElementById("d-pages");
-    EPSF.dom.dTrack = document.getElementById("d-track");
-    EPSF.dom.dFill = document.getElementById("d-fill");
+    E.dom.dPrev = document.getElementById("d-prev");
+    E.dom.dNext = document.getElementById("d-next");
+    E.dom.dPages = document.getElementById("d-pages");
+    E.dom.dTrack = document.getElementById("d-track");
+    E.dom.dFill = document.getElementById("d-fill");
 
-    EPSF.dom.spineShadow = document.getElementById("spine-shadow");
+    E.dom.spineShadow = document.getElementById("spine-shadow");
 
-    EPSF.dom.turnCover = document.getElementById("turn-cover");
-    EPSF.dom.mediaLayer = document.getElementById("media-layer");
+    E.dom.turnCover = document.getElementById("turn-cover");
+    E.dom.mediaLayer = document.getElementById("media-layer");
 
-    EPSF.dom.rZoom = document.getElementById("r-zoom");
+    E.dom.rZoom = document.getElementById("r-zoom");
 
-    EPSF.dom.zoomOverlay = document.getElementById("zoom-overlay");
-    EPSF.dom.zoomStage = document.getElementById("zoom-stage");
-    EPSF.dom.zoomPages = document.getElementById("zoom-pages");
-    EPSF.dom.zoomLabel = document.getElementById("zoom-label");
-    EPSF.dom.zoomPercent = document.getElementById("zoom-percent");
-    EPSF.dom.zoomInBtn = document.getElementById("zoom-in");
-    EPSF.dom.zoomOutBtn = document.getElementById("zoom-out");
-    EPSF.dom.zoomResetBtn = document.getElementById("zoom-reset");
-    EPSF.dom.zoomCloseBtn = document.getElementById("zoom-close");
+    E.dom.zoomOverlay = document.getElementById("zoom-overlay");
+    E.dom.zoomStage = document.getElementById("zoom-stage");
+    E.dom.zoomPages = document.getElementById("zoom-pages");
+    E.dom.zoomLabel = document.getElementById("zoom-label");
+    E.dom.zoomPercent = document.getElementById("zoom-percent");
+    E.dom.zoomInBtn = document.getElementById("zoom-in");
+    E.dom.zoomOutBtn = document.getElementById("zoom-out");
+    E.dom.zoomResetBtn = document.getElementById("zoom-reset");
+    E.dom.zoomCloseBtn = document.getElementById("zoom-close");
 
-    EPSF.dom.statIssues = document.getElementById("stat-issues");
-    EPSF.dom.statPages = document.getElementById("stat-pages");
+    E.dom.statIssues = document.getElementById("stat-issues");
+    E.dom.statPages = document.getElementById("stat-pages");
   };
 })();
