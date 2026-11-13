@@ -9,6 +9,7 @@
   var UI = EPSF.ui;
   var Med = EPSF.media;
   var Cover = EPSF.cover;
+  var Flip = EPSF.flip;
   var Zoom = EPSF.zoom;
 
   EPSF.reader.destroyFlipbook = function () {
@@ -23,6 +24,7 @@
     }
 
     if (D.mount) D.mount.innerHTML = "";
+
     S.isInitializing = false;
   };
 
@@ -87,7 +89,8 @@
     });
 
     S.pageFlip.on("flip", function (e) {
-      var idx = (e && typeof e.data === "number") ? e.data : S.currentIdx;
+      var idx = (e && typeof e.data === "number") ? e.data : UI.getCurrentIndex();
+
       S.currentIdx = Lay.clampInner(idx);
 
       Med.clearOverlays();
@@ -102,7 +105,7 @@
         Med.syncForCurrentPage();
 
         if (S.heldLoopRunning) {
-          setTimeout(EPSF.flip.heldLoop, 30);
+          setTimeout(Flip.heldLoop, 30);
         }
       } else {
         Med.clearOverlays();
@@ -114,7 +117,7 @@
 
   EPSF.reader.open = function (card) {
     UI.ensureAudio();
-    EPSF.flip.stopHeld();
+    Flip.stopHeld();
     UI.hideSparks();
 
     Cover.clearWatchdog();
@@ -126,8 +129,8 @@
     S.pageMeta = [];
     S.mediaUserGesture = true;
 
-    if (EPSF.zoom.isOpen && EPSF.zoom.isOpen()) {
-      EPSF.zoom.close();
+    if (Zoom.isOpen()) {
+      Zoom.close();
     }
 
     EPSF.reader.destroyFlipbook();
@@ -160,6 +163,7 @@
 
     D.reader.hidden = false;
     D.reader.classList.remove("is-open", "is-closing", "idle");
+
     document.body.style.overflow = "hidden";
 
     UI.hideHint();
@@ -187,8 +191,10 @@
         })
         .then(function (m) {
           loadedManifest = m;
+
           var mp = parseInt(m && m.pages, 10);
           if (mp > 0) return mp;
+
           return U.probeTotal();
         })
         .catch(function () {
@@ -228,19 +234,7 @@
           D.bookWrap.classList.add("cover-mode");
           D.bookWrap.classList.remove("turning-cover", "back-mode");
 
-          if (D.turnCover) {
-            D.turnCover.hidden = false;
-            D.turnCover.innerHTML =
-              '<div class="turn-page page turn-cover-front hard">' +
-                '<img id="turn-cover-front-img" alt="Magazine cover" draggable="false">' +
-              '</div>' +
-              '<div class="turn-page page turn-cover-inside"></div>';
-
-            Cover.position();
-
-            var img = D.turnCover.querySelector("#turn-cover-front-img");
-            if (img) img.src = U.pageUrl(1);
-          }
+          Cover.showStatic();
 
           L.ensureTurnJS().then(function () {
             if (!D.reader.hidden && S.viewMode === "front") {
@@ -281,11 +275,12 @@
   EPSF.reader.close = function () {
     S.jumpToken++;
     S.coverAnimToken++;
+
     S.isJumping = false;
     S.coverAnimating = false;
     S.dragTurn = 0;
 
-    EPSF.flip.stopHeld();
+    Flip.stopHeld();
     Cover.clearWatchdog();
     Cover.destroy(true);
 
@@ -298,8 +293,8 @@
 
     clearTimeout(S.idleTimer);
 
-    if (EPSF.zoom.isOpen && EPSF.zoom.isOpen()) {
-      EPSF.zoom.close();
+    if (Zoom.isOpen()) {
+      Zoom.close();
     }
 
     EPSF.reader.destroyFlipbook();
@@ -312,6 +307,7 @@
     setTimeout(function () {
       D.reader.hidden = true;
       D.reader.classList.remove("is-open", "is-closing");
+
       document.body.style.overflow = "";
 
       if (document.fullscreenElement) {
