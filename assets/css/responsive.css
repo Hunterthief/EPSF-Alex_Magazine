@@ -1,7 +1,156 @@
 @media (max-width: 900px) {
-  /* all existing mobile overrides */
+  .card-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .card-featured .cover {
+    aspect-ratio: 4/3;
+  }
+
+  .card-featured .body {
+    padding: 34px 28px 38px;
+  }
+
+  .hero {
+    padding: 76px 22px 66px;
+  }
+
+  .hero-stats {
+    gap: 30px;
+  }
+
+  .wrap {
+    padding: 0 20px;
+  }
+
+  .section {
+    padding: 60px 0 6px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+  }
+
+  .card .body {
+    padding: 16px 16px 20px;
+  }
+
+  .card .issue-title {
+    font-size: 0.98rem;
+  }
+
+  .card .issue-meta {
+    font-size: 0.6rem;
+  }
+
+  .logo-mark {
+    height: 46px;
+  }
+
+  .r-top {
+    padding: 14px 16px;
+  }
+
+  .r-brand-logo {
+    height: 24px;
+  }
+
+  .r-title,
+  .r-sep {
+    display: none;
+  }
+
+  .r-btn .lbl {
+    display: none;
+  }
+
+  .r-btn {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .edge {
+    display: none;
+  }
+
+  .dock {
+    bottom: 18px;
+    gap: 12px;
+    padding: 9px 14px;
+    width: calc(100% - 32px);
+    max-width: 380px;
+    justify-content: space-between;
+  }
+
+  .dock-mid {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .hint {
+    bottom: 92px;
+    font-size: 0.62rem;
+    padding: 10px 18px;
+  }
+
+  .end-card {
+    top: 72px;
+    padding: 12px 16px;
+  }
+
+  .page-stack {
+    display: none;
+  }
+
+  .spine-shadow {
+    width: 84px;
+  }
+
+  .zoom-top {
+    padding: 12px 14px;
+  }
+
+  .zoom-controls {
+    gap: 6px;
+  }
+
+  .zoom-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 0.76rem;
+  }
+
+  .zoom-btn.percent {
+    min-width: 62px;
+  }
+
+  .zoom-hint {
+    font-size: 0.62rem;
+    padding: 10px 14px 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* reduced motion overrides */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .card {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-eyebrow,
+  .hero h1,
+  .hero p,
+  .hero-stats {
+    opacity: 1;
+  }
 }
