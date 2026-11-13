@@ -1,0 +1,91 @@
+/* ============ MEDIA OVERLAYS ============ */
+
+.media-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.18s ease;
+}
+
+.book-wrap.cover-mode .media-layer,
+.book-wrap.turning-cover .media-layer,
+.book-wrap.back-mode .media-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.media-box {
+  position: absolute;
+  pointer-events: auto;
+  overflow: hidden;
+  background: rgba(2, 8, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.media-box.media-video {
+  background: #000;
+}
+
+.media-box.media-video video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-box.media-audio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-height: 38px;
+}
+
+.media-audio-btn {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s var(--ease-out);
+}
+
+.media-audio-btn:hover {
+  background: var(--accent-soft);
+  transform: scale(1.05);
+}
+
+.media-audio-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.media-audio-time {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
