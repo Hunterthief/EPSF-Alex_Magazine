@@ -1,1 +1,121 @@
-<div class="turn-page page turn-cover-front hard">
+<!-- ================= READER ================= -->
+<div class="reader" id="reader" hidden>
+  <div class="reader-fade"></div>
+
+  <div class="r-top">
+    <div class="r-top-left">
+      <img
+        class="r-brand-logo"
+        src="{{ '/assets/images/logo-white.png' | relative_url }}"
+        alt="EPSF Alex"
+        onerror="this.style.display='none'; if(this.nextElementSibling)this.nextElementSibling.style.display='inline';"
+      >
+      <span class="r-brand r-brand-fallback">EPSF Alex</span>
+      <span class="r-sep"></span>
+      <span class="r-title" id="r-title">—</span>
+    </div>
+
+    <div class="r-top-right">
+      <a class="r-btn" id="r-dl" href="#" target="_blank" rel="noopener" download>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <path d="M7 10l5 5 5-5"/>
+          <path d="M12 15V3"/>
+        </svg>
+        <span class="lbl">PDF</span>
+      </a>
+
+      <button class="r-btn icon" id="r-zoom" title="Zoom" aria-label="Zoom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+          <path d="M11 8v6"></path>
+          <path d="M8 11h6"></path>
+        </svg>
+      </button>
+
+      <button class="r-btn icon" id="r-fs" title="Fullscreen" aria-label="Fullscreen">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+        </svg>
+      </button>
+
+      <button class="r-btn icon close" id="r-close" title="Close" aria-label="Close reader">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="r-stage" id="r-stage">
+    <div class="book-wrap cover-mode" id="book-wrap">
+      <div class="page-stack page-stack--l" id="stack-l"></div>
+      <div class="page-stack page-stack--r" id="stack-r"></div>
+
+      <div id="flipbook-mount"></div>
+
+      <div class="spine-shadow" id="spine-shadow" aria-hidden="true"></div>
+      <div class="book-shadow"></div>
+
+      <!--
+        IMPORTANT:
+        Turn.js needs children with class="page".
+        Do not use only class="turn-page".
+      -->
+      <div class="turn-cover" id="turn-cover" hidden>
+        <div class="turn-page page turn-cover-front hard">
+          <img id="turn-cover-front-img" alt="Magazine cover" draggable="false">
+        </div>
+        <div class="turn-page page turn-cover-inside"></div>
+      </div>
+
+      <div class="media-layer" id="media-layer"></div>
+
+      <div class="rapid-flash" id="rapid-flash"></div>
+      <div class="sparks" id="sparks"></div>
+    </div>
+  </div>
+
+  <div class="edge edge--l" id="edge-l" title="Previous page">&#8249;</div>
+  <div class="edge edge--r" id="edge-r" title="Next page">&#8250;</div>
+
+  <div class="hint" id="hint">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+    <span id="hint-txt">Click the cover to open</span>
+  </div>
+
+  <div class="end-card" id="end-card">
+    <span class="end-label">The End</span>
+    <span class="end-sub">You've finished this issue.</span>
+
+    <div class="end-actions">
+      <button class="end-again" id="end-again">Read Again</button>
+      <button class="end-close" id="end-close">Close</button>
+    </div>
+  </div>
+
+  <div class="dock" id="dock">
+    <button class="dock-btn" id="d-prev" aria-label="Previous page">&#8249;</button>
+
+    <div class="dock-mid">
+      <span class="dock-pages" id="d-pages" title="Click to jump to a page">Cover</span>
+      <div class="dock-track" id="d-track" title="Click to jump">
+        <div class="dock-fill" id="d-fill"></div>
+      </div>
+    </div>
+
+    <button class="dock-btn" id="d-next" aria-label="Next page">&#8250;</button>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-txt" id="loader-txt">Preparing issue</div>
+  </div>
+</div>
