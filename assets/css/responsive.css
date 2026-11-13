@@ -1,0 +1,7 @@
+@media (max-width: 900px) {
+  /* all existing mobile overrides */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* reduced motion overrides */
+}
