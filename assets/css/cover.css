@@ -29,11 +29,6 @@
   display: none;
 }
 
-/*
-  IMPORTANT:
-  Turn.js uses .page internally.
-  Keep both .turn-page and .page styling safe.
-*/
 .turn-cover .turn-page,
 .turn-cover .page {
   background: transparent;
