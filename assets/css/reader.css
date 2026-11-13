@@ -1,0 +1,119 @@
+.reader { ... }
+.reader[hidden] { ... }
+.reader::before { ... }
+.reader::after { ... }
+.reader-fade { ... }
+.reader.is-open .reader-fade { ... }
+.reader.is-closing .reader-fade { ... }
+
+.r-top { ... }
+.r-top-left { ... }
+.r-brand-logo { ... }
+.r-brand-fallback { ... }
+.r-brand { ... }
+.r-sep { ... }
+.r-title { ... }
+.r-top-right { ... }
+.r-btn { ... }
+.r-btn:hover { ... }
+.r-btn.icon { ... }
+.r-btn.close:hover { ... }
+
+.r-stage { ... }
+
+.book-wrap { ... }
+.book-wrap.visible { ... }
+@keyframes bookIn { ... }
+
+#flipbook-mount { ... }
+.book-wrap.is-flipping #flipbook-mount { ... }
+
+#flipbook { ... }
+#flipbook canvas { ... }
+
+.book-wrap.cover-mode #flipbook-mount,
+.book-wrap.back-mode #flipbook-mount { ... }
+
+.book-wrap.cover-mode .page-stack,
+.book-wrap.back-mode .page-stack { ... }
+
+.book-wrap.cover-mode .book-shadow,
+.book-wrap.back-mode .book-shadow { ... }
+
+.spine-shadow { ... }
+.book-shadow { ... }
+
+.page-stack { ... }
+.page-stack--r { ... }
+.page-stack--l { ... }
+.sheet { ... }
+.sheet.sheet-gray { ... }
+.stack-hover { ... }
+
+.sheet-tip { ... }
+.sheet-tip.show { ... }
+
+.sparks { ... }
+.spark { ... }
+@keyframes sparkFly { ... }
+.spark-dot { ... }
+@keyframes dotFly { ... }
+
+.rapid-flash { ... }
+.rapid-flash.active { ... }
+.rapid-flash.side-l { ... }
+.rapid-flash.side-r { ... }
+.rapid-flash.side-b { ... }
+@keyframes flashPulse { ... }
+
+.edge { ... }
+.edge:hover { ... }
+.edge--l { ... }
+.edge--r { ... }
+.edge.off { ... }
+
+.dock { ... }
+.dock-btn { ... }
+.dock-btn:hover:not(:disabled) { ... }
+.dock-btn:disabled { ... }
+.dock-mid { ... }
+.dock-pages { ... }
+.dock-pages:hover { ... }
+.page-input { ... }
+.page-input::-webkit-inner-spin-button,
+.page-input::-webkit-outer-spin-button { ... }
+.dock-track { ... }
+.dock-fill { ... }
+
+.reader.idle .r-top,
+.reader.idle .dock,
+.reader.idle .edge { ... }
+
+.reader.idle .r-top { ... }
+.reader.idle .dock { ... }
+.reader.idle .edge { ... }
+.reader.idle { ... }
+
+.hint { ... }
+.hint.show { ... }
+@keyframes hintPulse { ... }
+
+.end-card { ... }
+.end-card.show { ... }
+@keyframes endIn { ... }
+.end-card .end-label { ... }
+.end-card .end-sub { ... }
+.end-actions { ... }
+.end-actions button { ... }
+.end-again { ... }
+.end-again:hover { ... }
+.end-close { ... }
+.end-close:hover { ... }
+
+.loader { ... }
+.loader.gone { ... }
+.loader-ring { ... }
+@keyframes spin { ... }
+.loader-txt { ... }
+.loader.err .loader-ring { ... }
+.loader.err .loader-txt { ... }
