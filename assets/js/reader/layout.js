@@ -15,18 +15,6 @@
       });
   }
 
-  /*
-    Detect whether the desktop reader is using the Cover-saver filler page.
-
-    If yes:
-      index 0 = Cover-saver.png
-      index 1 = 1.jpg cover
-      index 2 = 2.jpg first inside page
-
-    If no, we are likely using the hybrid Turn.js cover bridge:
-      viewMode "front" = cover
-      viewMode "book" + currentIdx 0 = first inside page
-  */
   function hasBackgroundFiller() {
     return (
       !S.isMobile &&
@@ -40,15 +28,8 @@
   EPSF.layout.isCoverView = function () {
     if (S.isMobile) return false;
 
-    /*
-      Hybrid Turn.js cover mode.
-    */
     if (S.viewMode === "front") return true;
 
-    /*
-      St.PageFlip owns everything, with Cover-saver.png as desktop filler.
-      The cover is the first spread: index 0 + index 1.
-    */
     if (hasBackgroundFiller() && S.currentIdx === 0) return true;
 
     return false;
@@ -59,18 +40,10 @@
 
     if (S.viewMode !== "book") return false;
 
-    /*
-      St.PageFlip owns everything, with Cover-saver.png as desktop filler.
-      First real magazine spread after the cover is index 2 + index 3.
-    */
     if (hasBackgroundFiller()) {
       return S.currentIdx === 2;
     }
 
-    /*
-      Hybrid Turn.js cover bridge.
-      St.PageFlip interior starts at index 0, which is page 2.jpg.
-    */
     return S.currentIdx === 0;
   };
 
@@ -96,10 +69,6 @@
       return m.originalPage;
     }
 
-    /*
-      Colophon filler pages have originalPage = null.
-      Infer a sensible label from neighboring real pages.
-    */
     var prev = i > 0 ? S.pageMeta[i - 1] : null;
     var next = i < S.pageMeta.length - 1 ? S.pageMeta[i + 1] : null;
 
@@ -153,18 +122,6 @@
       return Math.max(0, Math.min(S.N - 1, mIdx));
     }
 
-    /*
-      Desktop indexing with filler background:
-
-        index 0 = Cover-saver.png
-        index 1 = 1.jpg cover
-        index 2 = 2.jpg
-        index 3 = 3.jpg
-        ...
-
-      Therefore original page N usually maps to inner index N.
-      Spreads must start on even indexes.
-    */
     if (pageNum <= 1) return 0;
     if (pageNum >= totalLogical) return S.lastSpreadIdx;
 
@@ -176,6 +133,74 @@
 
     return EPSF.layout.clampInner(idx);
   };
+
+  function computeRenderSize(pageW, pageH) {
+    var dpr = window.devicePixelRatio || 1;
+
+    /*
+      Minimum internal render multiplier.
+
+      Desktop gets a stronger baseline because text legibility matters most there.
+      Mobile is capped lower to avoid excessive memory use.
+    */
+    var preferred = S.isMobile
+      ? Math.max(1.55, Math.min(2.15, dpr * 1.25))
+      : Math.max(1.95, Math.min(2.75, dpr * 1.45));
+
+    /*
+      Do not render far beyond the source image resolution.
+
+      Zoom uses the source image directly, so matching the source resolution
+      is the closest equivalent for normal page rendering.
+    */
+    if (S.sourceW > 0 && S.sourceH > 0 && pageW > 0 && pageH > 0) {
+      var sourceScale = Math.min(
+        S.sourceW / pageW,
+        S.sourceH / pageH
+      );
+
+      preferred = Math.min(
+        preferred,
+        Math.max(1, sourceScale * 1.08)
+      );
+    }
+
+    var renderW = Math.round(pageW * preferred);
+    var renderH = Math.round(pageH * preferred);
+
+    /*
+      Safety caps.
+
+      These prevent enormous canvases on very large monitors or high-DPR devices.
+      The caps are still high enough to keep body text sharp.
+    */
+    var maxSide = S.isMobile ? 1600 : 2100;
+    var maxArea = S.isMobile ? 2600000 : 4300000;
+
+    if (renderW > maxSide || renderH > maxSide) {
+      var sideScale = Math.min(maxSide / renderW, maxSide / renderH);
+      renderW = Math.max(1, Math.round(renderW * sideScale));
+      renderH = Math.max(1, Math.round(renderH * sideScale));
+    }
+
+    var area = renderW * renderH;
+
+    if (area > maxArea) {
+      var areaScale = Math.sqrt(maxArea / area);
+      renderW = Math.max(1, Math.round(renderW * areaScale));
+      renderH = Math.max(1, Math.round(renderH * areaScale));
+    }
+
+    /*
+      Never render smaller than the displayed CSS size.
+    */
+    if (renderW < pageW) renderW = pageW;
+    if (renderH < pageH) renderH = pageH;
+
+    S.renderW = renderW;
+    S.renderH = renderH;
+    S.renderScale = pageW / renderW;
+  }
 
   EPSF.layout.computeLayout = function () {
     var narrow = window.innerWidth < 900;
@@ -221,6 +246,8 @@
       D.bookWrap.style.height = S.pageH + "px";
     }
 
+    computeRenderSize(S.pageW, S.pageH);
+
     if (S.isMobile) {
       if (D.spineShadow) D.spineShadow.style.display = "none";
     } else {
@@ -249,27 +276,12 @@
     }
 
     if (S.isMobile) {
-      /*
-        Mobile:
-          0 = cover
-          1.. = interior
-          last = back cover
-      */
       pushPage(U.pageUrl(1), 1, "cover");
 
       for (var i = 2; i <= S.total; i++) {
         pushPage(U.pageUrl(i), i, "page");
       }
     } else {
-      /*
-        Desktop:
-          0 = Cover-saver.png filler
-          1 = cover
-          2.. = interior
-          last = back cover
-
-        This allows the cover to appear as the right-hand page of the first spread.
-      */
       pushPage(backgroundSrc, 0, "background");
       pushPage(U.pageUrl(1), 1, "cover");
 
@@ -278,10 +290,6 @@
       }
     }
 
-    /*
-      Keep the back cover last.
-      Pad before the back cover if needed so St.PageFlip has an even page count.
-    */
     if (S.inner.length % 2 === 0) {
       pushPage(colophonSrc, null, "colophon");
     }
@@ -384,15 +392,6 @@
     var coverView = EPSF.layout.isCoverView();
     var firstInteriorView = EPSF.layout.isFirstInteriorView();
 
-    /*
-      Normal stack behavior:
-        - show right stack for unread spreads
-        - show left stack for read spreads
-
-      Requested clean behavior:
-        - on cover: disable both stacks
-        - on first interior spread after cover: disable left stack only
-    */
     var open =
       !S.isPortrait &&
       S.N > 0 &&
@@ -405,9 +404,6 @@
     var unread = open ? Math.max(0, S.maxSpread - currentSpread) : 0;
     var read = open ? Math.max(0, currentSpread - 1) : 0;
 
-    /*
-      Hide the left stack on the first real magazine spread after the cover.
-    */
     if (firstInteriorView) {
       read = 0;
     }
