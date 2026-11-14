@@ -28,6 +28,13 @@ title: Home
       logoMark: "{{ '/assets/images/logo-mark.png' | relative_url }}",
       soundsBase: "{{ '/assets/sounds' | relative_url }}",
 
+      /*
+        Desktop filler page placed before the real cover.
+        Upload this file to:
+        assets/images/Cover-saver.png
+      */
+      coverSaverUrl: "{{ '/assets/images/Cover-saver.png' | relative_url }}",
+
       pageFlipEsmUrls: [
         "{{ '/assets/vendor/page-flip.esm.js' | relative_url }}",
         "https://esm.sh/page-flip@2.0.7",
@@ -37,17 +44,6 @@ title: Home
 
       pageFlipScriptUrls: [
         "{{ '/assets/vendor/page-flip.browser.js' | relative_url }}"
-      ],
-
-      jqueryUrls: [
-        "{{ '/assets/vendor/jquery-1.12.4.min.js' | relative_url }}",
-        "https://code.jquery.com/jquery-1.12.4.min.js"
-      ],
-
-      turnJsUrls: [
-        "{{ '/assets/vendor/turn.min.js' | relative_url }}",
-        "https://cdnjs.cloudflare.com/ajax/libs/turn.js/4/turn.min.js",
-        "https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"
       ]
     };
   </script>
