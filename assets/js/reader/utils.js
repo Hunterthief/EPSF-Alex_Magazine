@@ -78,6 +78,61 @@
     });
   };
 
+  EPSF.util.makeBlankDataUrl = function (w, h, color) {
+    w = Math.max(1, Math.round(w || 1200));
+    h = Math.max(1, Math.round(h || 1600));
+    color = color || "#FFFFFF";
+
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+        '<rect width="' + w + '" height="' + h + '" fill="' + color + '"/>' +
+      '</svg>';
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  };
+
+  EPSF.util.backgroundPageSrc = function () {
+    var cfg = EPSF.config || {};
+
+    if (cfg.coverSaverUrl) {
+      return cfg.coverSaverUrl;
+    }
+
+    var w = 1200;
+    var h = Math.max(1, Math.round(w / (S.aspect || 0.72)));
+
+    return EPSF.util.makeBlankDataUrl(w, h, "#FFFFFF");
+  };
+
+  EPSF.util.prepareBackground = function () {
+    var src = EPSF.config && EPSF.config.coverSaverUrl
+      ? EPSF.config.coverSaverUrl
+      : "";
+
+    if (!src) {
+      return Promise.resolve("");
+    }
+
+    return new Promise(function (resolve) {
+      var im = new Image();
+
+      im.onload = function () {
+        resolve(src);
+      };
+
+      im.onerror = function () {
+        /*
+          If Cover-saver.png is missing, fall back to a blank white page
+          instead of breaking the reader.
+        */
+        EPSF.config.coverSaverUrl = "";
+        resolve("");
+      };
+
+      im.src = src;
+    });
+  };
+
   EPSF.util.makeBackCoverDataUrl = function (w, h) {
     var cx = w / 2;
     var cy = h / 2;
