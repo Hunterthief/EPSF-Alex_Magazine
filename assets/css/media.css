@@ -41,6 +41,7 @@
   border: 0;
   box-shadow: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /*
@@ -66,9 +67,8 @@
 /*
   Video element.
 
-  If a poster exists, video starts invisible and fades in when ready.
-  If no poster exists, video is visible immediately, though the browser may
-  still need a moment to paint the first frame.
+  The video itself must not receive pointer events.
+  The parent .media-box handles taps so play/pause/unmute logic stays reliable.
 */
 .media-box.media-video video {
   position: absolute;
@@ -79,6 +79,7 @@
   object-fit: fill;
   background: transparent;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 160ms ease;
   user-select: none;
   -webkit-user-drag: none;
@@ -97,10 +98,14 @@
 }
 
 /*
-  Hide native controls aggressively.
-  The video is still clickable for play/pause.
+  Aggressively hide any native controls that might appear in some browsers.
+  The real fix is also removing the controls attribute in JS.
 */
 .media-box.media-video video::-webkit-media-controls {
+  display: none !important;
+}
+
+.media-box.media-video video::-webkit-media-controls-enclosure {
   display: none !important;
 }
 
@@ -138,6 +143,14 @@
   display: none !important;
 }
 
+.media-box.media-video video::-moz-media-controls {
+  display: none !important;
+}
+
+.media-box.media-video video::-moz-media-controls-panel {
+  display: none !important;
+}
+
 .media-box.media-video:focus-visible {
   outline: 2px solid rgba(110, 155, 255, 0.82);
   outline-offset: 3px;
@@ -153,6 +166,14 @@
 }
 
 .media-box.media-video.media-error .media-frame {
+  opacity: 1;
+}
+
+/*
+  If audible playback was blocked by the browser, keep the poster visible.
+  The user can tap again.
+*/
+.media-box.media-video.media-blocked .media-frame {
   opacity: 1;
 }
 
