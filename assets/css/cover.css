@@ -1,4 +1,4 @@
-/* ============ TURN.JS COVER BRIDGE ============ */
+/* ============ CUSTOM COVER BRIDGE ============ */
 
 .turn-cover {
   position: absolute;
@@ -13,37 +13,38 @@
   display: none !important;
 }
 
-/* Before Turn.js is initialized, show a static front cover fallback */
-.turn-cover:not(.turn-ready) .turn-cover-front {
+.turn-cover.animating {
+  pointer-events: none;
+}
+
+.turn-cover .cover-leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 760ms var(--ease-book);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.turn-cover .cover-face {
   position: absolute;
   inset: 0;
   overflow: hidden;
   border-radius: 5px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.turn-cover .cover-front {
   background: #0A192F;
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.28),
-    0 30px 60px -12px rgba(0,0,0,0.58);
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 30px 60px -12px rgba(0, 0, 0, 0.58);
 }
 
-.turn-cover:not(.turn-ready) .turn-cover-inside {
-  display: none;
-}
-
-.turn-cover .turn-page,
-.turn-cover .page {
-  background: transparent;
-}
-
-.turn-cover .turn-cover-front {
-  overflow: hidden;
-  border-radius: 5px;
-  background: #0A192F;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.28),
-    0 30px 60px -12px rgba(0,0,0,0.58);
-}
-
-.turn-cover .turn-cover-front img {
+.turn-cover .cover-front img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -53,11 +54,27 @@
   pointer-events: none;
 }
 
-.turn-cover .turn-cover-inside {
-  background: transparent;
+.turn-cover .cover-back {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(110, 155, 255, 0.16), transparent 60%),
+    linear-gradient(135deg, #06142f 0%, #0A192F 45%, #071a3d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.24),
+    0 24px 50px -16px rgba(0, 0, 0, 0.52);
 }
 
-/* While the Turn.js cover is animating, reveal the St.PageFlip layer underneath */
+.turn-cover .cover-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0%, transparent 18%, transparent 82%, rgba(0, 0, 0, 0.12) 100%);
+}
+
+/* While the cover is animating, reveal the St.PageFlip layer underneath */
 .book-wrap.cover-mode.turning-cover #flipbook-mount {
   opacity: 1;
   pointer-events: none;
