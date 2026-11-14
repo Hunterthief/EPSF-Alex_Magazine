@@ -10,49 +10,58 @@
   };
 
   EPSF.zoom.getSources = function () {
-    if (S.viewMode === "front") {
-      return S.total >= 1 ? [U.pageUrl(1)] : [];
-    }
-
     if (!S.inner.length) return [];
 
-    var arr = [S.inner[S.currentIdx]];
+    var indices = [];
 
-    if (!S.isPortrait && S.inner[S.currentIdx + 1]) {
-      arr.push(S.inner[S.currentIdx + 1]);
+    if (S.isPortrait) {
+      indices.push(S.currentIdx);
+    } else {
+      indices.push(S.currentIdx);
+      indices.push(S.currentIdx + 1);
+    }
+
+    var arr = [];
+
+    indices.forEach(function (i) {
+      if (i < 0 || i >= S.inner.length) return;
+
+      var meta = S.pageMeta[i];
+
+      /*
+        Do not zoom the desktop filler background.
+        Zoom the real cover instead.
+      */
+      if (meta && meta.kind === "background") return;
+
+      if (S.inner[i]) arr.push(S.inner[i]);
+    });
+
+    if (!arr.length && S.total >= 1) {
+      arr.push(U.pageUrl(1));
     }
 
     return arr;
   };
 
   EPSF.zoom.getLabel = function () {
-    if (S.viewMode === "front") return "Cover";
     if (!S.inner.length) return "Zoom";
 
-    if (S.isMobile) {
-      return "Page " + (S.currentIdx + 1);
+    var totalLogical = S.total + 1;
+    var origs = EPSF.layout.originalPagesForCurrentSpread();
+
+    if (!origs.length) return "Cover";
+
+    if (origs.indexOf(totalLogical) >= 0) {
+      return "Back Cover";
     }
 
-    var desktopPages = S.N + 1;
-
-    var atEnd = S.isPortrait
-      ? (S.currentIdx >= S.N - 1)
-      : (S.currentIdx >= S.lastSpreadIdx);
-
-    if (atEnd) return "Back Cover";
-
-    if (S.isPortrait) {
-      var logical = Math.min(desktopPages, S.currentIdx + 2);
-      return "Page " + logical;
+    if (origs.length === 1) {
+      if (origs[0] === 1) return "Cover";
+      return "Page " + origs[0];
     }
 
-    var left = S.currentIdx + 2;
-    var right = left + 1;
-
-    if (left > desktopPages) left = desktopPages;
-    if (right > desktopPages) right = 0;
-
-    return right ? "Pages " + left + "–" + right : "Page " + left;
+    return "Pages " + origs[0] + "–" + origs[1];
   };
 
   EPSF.zoom.applyTransform = function () {
