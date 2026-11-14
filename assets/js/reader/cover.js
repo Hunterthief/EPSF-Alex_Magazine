@@ -8,17 +8,20 @@
   var Med = EPSF.media;
   var Lay = EPSF.layout;
 
-  var DURATION = S.RM ? 1 : 900;
+  var DURATION = S.RM ? 1 : 980;
 
   var TEMPLATE =
     '<div class="cover-leaf">' +
       '<div class="cover-face cover-front">' +
         '<img id="turn-cover-front-img" alt="Magazine cover" draggable="false">' +
       '</div>' +
-      '<div class="cover-face cover-back"></div>' +
+      '<div class="cover-face cover-back">' +
+        '<img id="turn-cover-back-img" alt="Inside cover" draggable="false">' +
+      '</div>' +
     '</div>';
 
   var activeLeafHandler = null;
+  var preloadedInsideSrc = "";
 
   function clearWatchdog() {
     if (S.coverWatchdogTimer) {
@@ -40,6 +43,75 @@
     }
   }
 
+  function getFrontSrc() {
+    if (!S.pagesUrl) return "";
+    return U.pageUrl(1);
+  }
+
+  function getInsideSrc() {
+    /*
+      The inside/back of the cover should be the first real inside page.
+
+      On desktop, St.PageFlip inner pages usually start at page 2:
+        inner[0] = page 2
+        inner[1] = page 3
+        ...
+
+      So S.inner[0] is the best source for the inside cover face.
+    */
+    if (S.inner && S.inner.length) {
+      return S.inner[0];
+    }
+
+    if (S.total >= 2) {
+      return U.pageUrl(2);
+    }
+
+    if (S.backCoverSrc) {
+      return S.backCoverSrc;
+    }
+
+    return "";
+  }
+
+  function preloadInsideSrc(src) {
+    if (!src || preloadedInsideSrc === src) return;
+
+    preloadedInsideSrc = src;
+
+    try {
+      U.loadImage(src).catch(function () {});
+    } catch (e) {}
+  }
+
+  function updateCoverImages() {
+    if (!D.turnCover) return;
+
+    var front = D.turnCover.querySelector("#turn-cover-front-img");
+    var back = D.turnCover.querySelector("#turn-cover-back-img");
+
+    var frontSrc = getFrontSrc();
+    var insideSrc = getInsideSrc();
+
+    if (front && frontSrc && front.getAttribute("src") !== frontSrc) {
+      front.src = frontSrc;
+    }
+
+    if (back) {
+      if (insideSrc) {
+        if (back.getAttribute("src") !== insideSrc) {
+          back.src = insideSrc;
+        }
+
+        back.style.display = "";
+        preloadInsideSrc(insideSrc);
+      } else {
+        back.removeAttribute("src");
+        back.style.display = "none";
+      }
+    }
+  }
+
   function ensureDom() {
     if (!D.turnCover) return null;
 
@@ -47,11 +119,7 @@
       D.turnCover.innerHTML = TEMPLATE;
     }
 
-    var img = D.turnCover.querySelector("#turn-cover-front-img");
-
-    if (img && S.pagesUrl) {
-      img.src = U.pageUrl(1);
-    }
+    updateCoverImages();
 
     return getLeaf();
   }
@@ -65,13 +133,18 @@
 
     /*
       IMPORTANT:
-      On desktop, the cover must sit in the RIGHT page position.
+      On desktop, the cover starts in the RIGHT page position.
 
       bookWrap width = pageW * 2
-      left page  = 0 to pageW
-      right page = pageW to pageW * 2
+
+      left page:
+        x = 0 to pageW
+
+      right page:
+        x = pageW to pageW * 2
 
       So the cover leaf starts at pageW.
+      Its hinge is the left edge, which is the spine.
     */
     D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW) + "px";
   }
@@ -96,6 +169,7 @@
 
     ensureDom();
     setSize();
+    updateCoverImages();
 
     D.turnCover.hidden = false;
     D.turnCover.classList.remove("cover-opening", "cover-closing", "animating");
@@ -124,6 +198,7 @@
     }
 
     setSize();
+    updateCoverImages();
     detachLeafListener();
     clearWatchdog();
 
@@ -165,7 +240,7 @@
       Safety watchdog.
       If animationend never fires for any browser reason, the cover still resolves.
     */
-    S.coverWatchdogTimer = setTimeout(finish, DURATION + 700);
+    S.coverWatchdogTimer = setTimeout(finish, DURATION + 750);
   }
 
   EPSF.cover.finishOpen = function () {
@@ -233,10 +308,11 @@
 
     ensureDom();
     setSize();
+    updateCoverImages();
 
     /*
       Start closed:
-      rotateY(0deg), fully visible.
+      rotateY(0deg), fully visible, front cover showing page 1.
     */
     setInstant(0, 1);
 
@@ -264,6 +340,7 @@
 
     ensureDom();
     setSize();
+    updateCoverImages();
 
     /*
       Start from the opened position:
@@ -349,15 +426,17 @@
       return false;
     }
 
+    if (S.coverAnimating) {
+      return true;
+    }
+
     ensureDom();
     setSize();
+    updateCoverImages();
 
-    if (S.viewMode === "front" || S.coverAnimating) {
+    if (S.viewMode === "front") {
       D.turnCover.hidden = false;
-
-      if (!S.coverAnimating) {
-        showClosed();
-      }
+      showClosed();
     } else {
       hideCover();
     }
