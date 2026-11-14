@@ -8,6 +8,7 @@
   E.config = Object.assign({
     logoMark: "/assets/images/logo-mark.png",
     soundsBase: "/assets/sounds",
+    coverSaverUrl: "",
 
     pageFlipEsmUrls: [
       "/assets/vendor/page-flip.esm.js",
@@ -18,17 +19,6 @@
 
     pageFlipScriptUrls: [
       "/assets/vendor/page-flip.browser.js"
-    ],
-
-    jqueryUrls: [
-      "/assets/vendor/jquery-1.12.4.min.js",
-      "https://code.jquery.com/jquery-1.12.4.min.js"
-    ],
-
-    turnJsUrls: [
-      "/assets/vendor/turn.min.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/turn.js/4/turn.min.js",
-      "https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"
     ]
   }, window.EPSF_CONFIG || {});
 
@@ -57,7 +47,7 @@
     isInitializing: false,
     suppressLoader: false,
 
-    viewMode: "front",
+    viewMode: "book",
     coverAnimating: false,
     coverAnimToken: 0,
     dragTurn: 0,
