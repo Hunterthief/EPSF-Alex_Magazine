@@ -6,7 +6,6 @@
   var Lay = EPSF.layout;
   var UI = EPSF.ui;
   var Med = EPSF.media;
-  var Cover = EPSF.cover;
   var Flip = EPSF.flip;
   var Reader = EPSF.reader;
   var Zoom = EPSF.zoom;
@@ -64,7 +63,7 @@
 
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (S.viewMode !== "book" || S.isPortrait) {
+      if (S.isPortrait) {
         UI.hideTip();
 
         var m0 = hoverMarkerFor(container);
@@ -100,7 +99,7 @@
     });
 
     container.addEventListener("click", function (e) {
-      if (S.viewMode !== "book" || S.isPortrait || S.isJumping || S.coverAnimating) return;
+      if (S.isPortrait || S.isJumping || S.coverAnimating) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
@@ -124,14 +123,12 @@
     EPSF.events.bindDock();
     EPSF.events.bindEdges();
     EPSF.events.bindStageClick();
-    EPSF.events.bindBookWrapPointer();
     EPSF.events.bindStacks();
     EPSF.events.bindKeyboard();
     EPSF.events.bindResize();
     EPSF.events.bindIdle();
 
     Zoom.bind();
-    Cover.bindClick();
   };
 
   EPSF.events.bindCards = function () {
@@ -156,29 +153,7 @@
       if (S.coverAnimating) return;
 
       UI.hideEnd();
-
-      if (S.isMobile) {
-        Flip.jumpToInner(0, false);
-        return;
-      }
-
-      if (S.viewMode === "book") {
-        if (S.currentIdx === 0) {
-          Cover.closeToCover();
-        } else {
-          Cover.forceBook(0);
-
-          setTimeout(function () {
-            if (S.viewMode === "book" && S.currentIdx === 0) {
-              Cover.closeToCover();
-            } else {
-              Cover.forceFront();
-            }
-          }, 60);
-        }
-      } else {
-        Cover.forceFront();
-      }
+      Flip.jumpToInner(0, false);
     });
 
     document.getElementById("end-close").addEventListener("click", Reader.close);
@@ -212,29 +187,13 @@
       var rect = D.dTrack.getBoundingClientRect();
       var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
 
-      if (S.isMobile) {
-        var targetIdx = Math.round(frac * (S.N - 1));
-        Flip.jumpToInner(targetIdx, true);
-        return;
-      }
-
-      var desktopPages = S.N + 1;
-      var targetLogical = Math.max(
+      var totalLogical = S.total + 1;
+      var targetOrig = Math.max(
         1,
-        Math.min(desktopPages, Math.round(frac * (desktopPages - 1)) + 1)
+        Math.min(totalLogical, Math.round(frac * (totalLogical - 1)) + 1)
       );
 
-      if (targetLogical <= 1) {
-        Cover.forceFront();
-        return;
-      }
-
-      if (targetLogical > S.N) {
-        Cover.forceBook(S.isPortrait ? (S.N - 1) : S.lastSpreadIdx);
-        return;
-      }
-
-      Flip.jumpToInner(targetLogical - 2, true);
+      Flip.jumpToInner(Lay.indexForOriginalPage(targetOrig), true);
     });
 
     D.dPages.addEventListener("click", function () {
@@ -244,18 +203,11 @@
       input.type = "number";
       input.className = "page-input";
 
-      var maxPage = S.isMobile ? S.N : (S.N + 1);
+      var totalLogical = S.total + 1;
 
       input.min = "1";
-      input.max = String(maxPage);
-
-      if (S.isMobile) {
-        input.value = String(S.currentIdx + 1);
-      } else {
-        input.value = S.viewMode === "front"
-          ? "1"
-          : String(Math.min(maxPage, S.currentIdx + 2));
-      }
+      input.max = String(totalLogical);
+      input.value = String(Lay.currentOriginalPage());
 
       D.dPages.style.display = "none";
       D.dPages.parentNode.insertBefore(input, D.dPages);
@@ -277,21 +229,7 @@
         D.dPages.style.display = "";
 
         if (jump && !isNaN(val)) {
-          if (S.isMobile) {
-            var target = Math.max(0, Math.min(S.N - 1, val - 1));
-            Flip.jumpToInner(target, true);
-          } else {
-            var desktopPages = S.N + 1;
-
-            if (val <= 1) {
-              if (S.viewMode === "book") Cover.closeToCover();
-              else Cover.forceFront();
-            } else if (val > desktopPages) {
-              Cover.forceBook(S.isPortrait ? (S.N - 1) : S.lastSpreadIdx);
-            } else {
-              Flip.jumpToInner(val - 2, true);
-            }
-          }
+          Flip.jumpToInner(Lay.indexForOriginalPage(val), true);
         }
 
         UI.updateUIAll();
@@ -336,72 +274,6 @@
 
       Flip.requestFlip(e.clientX < midX ? -1 : 1);
     });
-  };
-
-  EPSF.events.bindBookWrapPointer = function () {
-    var bookWrapPointer = {
-      active: false,
-      x0: 0,
-      y0: 0,
-      moved: false
-    };
-
-    D.bookWrap.addEventListener("pointerdown", function (e) {
-      if (e.target && e.target.closest && e.target.closest(".media-box")) return;
-
-      if (S.isMobile || S.coverAnimating || S.isJumping) return;
-      if (S.viewMode !== "book" || !S.pageFlip || S.N <= 0) return;
-
-      bookWrapPointer.active = true;
-      bookWrapPointer.x0 = e.clientX;
-      bookWrapPointer.y0 = e.clientY;
-      bookWrapPointer.moved = false;
-    }, true);
-
-    D.bookWrap.addEventListener("pointermove", function (e) {
-      if (e.target && e.target.closest && e.target.closest(".media-box")) return;
-
-      if (S.isMobile || !bookWrapPointer.active) return;
-
-      var dx = e.clientX - bookWrapPointer.x0;
-      var dy = e.clientY - bookWrapPointer.y0;
-
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-        bookWrapPointer.moved = true;
-      }
-    }, true);
-
-    D.bookWrap.addEventListener("pointerup", function (e) {
-      if (e.target && e.target.closest && e.target.closest(".media-box")) {
-        bookWrapPointer.active = false;
-        return;
-      }
-
-      if (S.isMobile || !bookWrapPointer.active || bookWrapPointer.moved) {
-        bookWrapPointer.active = false;
-        return;
-      }
-
-      bookWrapPointer.active = false;
-
-      var rect = D.bookWrap.getBoundingClientRect();
-      var midX = rect.left + rect.width / 2;
-      var isLeft = e.clientX < midX;
-
-      if (isLeft && S.currentIdx <= 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        Flip.requestFlip(-1);
-        return;
-      }
-
-      if (!isLeft && (S.isPortrait ? (S.currentIdx >= S.N - 1) : (S.currentIdx >= S.lastSpreadIdx))) {
-        e.preventDefault();
-        e.stopPropagation();
-        Flip.requestFlip(1);
-        return;
-      }
-    }, true);
   };
 
   EPSF.events.bindStacks = function () {
@@ -499,42 +371,17 @@
       var oldW = S.pageW;
       var oldH = S.pageH;
       var oldPortrait = S.isPortrait;
+      var currentOrig = Lay.currentOriginalPage();
 
       Lay.computeLayout();
 
       if (oldMobile !== S.isMobile && S.N > 0) {
-        var currentLogicalPage;
-
-        if (oldMobile) {
-          currentLogicalPage = S.currentIdx + 1;
-        } else {
-          if (S.viewMode === "front") currentLogicalPage = 1;
-          else currentLogicalPage = S.currentIdx + 2;
-        }
-
         Med.clearOverlays();
         Lay.rebuildInner();
         Lay.buildStacks();
 
-        if (S.isMobile) {
-          Cover.destroy(true);
-
-          D.bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
-
-          S.viewMode = "book";
-
-          var targetIdx = Math.max(0, Math.min(S.N - 1, currentLogicalPage - 1));
-          Reader.createFlipbook(targetIdx, true);
-        } else {
-          if (currentLogicalPage <= 1) {
-            Cover.forceFront();
-          } else {
-            var desktopTargetIdx = Math.max(0, Math.min(S.N - 1, currentLogicalPage - 2));
-            Cover.forceBook(desktopTargetIdx);
-          }
-
-          Cover.build();
-        }
+        var targetIdx = Lay.indexForOriginalPage(currentOrig);
+        Reader.createFlipbook(targetIdx, true);
 
         return;
       }
@@ -546,21 +393,12 @@
       ) {
         Med.clearOverlays();
 
-        if (!S.isMobile && S.viewMode === "front") {
-          Cover.destroy(false);
-          Cover.build();
-        }
-
         var start = UI.getCurrentIndex();
 
         if (S.N > 0) {
           Reader.createFlipbook(start, true);
         }
       } else {
-        if (!S.isMobile && S.viewMode === "front") {
-          Cover.position();
-        }
-
         UI.updateUIAll();
         Med.syncForCurrentPage();
       }
