@@ -9,6 +9,10 @@
   transition: opacity 0.18s ease;
 }
 
+/*
+  Keep media hidden only while a legacy cover mode is active.
+  In the current St.PageFlip-owned cover setup, this normally does not apply.
+*/
 .book-wrap.cover-mode .media-layer,
 .book-wrap.turning-cover .media-layer,
 .book-wrap.back-mode .media-layer {
@@ -20,24 +24,22 @@
   position: absolute;
   pointer-events: auto;
   overflow: hidden;
-  background: rgba(2, 8, 20, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  border: 0;
   border-radius: 10px;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: none;
 }
 
 /*
-  Video boxes are transparent and sized to the real video aspect ratio.
-  This removes black bars / letterboxing.
+  VIDEO BOX.
+
+  The box itself is transparent and sized to the real video aspect ratio.
+  This removes black bars and makes it feel embedded in the page.
 */
 .media-box.media-video {
   background: transparent;
   border: 0;
   box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   cursor: pointer;
 }
 
@@ -45,12 +47,17 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: fill;
   background: transparent;
-  transition: opacity 0.18s ease;
+  opacity: 1;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-/* Hide any native controls that might appear in some browsers. */
+/*
+  Hide native controls aggressively.
+  The video is still clickable for play/pause.
+*/
 .media-box.media-video video::-webkit-media-controls {
   display: none !important;
 }
@@ -94,12 +101,31 @@
   outline-offset: 3px;
 }
 
+/*
+  Very subtle fallback if the video file fails to load.
+  This avoids a completely invisible broken element.
+*/
+.media-box.media-video.media-error {
+  background: rgba(2, 8, 20, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/*
+  AUDIO BOX.
+  Audio still uses a small visible player panel.
+*/
 .media-box.media-audio {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
   min-height: 38px;
+  background: rgba(2, 8, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .media-audio-btn {
