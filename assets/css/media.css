@@ -33,7 +33,7 @@
 /*
   VIDEO BOX.
 
-  The box itself is transparent and sized to the real video aspect ratio.
+  The box itself is transparent and sized to the real video/poster aspect ratio.
   This removes black bars and makes it feel embedded in the page.
 */
 .media-box.media-video {
@@ -43,15 +43,57 @@
   cursor: pointer;
 }
 
+/*
+  Poster / first-frame image.
+
+  This is what makes the video appear instantly.
+  It sits underneath the video and fades out once the video is ready.
+*/
+.media-box.media-video .media-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+/*
+  Video element.
+
+  If a poster exists, video starts invisible and fades in when ready.
+  If no poster exists, video is visible immediately, though the browser may
+  still need a moment to paint the first frame.
+*/
 .media-box.media-video video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   object-fit: fill;
   background: transparent;
-  opacity: 1;
+  opacity: 0;
+  transition: opacity 160ms ease;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.media-box.media-video.media-ready video {
+  opacity: 1;
+}
+
+.media-box.media-video.no-poster video {
+  opacity: 1;
+}
+
+.media-box.media-video.is-playing .media-frame {
+  opacity: 0;
 }
 
 /*
@@ -108,6 +150,10 @@
 .media-box.media-video.media-error {
   background: rgba(2, 8, 20, 0.16);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.media-box.media-video.media-error .media-frame {
+  opacity: 1;
 }
 
 /*
