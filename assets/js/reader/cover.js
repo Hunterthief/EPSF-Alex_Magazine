@@ -20,6 +20,15 @@
   var FRONT_PAGE = 1;
   var INSIDE_PAGE = 2;
 
+  /*
+    Reveal the real magazine after the cover has passed the halfway point.
+
+    0.50 is exactly halfway.
+    0.58 lets the back of the cover, page 2, become clearly visible first,
+    then the real magazine fades in underneath while the cover keeps turning.
+  */
+  var REVEAL_PROGRESS = 0.58;
+
   var TEMPLATE =
     '<div class="cover-leaf">' +
       '<div class="cover-face cover-front">' +
@@ -204,6 +213,17 @@
     D.turnCover.classList.add("cover-closed");
     D.turnCover.style.pointerEvents = "auto";
 
+    if (D.bookWrap) {
+      D.bookWrap.classList.add("cover-mode");
+      D.bookWrap.classList.remove(
+        "back-mode",
+        "turning-cover",
+        "cover-opening",
+        "cover-closing",
+        "cover-reveal"
+      );
+    }
+
     setInstant(0, 1);
   }
 
@@ -224,7 +244,7 @@
   function runAnimation(mode, done) {
     var leaf = ensureDom();
 
-    if (!leaf || !D.turnCover) {
+    if (!leaf || !D.turnCover || !D.bookWrap) {
       done();
       return;
     }
@@ -246,16 +266,44 @@
       mode === "open" ? "cover-opening" : "cover-closing"
     );
 
+    /*
+      Opening:
+        - cover-mode stays on
+        - turning-cover hides the magazine immediately
+        - cover-reveal is NOT added yet
+        - magazine appears later via revealTimer
+
+      Closing:
+        - cover-mode stays on
+        - turning-cover is added
+        - cover-reveal is added immediately so the magazine remains visible
+          while the cover closes over it
+    */
     D.bookWrap.classList.add(
+      "cover-mode",
       "turning-cover",
       mode === "open" ? "cover-opening" : "cover-closing"
     );
 
+    D.bookWrap.classList.remove("back-mode");
+
     if (mode === "open") {
       D.bookWrap.classList.remove("cover-closing", "cover-reveal");
+
+      if (S.pageFlip && S.N > 0) {
+        try {
+          S.pageFlip.turnToPage(0);
+        } catch (e) {}
+      }
     } else {
       D.bookWrap.classList.remove("cover-opening");
       D.bookWrap.classList.add("cover-reveal");
+
+      if (S.pageFlip && S.N > 0) {
+        try {
+          S.pageFlip.turnToPage(0);
+        } catch (e) {}
+      }
     }
 
     var animName = mode === "open" ? "coverOpen" : "coverClose";
@@ -290,9 +338,14 @@
     );
 
     /*
-      Opening:
-      Reveal the real St.PageFlip page 2 underneath near the end.
-      Because the back of the cover is also page 2, it blends seamlessly.
+      Opening reveal timing.
+
+      The back of the cover becomes visible around 50%.
+      We reveal the real magazine slightly after that, so the handoff feels natural:
+        front cover turns
+        back cover/page 2 appears
+        real magazine fades in underneath
+        cover finishes and disappears
     */
     if (mode === "open") {
       if (S.RM) {
@@ -300,7 +353,7 @@
       } else {
         revealTimer = setTimeout(function () {
           D.bookWrap.classList.add("cover-reveal");
-        }, Math.round(DURATION * 0.54));
+        }, Math.round(DURATION * REVEAL_PROGRESS));
       }
     }
   }
@@ -315,14 +368,16 @@
     S.currentIdx = 0;
     S.coverAnimating = false;
 
-    D.bookWrap.classList.remove(
-      "cover-mode",
-      "turning-cover",
-      "back-mode",
-      "cover-opening",
-      "cover-closing",
-      "cover-reveal"
-    );
+    if (D.bookWrap) {
+      D.bookWrap.classList.remove(
+        "cover-mode",
+        "turning-cover",
+        "back-mode",
+        "cover-opening",
+        "cover-closing",
+        "cover-reveal"
+      );
+    }
 
     hideCover();
 
@@ -347,15 +402,17 @@
     S.currentIdx = 0;
     S.coverAnimating = false;
 
-    D.bookWrap.classList.add("cover-mode");
+    if (D.bookWrap) {
+      D.bookWrap.classList.add("cover-mode");
 
-    D.bookWrap.classList.remove(
-      "turning-cover",
-      "back-mode",
-      "cover-opening",
-      "cover-closing",
-      "cover-reveal"
-    );
+      D.bookWrap.classList.remove(
+        "turning-cover",
+        "back-mode",
+        "cover-opening",
+        "cover-closing",
+        "cover-reveal"
+      );
+    }
 
     showClosed();
 
@@ -386,6 +443,7 @@
     /*
       Start closed:
       front cover page 1 visible.
+      Magazine is hidden by CSS as soon as turning-cover is added.
     */
     setInstant(0, 1);
 
@@ -409,8 +467,6 @@
     UI.hideHint();
     Med.clearOverlays();
 
-    D.bookWrap.classList.add("cover-mode");
-
     ensureDom();
     setSize();
 
@@ -433,15 +489,17 @@
     S.viewMode = "front";
     S.currentIdx = 0;
 
-    D.bookWrap.classList.add("cover-mode");
+    if (D.bookWrap) {
+      D.bookWrap.classList.add("cover-mode");
 
-    D.bookWrap.classList.remove(
-      "turning-cover",
-      "back-mode",
-      "cover-opening",
-      "cover-closing",
-      "cover-reveal"
-    );
+      D.bookWrap.classList.remove(
+        "turning-cover",
+        "back-mode",
+        "cover-opening",
+        "cover-closing",
+        "cover-reveal"
+      );
+    }
 
     showClosed();
 
@@ -466,14 +524,16 @@
 
     S.viewMode = "book";
 
-    D.bookWrap.classList.remove(
-      "cover-mode",
-      "turning-cover",
-      "back-mode",
-      "cover-opening",
-      "cover-closing",
-      "cover-reveal"
-    );
+    if (D.bookWrap) {
+      D.bookWrap.classList.remove(
+        "cover-mode",
+        "turning-cover",
+        "back-mode",
+        "cover-opening",
+        "cover-closing",
+        "cover-reveal"
+      );
+    }
 
     if (S.pageFlip && S.N > 0) {
       var t = Lay.clampInner(idx);
@@ -497,6 +557,15 @@
 
     if (hide !== false) {
       hideCover();
+
+      if (D.bookWrap) {
+        D.bookWrap.classList.remove(
+          "turning-cover",
+          "cover-opening",
+          "cover-closing",
+          "cover-reveal"
+        );
+      }
     } else {
       if (S.viewMode === "front") {
         showClosed();
