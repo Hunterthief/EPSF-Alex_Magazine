@@ -12,9 +12,8 @@
         "w": 0.70,
         "h": 0.30
       },
-      "controls": true,
       "autoplay": false,
-      "muted": true,
+      "muted": false,
       "loop": false
     }
   ]
