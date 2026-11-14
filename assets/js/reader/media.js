@@ -152,6 +152,7 @@
     */
     try {
       video.muted = true;
+      video.setAttribute("muted", "");
 
       var p = video.play();
 
@@ -185,15 +186,23 @@
 
     video.preload = "auto";
     video.muted = true;
+    video.setAttribute("muted", "");
+
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
+    /*
+      IMPORTANT:
+      Do NOT use setAttribute("controls", "false").
+      Boolean attributes are enabled merely by existing.
+    */
     video.controls = false;
-    video.setAttribute("controls", "false");
-    video.setAttribute("controlslist", "nodownload nofullscreen noremoteplayback");
+    video.removeAttribute("controls");
+
     video.disablePictureInPicture = true;
     video.setAttribute("disablepictureinpicture", "");
+
     video.setAttribute("disableremoteplayback", "");
 
     video.style.cssText =
@@ -406,38 +415,6 @@
     });
   };
 
-  /*
-    FORCE AUDIBLE PLAYBACK.
-
-    This is called when the user clicks/taps the video.
-    It intentionally overrides manifest muted settings because the user
-    explicitly started playback.
-  */
-  function makeVideoAudible(video, m) {
-    if (!video) return;
-
-    try {
-      video.muted = false;
-      video.defaultMuted = false;
-      video.removeAttribute("muted");
-
-      var vol = 1;
-
-      if (m && typeof m.volume === "number" && m.volume > 0) {
-        vol = m.volume;
-      }
-
-      video.volume = U.clampNum(vol, 0, 1);
-
-      /*
-        If volume was zero, force audible volume.
-      */
-      if (!video.volume || video.volume <= 0) {
-        video.volume = 1;
-      }
-    } catch (e) {}
-  }
-
   EPSF.media.createVideoOverlay = function (m, slot) {
     if (!D.mediaLayer || !m.src) return;
 
@@ -463,7 +440,7 @@
     box.setAttribute("tabindex", "0");
     box.setAttribute(
       "aria-label",
-      (m.title || "Video") + " — click to play or pause with sound"
+      (m.title || "Video") + " — tap to play with sound"
     );
 
     var posterImg = null;
@@ -481,15 +458,21 @@
 
     var video = document.createElement("video");
 
+    /*
+      IMPORTANT:
+      Remove native controls completely.
+      Do not use controls="false".
+    */
     video.controls = false;
-    video.setAttribute("controls", "false");
-    video.setAttribute("controlslist", "nodownload nofullscreen noremoteplayback");
+    video.removeAttribute("controls");
+
     video.disablePictureInPicture = true;
     video.setAttribute("disablepictureinpicture", "");
     video.setAttribute("disableremoteplayback", "");
 
     video.loop = !!m.loop;
     video.preload = "auto";
+
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
@@ -497,20 +480,29 @@
     /*
       Initial muted state.
 
-      For autoplay, manifest muted is respected.
-      For manual click, makeVideoAudible() overrides it.
+      If manifest wants muted autoplay, start muted.
+      If user taps, we force audible playback.
     */
     video.muted = !!m.muted;
 
-    video.volume = U.clampNum(
+    if (video.muted) {
+      video.setAttribute("muted", "");
+    } else {
+      video.removeAttribute("muted");
+      video.defaultMuted = false;
+    }
+
+    var initialVolume = U.clampNum(
       typeof m.volume === "number" && m.volume > 0 ? m.volume : 1,
       0,
       1
     );
 
-    if (!video.volume || video.volume <= 0) {
-      video.volume = 1;
+    if (!initialVolume || initialVolume <= 0) {
+      initialVolume = 1;
     }
+
+    video.volume = initialVolume;
 
     if (m.title) {
       video.setAttribute("aria-label", m.title);
@@ -535,8 +527,51 @@
       rect: rect,
       slot: slot,
       key: entryKey(m, slot),
-      audibleRequested: false
+      audibleRequested: false,
+      userUnmuted: false
     };
+
+    var audioLock = false;
+
+    function forceAudible() {
+      if (audioLock) return;
+
+      /*
+        If it is already audible, do nothing.
+      */
+      if (!video.muted && video.volume > 0) return;
+
+      audioLock = true;
+
+      try {
+        item.audibleRequested = true;
+        item.userUnmuted = true;
+
+        video.muted = false;
+        video.defaultMuted = false;
+        video.removeAttribute("muted");
+
+        var vol = U.clampNum(
+          typeof m.volume === "number" && m.volume > 0 ? m.volume : 1,
+          0,
+          1
+        );
+
+        if (!vol || vol <= 0) {
+          vol = 1;
+        }
+
+        video.volume = vol;
+
+        if (!video.volume || video.volume <= 0) {
+          video.volume = 1;
+        }
+      } catch (e) {}
+
+      setTimeout(function () {
+        audioLock = false;
+      }, 0);
+    }
 
     function markReady() {
       box.classList.add("media-ready");
@@ -558,30 +593,37 @@
     }
 
     video.addEventListener("loadedmetadata", onMeta);
+
     video.addEventListener("loadeddata", function () {
       onMeta();
       markReady();
     });
+
     video.addEventListener("canplay", markReady);
 
     video.addEventListener("play", function () {
       box.classList.add("is-playing");
+      box.classList.remove("media-blocked");
       pauseOtherMedia(video);
+
+      /*
+        If this play was triggered by a user gesture that requested sound,
+        make sure the browser did not silently mute it.
+      */
+      if (item.audibleRequested) {
+        forceAudible();
+      }
     });
 
     video.addEventListener("playing", function () {
-      /*
-        Some browsers may auto-mute playback despite our request.
-        If the user explicitly asked for audible playback, force unmute again.
-      */
-      if (item.audibleRequested && video.muted) {
-        makeVideoAudible(video, m);
+      if (item.audibleRequested) {
+        forceAudible();
       }
     });
 
     video.addEventListener("volumechange", function () {
-      if (item.audibleRequested && video.muted) {
-        makeVideoAudible(video, m);
+      if (item.audibleRequested) {
+        forceAudible();
       }
     });
 
@@ -600,24 +642,40 @@
 
     function playWithSound() {
       S.mediaUserGesture = true;
-      item.audibleRequested = true;
 
-      makeVideoAudible(video, m);
+      forceAudible();
 
-      if (video.ended) {
+      /*
+        If the video ended, rewind before playing again.
+      */
+      if (
+        video.ended ||
+        (video.duration && video.currentTime >= video.duration - 0.05)
+      ) {
         try {
           video.currentTime = 0;
         } catch (e) {}
       }
+
+      /*
+        If the element has not initialized yet, force load before play.
+        This still happens inside the user gesture.
+      */
+      try {
+        if (video.readyState === 0 || video.networkState === 0) {
+          video.load();
+        }
+      } catch (e) {}
 
       var p = video.play();
 
       if (p && typeof p.catch === "function") {
         p.catch(function () {
           /*
-            Do not silently fallback to muted playback after a manual click.
-            If audible playback is blocked, the user can click again.
+            Do not fallback to muted playback after a manual tap.
+            Keep poster visible and let the user tap again if needed.
           */
+          box.classList.add("media-blocked");
         });
       }
     }
@@ -628,18 +686,58 @@
         e.stopPropagation();
       }
 
+      S.mediaUserGesture = true;
+
+      /*
+        Case 1:
+        Video is paused or ended → play with sound.
+      */
       if (video.paused || video.ended) {
         playWithSound();
-      } else {
-        video.pause();
+        return;
       }
+
+      /*
+        Case 2:
+        Video is already playing but muted.
+        This commonly happens with autoplay muted videos.
+        Tap should unmute it, not pause it.
+      */
+      if (video.muted) {
+        forceAudible();
+        return;
+      }
+
+      /*
+        Case 3:
+        Video is playing with sound → pause.
+      */
+      video.pause();
     }
 
-    box.addEventListener("click", togglePlay);
+    var lastTapTime = 0;
+
+    function handleTap(e) {
+      var now = Date.now();
+
+      /*
+        Prevent touchend + click double-firing on mobile.
+      */
+      if (now - lastTapTime < 300) return;
+
+      lastTapTime = now;
+      togglePlay(e);
+    }
+
+    box.addEventListener("click", handleTap);
+
+    box.addEventListener("touchend", function (e) {
+      handleTap(e);
+    });
 
     box.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") {
-        togglePlay(e);
+        handleTap(e);
       }
     });
 
@@ -669,15 +767,17 @@
       - If manifest says muted, autoplay muted.
       - If manifest says not muted, try audible autoplay.
       - If browser blocks audible autoplay, do not start muted silently.
-        The user can click to start with sound.
+        The user can tap to start with sound.
     */
     if (m.autoplay) {
       if (m.muted) {
         video.muted = true;
+        video.setAttribute("muted", "");
+
         video.play().catch(function () {});
       } else {
         item.audibleRequested = true;
-        makeVideoAudible(video, m);
+        forceAudible();
 
         var ap = video.play();
 
@@ -687,6 +787,7 @@
               Autoplay with sound was blocked by the browser.
               Leave it paused with poster/first frame visible.
             */
+            box.classList.add("media-blocked");
           });
         }
       }
@@ -704,6 +805,7 @@
     var audio = new Audio(resolveSrc(m.src));
     audio.loop = !!m.loop;
     audio.preload = "auto";
+
     audio.volume = U.clampNum(
       typeof m.volume === "number" && m.volume > 0 ? m.volume : 1,
       0,
