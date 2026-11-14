@@ -8,7 +8,6 @@
   var Lay = EPSF.layout;
   var UI = EPSF.ui;
   var Med = EPSF.media;
-  var Cover = EPSF.cover;
   var Flip = EPSF.flip;
   var Zoom = EPSF.zoom;
 
@@ -93,7 +92,10 @@
 
       S.currentIdx = Lay.clampInner(idx);
 
-      // Only remove media when a real flip starts.
+      /*
+        Only remove media when an actual flip starts.
+        Hovering/dragging state changes should not kill playback.
+      */
       Med.clearOverlays();
       UI.updateUIAll();
     });
@@ -101,8 +103,6 @@
     S.pageFlip.on("changeState", function (e) {
       S.sfState = (e && e.data) ? e.data : "read";
 
-      // Do NOT clear media on harmless hover/drag state changes.
-      // Only resync when the reader returns to read state.
       if (S.sfState === "read") {
         UI.updateUIAll();
         Med.syncForCurrentPage();
@@ -120,9 +120,6 @@
     UI.ensureAudio();
     Flip.stopHeld();
     UI.hideSparks();
-
-    Cover.clearWatchdog();
-    Cover.destroy(true);
 
     Med.clearOverlays();
 
@@ -157,7 +154,7 @@
     S.coverAnimToken++;
     S.coverAnimating = false;
     S.dragTurn = 0;
-    S.viewMode = "front";
+    S.viewMode = "book";
 
     D.loader.classList.remove("err", "gone");
     D.loaderTxt.textContent = "Preparing issue";
@@ -171,8 +168,16 @@
     UI.hideEnd();
     UI.hideTip();
 
-    D.bookWrap.classList.remove("visible", "back-mode", "turning-cover", "is-flipping");
-    D.bookWrap.classList.add("cover-mode");
+    D.bookWrap.classList.remove(
+      "visible",
+      "cover-mode",
+      "back-mode",
+      "turning-cover",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal",
+      "is-flipping"
+    );
 
     var loadedManifest = null;
 
@@ -210,6 +215,8 @@
       Med.clearOverlays();
       S.mediaUserGesture = true;
 
+      return U.prepareBackground();
+    }).then(function () {
       return L.ensurePageFlip().then(function () {
         Lay.computeLayout();
         Lay.rebuildInner();
@@ -219,33 +226,14 @@
           D.statPages.textContent = String(S.total).padStart(2, "0");
         }
 
-        if (S.isMobile) {
-          Cover.destroy(true);
+        /*
+          Desktop starts at index 0:
+            Cover-saver.png + 1.jpg cover
 
-          D.bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
-
-          S.viewMode = "book";
-          S.currentIdx = 0;
-
-          EPSF.reader.createFlipbook(0, false);
-        } else {
-          S.viewMode = "front";
-          S.currentIdx = 0;
-
-          D.bookWrap.classList.add("cover-mode");
-          D.bookWrap.classList.remove("turning-cover", "back-mode");
-
-          Cover.showStatic();
-
-          if (S.N > 0) {
-            EPSF.reader.createFlipbook(0, false);
-          } else {
-            D.loader.classList.add("gone");
-            D.bookWrap.classList.add("visible");
-            D.reader.classList.add("is-open");
-            UI.updateUIAll();
-          }
-        }
+          Mobile starts at index 0:
+            1.jpg cover
+        */
+        EPSF.reader.createFlipbook(0, false);
       });
     }).catch(function (e) {
       var msg = (e && e.message) ? e.message : String(e);
@@ -274,8 +262,6 @@
     S.dragTurn = 0;
 
     Flip.stopHeld();
-    Cover.clearWatchdog();
-    Cover.destroy(true);
 
     Med.clearOverlays();
 
@@ -295,7 +281,15 @@
     D.reader.classList.add("is-closing");
     D.reader.classList.remove("idle");
 
-    D.bookWrap.classList.remove("visible", "is-flipping", "turning-cover");
+    D.bookWrap.classList.remove(
+      "visible",
+      "is-flipping",
+      "cover-mode",
+      "turning-cover",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
 
     setTimeout(function () {
       D.reader.hidden = true;
