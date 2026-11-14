@@ -8,7 +8,17 @@
   var Med = EPSF.media;
   var Lay = EPSF.layout;
 
-  var DURATION = S.RM ? 1 : 980;
+  var DURATION = S.RM ? 1 : 880;
+
+  /*
+    Your cover is page 1.
+    The inside/back of the cover should be page 2.
+
+    If your issue numbering is different, change this number.
+    Example:
+      INSIDE_PAGE = 1;
+  */
+  var INSIDE_PAGE = 2;
 
   var TEMPLATE =
     '<div class="cover-leaf">' +
@@ -21,17 +31,47 @@
     '</div>';
 
   var activeLeafHandler = null;
-  var preloadedInsideSrc = "";
+  var revealTimer = null;
 
-  function clearWatchdog() {
+  function clearWatchdogOnly() {
     if (S.coverWatchdogTimer) {
       clearTimeout(S.coverWatchdogTimer);
       S.coverWatchdogTimer = null;
     }
   }
 
-  function getLeaf() {
-    return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
+  function clearRevealTimer() {
+    if (revealTimer) {
+      clearTimeout(revealTimer);
+      revealTimer = null;
+    }
+  }
+
+  function clearAllTimers() {
+    clearWatchdogOnly();
+    clearRevealTimer();
+  }
+
+  function removeCoverStates() {
+    if (!D.turnCover) return;
+
+    D.turnCover.classList.remove(
+      "cover-closed",
+      "cover-opening",
+      "cover-closing",
+      "animating"
+    );
+  }
+
+  function removeBookCoverClasses() {
+    if (!D.bookWrap) return;
+
+    D.bookWrap.classList.remove(
+      "turning-cover",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
   }
 
   function detachLeafListener() {
@@ -43,73 +83,19 @@
     }
   }
 
-  function getFrontSrc() {
+  function getLeaf() {
+    return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
+  }
+
+  function frontSrc() {
     if (!S.pagesUrl) return "";
     return U.pageUrl(1);
   }
 
-  function getInsideSrc() {
-    /*
-      The inside/back of the cover should be the first real inside page.
-
-      On desktop, St.PageFlip inner pages usually start at page 2:
-        inner[0] = page 2
-        inner[1] = page 3
-        ...
-
-      So S.inner[0] is the best source for the inside cover face.
-    */
-    if (S.inner && S.inner.length) {
-      return S.inner[0];
-    }
-
-    if (S.total >= 2) {
-      return U.pageUrl(2);
-    }
-
-    if (S.backCoverSrc) {
-      return S.backCoverSrc;
-    }
-
-    return "";
-  }
-
-  function preloadInsideSrc(src) {
-    if (!src || preloadedInsideSrc === src) return;
-
-    preloadedInsideSrc = src;
-
-    try {
-      U.loadImage(src).catch(function () {});
-    } catch (e) {}
-  }
-
-  function updateCoverImages() {
-    if (!D.turnCover) return;
-
-    var front = D.turnCover.querySelector("#turn-cover-front-img");
-    var back = D.turnCover.querySelector("#turn-cover-back-img");
-
-    var frontSrc = getFrontSrc();
-    var insideSrc = getInsideSrc();
-
-    if (front && frontSrc && front.getAttribute("src") !== frontSrc) {
-      front.src = frontSrc;
-    }
-
-    if (back) {
-      if (insideSrc) {
-        if (back.getAttribute("src") !== insideSrc) {
-          back.src = insideSrc;
-        }
-
-        back.style.display = "";
-        preloadInsideSrc(insideSrc);
-      } else {
-        back.removeAttribute("src");
-        back.style.display = "none";
-      }
-    }
+  function insideSrc() {
+    if (!S.pagesUrl) return "";
+    if (S.total < INSIDE_PAGE) return "";
+    return U.pageUrl(INSIDE_PAGE);
   }
 
   function ensureDom() {
@@ -119,7 +105,28 @@
       D.turnCover.innerHTML = TEMPLATE;
     }
 
-    updateCoverImages();
+    var frontImg = D.turnCover.querySelector("#turn-cover-front-img");
+    var backImg = D.turnCover.querySelector("#turn-cover-back-img");
+
+    if (frontImg) {
+      var fSrc = frontSrc();
+      if (fSrc) {
+        frontImg.src = fSrc;
+        frontImg.style.display = "block";
+      }
+    }
+
+    if (backImg) {
+      var bSrc = insideSrc();
+
+      if (bSrc) {
+        backImg.src = bSrc;
+        backImg.style.display = "block";
+      } else {
+        backImg.removeAttribute("src");
+        backImg.style.display = "none";
+      }
+    }
 
     return getLeaf();
   }
@@ -132,19 +139,15 @@
     D.turnCover.style.top = "0px";
 
     /*
-      IMPORTANT:
-      On desktop, the cover starts in the RIGHT page position.
+      Desktop:
+      The closed cover must sit in the RIGHT page position.
 
       bookWrap width = pageW * 2
+      left page  = 0 to pageW
+      right page = pageW to pageW * 2
 
-      left page:
-        x = 0 to pageW
-
-      right page:
-        x = pageW to pageW * 2
-
-      So the cover leaf starts at pageW.
-      Its hinge is the left edge, which is the spine.
+      Mobile:
+      Cover is just a normal St.PageFlip page, so this is hidden anyway.
     */
     D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW) + "px";
   }
@@ -169,10 +172,15 @@
 
     ensureDom();
     setSize();
-    updateCoverImages();
+
+    clearAllTimers();
+    detachLeafListener();
 
     D.turnCover.hidden = false;
-    D.turnCover.classList.remove("cover-opening", "cover-closing", "animating");
+
+    removeCoverStates();
+    removeBookCoverClasses();
+
     D.turnCover.classList.add("cover-closed");
     D.turnCover.style.pointerEvents = "auto";
 
@@ -182,10 +190,14 @@
   function hideCover() {
     if (!D.turnCover) return;
 
+    clearAllTimers();
     detachLeafListener();
 
     D.turnCover.hidden = true;
-    D.turnCover.classList.remove("cover-closed", "cover-opening", "cover-closing", "animating");
+
+    removeCoverStates();
+    removeBookCoverClasses();
+
     D.turnCover.style.pointerEvents = "";
   }
 
@@ -198,14 +210,14 @@
     }
 
     setSize();
-    updateCoverImages();
     detachLeafListener();
-    clearWatchdog();
+    clearAllTimers();
 
     D.turnCover.hidden = false;
     D.turnCover.style.setProperty("--cover-duration", DURATION + "ms");
 
-    D.turnCover.classList.remove("cover-closed", "cover-opening", "cover-closing", "animating");
+    removeCoverStates();
+    removeBookCoverClasses();
 
     void D.turnCover.offsetWidth;
 
@@ -213,6 +225,18 @@
       "animating",
       mode === "open" ? "cover-opening" : "cover-closing"
     );
+
+    D.bookWrap.classList.add(
+      "turning-cover",
+      mode === "open" ? "cover-opening" : "cover-closing"
+    );
+
+    if (mode === "open") {
+      D.bookWrap.classList.remove("cover-closing", "cover-reveal");
+    } else {
+      D.bookWrap.classList.remove("cover-opening");
+      D.bookWrap.classList.add("cover-reveal");
+    }
 
     var animName = mode === "open" ? "coverOpen" : "coverClose";
     var finished = false;
@@ -222,7 +246,7 @@
 
       finished = true;
 
-      clearWatchdog();
+      clearAllTimers();
       detachLeafListener();
       done();
     }
@@ -238,13 +262,31 @@
 
     /*
       Safety watchdog.
-      If animationend never fires for any browser reason, the cover still resolves.
+      If animationend never fires, the cover still resolves.
     */
-    S.coverWatchdogTimer = setTimeout(finish, DURATION + 750);
+    S.coverWatchdogTimer = setTimeout(
+      finish,
+      S.RM ? 120 : DURATION + 650
+    );
+
+    /*
+      Opening:
+      Reveal the interior underneath near the end, so the inside-cover page
+      blends seamlessly into the real St.PageFlip page.
+    */
+    if (mode === "open") {
+      if (S.RM) {
+        D.bookWrap.classList.add("cover-reveal");
+      } else {
+        revealTimer = setTimeout(function () {
+          D.bookWrap.classList.add("cover-reveal");
+        }, Math.round(DURATION * 0.64));
+      }
+    }
   }
 
   EPSF.cover.finishOpen = function () {
-    clearWatchdog();
+    clearAllTimers();
     detachLeafListener();
 
     if (S.viewMode === "book" && !S.coverAnimating) return;
@@ -253,7 +295,14 @@
     S.currentIdx = 0;
     S.coverAnimating = false;
 
-    D.bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
+    D.bookWrap.classList.remove(
+      "cover-mode",
+      "turning-cover",
+      "back-mode",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
 
     hideCover();
 
@@ -269,7 +318,7 @@
   };
 
   EPSF.cover.finishClose = function () {
-    clearWatchdog();
+    clearAllTimers();
     detachLeafListener();
 
     if (S.viewMode === "front" && !S.coverAnimating) return;
@@ -279,7 +328,14 @@
     S.coverAnimating = false;
 
     D.bookWrap.classList.add("cover-mode");
-    D.bookWrap.classList.remove("turning-cover", "back-mode");
+
+    D.bookWrap.classList.remove(
+      "turning-cover",
+      "back-mode",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
 
     showClosed();
 
@@ -304,15 +360,12 @@
     UI.hideHint();
     Med.clearOverlays();
 
-    D.bookWrap.classList.add("turning-cover");
-
     ensureDom();
     setSize();
-    updateCoverImages();
 
     /*
       Start closed:
-      rotateY(0deg), fully visible, front cover showing page 1.
+      rotateY(0deg), fully visible.
     */
     setInstant(0, 1);
 
@@ -336,23 +389,22 @@
     UI.hideHint();
     Med.clearOverlays();
 
-    D.bookWrap.classList.add("cover-mode", "turning-cover");
+    D.bookWrap.classList.add("cover-mode");
 
     ensureDom();
     setSize();
-    updateCoverImages();
 
     /*
       Start from the opened position:
-      rotateY(-180deg), invisible, then animate back to closed.
+      rotateY(-180deg), visible, showing the inside cover page.
     */
-    setInstant(-180, 0);
+    setInstant(-180, 1);
 
     runAnimation("close", EPSF.cover.finishClose);
   };
 
   EPSF.cover.forceFront = function () {
-    clearWatchdog();
+    clearAllTimers();
     detachLeafListener();
 
     S.coverAnimToken++;
@@ -362,7 +414,14 @@
     S.currentIdx = 0;
 
     D.bookWrap.classList.add("cover-mode");
-    D.bookWrap.classList.remove("turning-cover", "back-mode");
+
+    D.bookWrap.classList.remove(
+      "turning-cover",
+      "back-mode",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
 
     showClosed();
 
@@ -377,7 +436,7 @@
   };
 
   EPSF.cover.forceBook = function (idx) {
-    clearWatchdog();
+    clearAllTimers();
     detachLeafListener();
 
     S.coverAnimToken++;
@@ -387,7 +446,14 @@
 
     S.viewMode = "book";
 
-    D.bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
+    D.bookWrap.classList.remove(
+      "cover-mode",
+      "turning-cover",
+      "back-mode",
+      "cover-opening",
+      "cover-closing",
+      "cover-reveal"
+    );
 
     if (S.pageFlip && S.N > 0) {
       var t = Lay.clampInner(idx);
@@ -404,7 +470,7 @@
   };
 
   EPSF.cover.destroy = function (hide) {
-    clearWatchdog();
+    clearAllTimers();
     detachLeafListener();
 
     S.coverAnimating = false;
@@ -426,17 +492,15 @@
       return false;
     }
 
-    if (S.coverAnimating) {
-      return true;
-    }
-
     ensureDom();
     setSize();
-    updateCoverImages();
 
-    if (S.viewMode === "front") {
+    if (S.viewMode === "front" || S.coverAnimating) {
       D.turnCover.hidden = false;
-      showClosed();
+
+      if (!S.coverAnimating) {
+        showClosed();
+      }
     } else {
       hideCover();
     }
@@ -453,7 +517,7 @@
     setSize();
   };
 
-  EPSF.cover.clearWatchdog = clearWatchdog;
+  EPSF.cover.clearWatchdog = clearAllTimers;
 
   EPSF.cover.bindClick = function () {
     if (!D.turnCover) return;
