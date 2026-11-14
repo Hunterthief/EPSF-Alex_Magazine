@@ -146,6 +146,10 @@
   function primeHiddenVideo(video) {
     if (!video) return;
 
+    /*
+      Hidden preload videos are only used to warm cache and capture posters.
+      They stay muted so they do not make noise.
+    */
     try {
       video.muted = true;
 
@@ -230,10 +234,6 @@
       if (m.type === "video") {
         preloadVideo(m);
       } else if (m.type === "audio" && m.src) {
-        /*
-          Optional: warm audio cache too.
-          This does not affect visual appearance, but helps audio start faster.
-        */
         try {
           var a = new Audio(resolveSrc(m.src));
           a.preload = "auto";
@@ -406,6 +406,38 @@
     });
   };
 
+  /*
+    FORCE AUDIBLE PLAYBACK.
+
+    This is called when the user clicks/taps the video.
+    It intentionally overrides manifest muted settings because the user
+    explicitly started playback.
+  */
+  function makeVideoAudible(video, m) {
+    if (!video) return;
+
+    try {
+      video.muted = false;
+      video.defaultMuted = false;
+      video.removeAttribute("muted");
+
+      var vol = 1;
+
+      if (m && typeof m.volume === "number" && m.volume > 0) {
+        vol = m.volume;
+      }
+
+      video.volume = U.clampNum(vol, 0, 1);
+
+      /*
+        If volume was zero, force audible volume.
+      */
+      if (!video.volume || video.volume <= 0) {
+        video.volume = 1;
+      }
+    } catch (e) {}
+  }
+
   EPSF.media.createVideoOverlay = function (m, slot) {
     if (!D.mediaLayer || !m.src) return;
 
@@ -431,7 +463,7 @@
     box.setAttribute("tabindex", "0");
     box.setAttribute(
       "aria-label",
-      (m.title || "Video") + " — click to play or pause"
+      (m.title || "Video") + " — click to play or pause with sound"
     );
 
     var posterImg = null;
@@ -457,11 +489,28 @@
     video.setAttribute("disableremoteplayback", "");
 
     video.loop = !!m.loop;
-    video.muted = !!m.muted;
     video.preload = "auto";
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
+
+    /*
+      Initial muted state.
+
+      For autoplay, manifest muted is respected.
+      For manual click, makeVideoAudible() overrides it.
+    */
+    video.muted = !!m.muted;
+
+    video.volume = U.clampNum(
+      typeof m.volume === "number" && m.volume > 0 ? m.volume : 1,
+      0,
+      1
+    );
+
+    if (!video.volume || video.volume <= 0) {
+      video.volume = 1;
+    }
 
     if (m.title) {
       video.setAttribute("aria-label", m.title);
@@ -485,7 +534,8 @@
       type: "video",
       rect: rect,
       slot: slot,
-      key: entryKey(m, slot)
+      key: entryKey(m, slot),
+      audibleRequested: false
     };
 
     function markReady() {
@@ -515,12 +565,31 @@
     video.addEventListener("canplay", markReady);
 
     video.addEventListener("play", function () {
-      S.mediaUserGesture = true;
       box.classList.add("is-playing");
       pauseOtherMedia(video);
     });
 
+    video.addEventListener("playing", function () {
+      /*
+        Some browsers may auto-mute playback despite our request.
+        If the user explicitly asked for audible playback, force unmute again.
+      */
+      if (item.audibleRequested && video.muted) {
+        makeVideoAudible(video, m);
+      }
+    });
+
+    video.addEventListener("volumechange", function () {
+      if (item.audibleRequested && video.muted) {
+        makeVideoAudible(video, m);
+      }
+    });
+
     video.addEventListener("pause", function () {
+      box.classList.remove("is-playing");
+    });
+
+    video.addEventListener("ended", function () {
       box.classList.remove("is-playing");
     });
 
@@ -529,15 +598,38 @@
       markReady();
     });
 
+    function playWithSound() {
+      S.mediaUserGesture = true;
+      item.audibleRequested = true;
+
+      makeVideoAudible(video, m);
+
+      if (video.ended) {
+        try {
+          video.currentTime = 0;
+        } catch (e) {}
+      }
+
+      var p = video.play();
+
+      if (p && typeof p.catch === "function") {
+        p.catch(function () {
+          /*
+            Do not silently fallback to muted playback after a manual click.
+            If audible playback is blocked, the user can click again.
+          */
+        });
+      }
+    }
+
     function togglePlay(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
 
-      if (video.paused) {
-        S.mediaUserGesture = true;
-        video.play().catch(function () {});
+      if (video.paused || video.ended) {
+        playWithSound();
       } else {
         video.pause();
       }
@@ -553,10 +645,6 @@
 
     D.mediaLayer.appendChild(box);
 
-    /*
-      Place it immediately using the manifest rectangle.
-      After poster/video dimensions arrive, it is refit to the true aspect ratio.
-    */
     applyBasePosition(box, rect, slot);
 
     if (posterImg) {
@@ -575,8 +663,33 @@
 
     S.activeMedia.push(item);
 
+    /*
+      Autoplay behavior:
+
+      - If manifest says muted, autoplay muted.
+      - If manifest says not muted, try audible autoplay.
+      - If browser blocks audible autoplay, do not start muted silently.
+        The user can click to start with sound.
+    */
     if (m.autoplay) {
-      video.play().catch(function () {});
+      if (m.muted) {
+        video.muted = true;
+        video.play().catch(function () {});
+      } else {
+        item.audibleRequested = true;
+        makeVideoAudible(video, m);
+
+        var ap = video.play();
+
+        if (ap && typeof ap.catch === "function") {
+          ap.catch(function () {
+            /*
+              Autoplay with sound was blocked by the browser.
+              Leave it paused with poster/first frame visible.
+            */
+          });
+        }
+      }
     }
   };
 
@@ -592,10 +705,14 @@
     audio.loop = !!m.loop;
     audio.preload = "auto";
     audio.volume = U.clampNum(
-      typeof m.volume === "number" ? m.volume : 0.85,
+      typeof m.volume === "number" && m.volume > 0 ? m.volume : 1,
       0,
       1
     );
+
+    if (!audio.volume || audio.volume <= 0) {
+      audio.volume = 1;
+    }
 
     var btn = document.createElement("button");
     btn.type = "button";
@@ -637,6 +754,8 @@
 
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
+
+      S.mediaUserGesture = true;
 
       if (audio.paused) {
         audio.play().catch(function () {});
