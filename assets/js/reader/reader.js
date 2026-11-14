@@ -93,6 +93,7 @@
 
       S.currentIdx = Lay.clampInner(idx);
 
+      // Only remove media when a real flip starts.
       Med.clearOverlays();
       UI.updateUIAll();
     });
@@ -100,6 +101,8 @@
     S.pageFlip.on("changeState", function (e) {
       S.sfState = (e && e.data) ? e.data : "read";
 
+      // Do NOT clear media on harmless hover/drag state changes.
+      // Only resync when the reader returns to read state.
       if (S.sfState === "read") {
         UI.updateUIAll();
         Med.syncForCurrentPage();
@@ -107,8 +110,6 @@
         if (S.heldLoopRunning) {
           setTimeout(Flip.heldLoop, 30);
         }
-      } else {
-        Med.clearOverlays();
       }
     });
 
@@ -235,14 +236,6 @@
           D.bookWrap.classList.remove("turning-cover", "back-mode");
 
           Cover.showStatic();
-
-          L.ensureTurnJS().then(function () {
-            if (!D.reader.hidden && S.viewMode === "front") {
-              Cover.build();
-            }
-          }).catch(function () {
-            // Leave static fallback cover visible.
-          });
 
           if (S.N > 0) {
             EPSF.reader.createFlipbook(0, false);
