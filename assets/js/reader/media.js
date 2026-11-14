@@ -5,13 +5,18 @@
   var D = EPSF.dom;
   var U = EPSF.util;
 
+  S.mediaPreload = S.mediaPreload || {};
+
+  function cacheKey(m) {
+    return "vid:" + m.page + ":" + m.src;
+  }
+
   function entryKey(m, slot) {
-    return [
-      m.page,
-      m.type,
-      m.src,
-      slot && slot.slot ? slot.slot : "none"
-    ].join("|");
+    return cacheKey(m) + ":" + (slot && slot.slot ? slot.slot : "none");
+  }
+
+  function resolveSrc(src) {
+    return U.resolveMediaSrc(src);
   }
 
   function getPageSlotForOriginalPage(pageNum) {
@@ -67,15 +72,211 @@
     el.style.height = Math.max(1, Math.round(height)) + "px";
   }
 
+  function getPreloadEntry(m) {
+    var key = cacheKey(m);
+
+    if (!S.mediaPreload[key]) {
+      S.mediaPreload[key] = {
+        video: null,
+        posterDataUrl: "",
+        ready: false,
+        failed: false
+      };
+    }
+
+    return S.mediaPreload[key];
+  }
+
+  function preloadImageSrc(src) {
+    if (!src) return null;
+
+    var key = "img:" + src;
+
+    if (S.mediaPreload[key] && S.mediaPreload[key].img) {
+      return S.mediaPreload[key].img;
+    }
+
+    var img = new Image();
+    img.decoding = "async";
+    img.src = src;
+
+    S.mediaPreload[key] = {
+      img: img
+    };
+
+    return img;
+  }
+
+  function capturePosterFromVideo(video, m) {
+    var entry = getPreloadEntry(m);
+
+    if (!entry || entry.posterDataUrl) return;
+    if (!video || !video.videoWidth || !video.videoHeight) return;
+
+    try {
+      var maxW = 1600;
+      var scale = Math.min(1, maxW / video.videoWidth);
+
+      var w = Math.max(1, Math.round(video.videoWidth * scale));
+      var h = Math.max(1, Math.round(video.videoHeight * scale));
+
+      var canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+
+      var ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, w, h);
+
+      var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+
+      if (dataUrl && dataUrl.length > 100) {
+        entry.posterDataUrl = dataUrl;
+      }
+    } catch (e) {
+      /*
+        Canvas capture can fail for cross-origin media.
+        If that happens, the reader still works, it just may not have an
+        automatic first-frame poster.
+      */
+    }
+  }
+
+  function primeHiddenVideo(video) {
+    if (!video) return;
+
+    try {
+      video.muted = true;
+
+      var p = video.play();
+
+      if (p && typeof p.then === "function") {
+        p.then(function () {
+          try {
+            video.pause();
+          } catch (e) {}
+        }).catch(function () {});
+      } else {
+        try {
+          video.pause();
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }
+
+  function preloadVideo(m) {
+    if (!m || m.type !== "video" || !m.src) return;
+
+    var key = cacheKey(m);
+    var entry = getPreloadEntry(m);
+
+    if (entry.video) return;
+
+    if (m.poster) {
+      preloadImageSrc(resolveSrc(m.poster));
+    }
+
+    var video = document.createElement("video");
+
+    video.preload = "auto";
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    video.controls = false;
+    video.setAttribute("controls", "false");
+    video.setAttribute("controlslist", "nodownload nofullscreen noremoteplayback");
+    video.disablePictureInPicture = true;
+    video.setAttribute("disablepictureinpicture", "");
+    video.setAttribute("disableremoteplayback", "");
+
+    video.style.cssText =
+      "position:fixed;left:-99999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;";
+
+    video.src = resolveSrc(m.src);
+
+    if (m.poster) {
+      video.poster = resolveSrc(m.poster);
+    }
+
+    function onReadyData() {
+      entry.ready = true;
+      capturePosterFromVideo(video, m);
+    }
+
+    video.addEventListener("loadedmetadata", onReadyData);
+    video.addEventListener("loadeddata", onReadyData);
+    video.addEventListener("canplay", onReadyData);
+
+    video.addEventListener("error", function () {
+      entry.failed = true;
+    });
+
+    document.body.appendChild(video);
+
+    entry.video = video;
+
+    primeHiddenVideo(video);
+  }
+
+  EPSF.media.preloadIssue = function (manifest) {
+    if (!manifest || !Array.isArray(manifest.media)) return;
+
+    manifest.media.forEach(function (m) {
+      if (!m) return;
+
+      if (m.type === "video") {
+        preloadVideo(m);
+      } else if (m.type === "audio" && m.src) {
+        /*
+          Optional: warm audio cache too.
+          This does not affect visual appearance, but helps audio start faster.
+        */
+        try {
+          var a = new Audio(resolveSrc(m.src));
+          a.preload = "auto";
+        } catch (e) {}
+      }
+    });
+  };
+
+  function getBoxAspect(item) {
+    if (item.video && item.video.videoWidth && item.video.videoHeight) {
+      return item.video.videoWidth / item.video.videoHeight;
+    }
+
+    if (
+      item.posterImg &&
+      item.posterImg.naturalWidth &&
+      item.posterImg.naturalHeight
+    ) {
+      return item.posterImg.naturalWidth / item.posterImg.naturalHeight;
+    }
+
+    var entry = S.mediaPreload[cacheKey(item.media)];
+
+    if (
+      entry &&
+      entry.video &&
+      entry.video.videoWidth &&
+      entry.video.videoHeight
+    ) {
+      return entry.video.videoWidth / entry.video.videoHeight;
+    }
+
+    return null;
+  }
+
   function fitVideoItem(item) {
     if (!item || item.type !== "video") return;
 
     var box = item.el;
-    var video = item.player;
     var rect = item.rect;
     var slot = item.slot;
 
-    if (!box || !video || !rect) return;
+    if (!box || !rect) return;
 
     var pageW = S.pageW;
     var pageH = S.pageH;
@@ -91,21 +292,18 @@
 
     if (rectW <= 0 || rectH <= 0) return;
 
-    var vw = video.videoWidth || 0;
-    var vh = video.videoHeight || 0;
-
-    var videoAspect = (vw && vh) ? (vw / vh) : (rectW / rectH);
     var rectAspect = rectW / rectH;
+    var aspect = getBoxAspect(item) || rectAspect;
 
     var w;
     var h;
 
-    if (videoAspect >= rectAspect) {
+    if (aspect >= rectAspect) {
       w = rectW;
-      h = w / Math.max(videoAspect, 0.0001);
+      h = w / Math.max(aspect, 0.0001);
     } else {
       h = rectH;
-      w = h * Math.max(videoAspect, 0.0001);
+      w = h * Math.max(aspect, 0.0001);
     }
 
     w = Math.min(w, rectW);
@@ -119,8 +317,15 @@
     box.style.width = Math.max(1, Math.round(w)) + "px";
     box.style.height = Math.max(1, Math.round(h)) + "px";
 
-    video.style.width = "100%";
-    video.style.height = "100%";
+    if (item.video) {
+      item.video.style.width = "100%";
+      item.video.style.height = "100%";
+    }
+
+    if (item.posterImg) {
+      item.posterImg.style.width = "100%";
+      item.posterImg.style.height = "100%";
+    }
   }
 
   function hasOtherPlaying(exceptPlayer) {
@@ -151,102 +356,15 @@
     });
   }
 
-  function capturePoster(video) {
-    if (!video) return;
-    if (video.dataset.posterCaptured === "1") return;
-
-    video.dataset.posterCaptured = "1";
-
-    /*
-      If the manifest already supplied a poster, respect it.
-    */
-    if (video.poster) return;
-
-    if (!video.videoWidth || !video.videoHeight) return;
-
-    try {
-      var canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      var ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-
-      if (dataUrl && dataUrl.length > 100) {
-        video.poster = dataUrl;
-      }
-    } catch (e) {
-      /*
-        Canvas capture can fail for cross-origin media.
-        The fallback below still tries to display the first frame.
-      */
-    }
-  }
-
-  function primeVideoFrame(video) {
-    if (!video) return;
-    if (video.dataset.framePrimed === "1") return;
-
-    video.dataset.framePrimed = "1";
-
-    /*
-      Seek a tiny amount forward. Many browsers will then paint the first frame
-      even while paused.
-    */
-    try {
-      if (video.duration && isFinite(video.duration) && video.duration > 0) {
-        video.currentTime = Math.min(0.05, video.duration / 2);
-      }
-    } catch (e) {}
-
-    /*
-      Some browsers still refuse to paint a paused video until it has played once.
-      We temporarily mute, play for an instant, then pause again.
-      This is only to make the video visibly part of the page.
-    */
-    var wasMuted = video.muted;
-
-    try {
-      video.muted = true;
-
-      var p = video.play();
-
-      if (p && typeof p.then === "function") {
-        p.then(function () {
-          try {
-            video.pause();
-          } catch (e) {}
-
-          video.muted = wasMuted;
-        }).catch(function () {
-          video.muted = wasMuted;
-        });
-      } else {
+  EPSF.media.pauseAll = function () {
+    S.activeMedia.forEach(function (item) {
+      if (item.player && item.player.pause) {
         try {
-          video.pause();
+          item.player.pause();
         } catch (e) {}
-
-        video.muted = wasMuted;
       }
-    } catch (e) {
-      video.muted = wasMuted;
-    }
-  }
-
-  function prepareVisibleVideoFrame(video, autoplay) {
-    if (autoplay) return;
-
-    /*
-      Do not interrupt another video that is already playing.
-    */
-    if (hasOtherPlaying(video)) return;
-
-    primeVideoFrame(video);
-  }
+    });
+  };
 
   EPSF.media.clearOverlays = function () {
     S.activeMedia.forEach(function (item) {
@@ -292,9 +410,23 @@
     if (!D.mediaLayer || !m.src) return;
 
     var rect = U.normalizeRect(m);
+    var entry = getPreloadEntry(m);
+
+    var posterSrc = "";
+
+    if (m.poster) {
+      posterSrc = resolveSrc(m.poster);
+    } else if (entry && entry.posterDataUrl) {
+      posterSrc = entry.posterDataUrl;
+    }
 
     var box = document.createElement("div");
     box.className = "media-box media-video";
+
+    if (!posterSrc) {
+      box.classList.add("no-poster");
+    }
+
     box.setAttribute("role", "button");
     box.setAttribute("tabindex", "0");
     box.setAttribute(
@@ -302,12 +434,21 @@
       (m.title || "Video") + " — click to play or pause"
     );
 
+    var posterImg = null;
+
+    if (posterSrc) {
+      posterImg = document.createElement("img");
+      posterImg.className = "media-frame";
+      posterImg.alt = m.title || "Video poster";
+      posterImg.draggable = false;
+      posterImg.decoding = "async";
+      posterImg.src = posterSrc;
+
+      box.appendChild(posterImg);
+    }
+
     var video = document.createElement("video");
 
-    /*
-      Always invisible native controls.
-      Click/tap the video itself to play/pause.
-    */
     video.controls = false;
     video.setAttribute("controls", "false");
     video.setAttribute("controlslist", "nodownload nofullscreen noremoteplayback");
@@ -322,24 +463,23 @@
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    /*
-      Visible immediately. No fade-in-on-click behavior.
-    */
-    video.style.opacity = "1";
-
     if (m.title) {
       video.setAttribute("aria-label", m.title);
     }
 
-    if (m.poster) {
-      video.poster = U.resolveMediaSrc(m.poster);
+    if (posterSrc) {
+      video.poster = posterSrc;
     }
 
-    video.src = U.resolveMediaSrc(m.src);
+    video.src = resolveSrc(m.src);
+
+    box.appendChild(video);
 
     var item = {
       el: box,
       player: video,
+      video: video,
+      posterImg: posterImg,
       media: m,
       page: m.page,
       type: "video",
@@ -348,25 +488,31 @@
       key: entryKey(m, slot)
     };
 
-    function fit() {
+    function markReady() {
+      box.classList.add("media-ready");
+
+      if (posterImg) {
+        posterImg.style.opacity = "0";
+      }
+
       fitVideoItem(item);
     }
 
     function onMeta() {
-      fit();
-      capturePoster(video);
-      prepareVisibleVideoFrame(video, !!m.autoplay);
-    }
+      fitVideoItem(item);
+      capturePosterFromVideo(video, m);
 
-    function onData() {
-      fit();
-      capturePoster(video);
-      prepareVisibleVideoFrame(video, !!m.autoplay);
+      if (!posterSrc) {
+        box.classList.add("media-ready");
+      }
     }
 
     video.addEventListener("loadedmetadata", onMeta);
-    video.addEventListener("loadeddata", onData);
-    video.addEventListener("canplay", onMeta);
+    video.addEventListener("loadeddata", function () {
+      onMeta();
+      markReady();
+    });
+    video.addEventListener("canplay", markReady);
 
     video.addEventListener("play", function () {
       S.mediaUserGesture = true;
@@ -380,6 +526,7 @@
 
     video.addEventListener("error", function () {
       box.classList.add("media-error");
+      markReady();
     });
 
     function togglePlay(e) {
@@ -404,23 +551,29 @@
       }
     });
 
-    box.appendChild(video);
     D.mediaLayer.appendChild(box);
 
     /*
       Place it immediately using the manifest rectangle.
-      After metadata loads, it is refit to the true video aspect ratio.
+      After poster/video dimensions arrive, it is refit to the true aspect ratio.
     */
     applyBasePosition(box, rect, slot);
 
-    S.activeMedia.push(item);
+    if (posterImg) {
+      posterImg.onload = function () {
+        fitVideoItem(item);
+      };
 
-    /*
-      If dimensions are already known synchronously, fit/prime now.
-    */
+      if (posterImg.complete) {
+        fitVideoItem(item);
+      }
+    }
+
     if (video.videoWidth && video.videoHeight) {
       onMeta();
     }
+
+    S.activeMedia.push(item);
 
     if (m.autoplay) {
       video.play().catch(function () {});
@@ -435,9 +588,9 @@
     var box = document.createElement("div");
     box.className = "media-box media-audio";
 
-    var audio = new Audio(U.resolveMediaSrc(m.src));
+    var audio = new Audio(resolveSrc(m.src));
     audio.loop = !!m.loop;
-    audio.preload = m.preload || "metadata";
+    audio.preload = "auto";
     audio.volume = U.clampNum(
       typeof m.volume === "number" ? m.volume : 0.85,
       0,
@@ -537,7 +690,7 @@
     return out;
   }
 
-  EPSF.media.syncForCurrentPage = function () {
+  EPSF.media.syncForCurrentPage = function (force) {
     if (!D.mediaLayer) return;
 
     if (!S.issueManifest || !Array.isArray(S.issueManifest.media)) {
@@ -549,12 +702,14 @@
       return;
     }
 
-    if (S.coverAnimating || S.isJumping) {
-      return;
-    }
+    if (!force) {
+      if (S.coverAnimating || S.isJumping) {
+        return;
+      }
 
-    if (S.sfState !== "read") {
-      return;
+      if (S.sfState !== "read") {
+        return;
+      }
     }
 
     if (S.viewMode && S.viewMode !== "book") {
@@ -575,6 +730,13 @@
     */
     if (same) {
       EPSF.media.reposition();
+
+      S.activeMedia.forEach(function (item) {
+        if (item.el) {
+          item.el.classList.remove("is-stale");
+        }
+      });
+
       return;
     }
 
