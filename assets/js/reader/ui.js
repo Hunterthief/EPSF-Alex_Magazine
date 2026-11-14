@@ -24,33 +24,37 @@
   };
 
   EPSF.ui.updateDock = function () {
-    if (S.isMobile) {
-      var pageNum = S.currentIdx + 1;
-      if (pageNum > S.N) pageNum = S.N;
+    var totalLogical = S.total + 1;
 
-      D.dPages.textContent = "Page " + pageNum + " / " + S.N;
-      D.dFill.style.width = Math.round((pageNum / Math.max(S.N, 1)) * 100) + "%";
+    if (S.isMobile) {
+      if (S.N <= 0) {
+        D.dPages.textContent = "Cover";
+        D.dFill.style.width = "0%";
+        D.dPrev.disabled = true;
+        D.dNext.disabled = true;
+        D.edgeL.classList.add("off");
+        D.edgeR.classList.add("off");
+        return;
+      }
+
+      var orig = EPSF.layout.originalPageForIndex(S.currentIdx) || totalLogical;
+      if (orig > totalLogical) orig = totalLogical;
+
+      if (orig === 1) {
+        D.dPages.textContent = "Cover";
+      } else if (orig === totalLogical) {
+        D.dPages.textContent = "Back Cover";
+      } else {
+        D.dPages.textContent = "Page " + orig + " / " + totalLogical;
+      }
+
+      D.dFill.style.width = Math.round((orig / Math.max(totalLogical, 1)) * 100) + "%";
 
       D.dPrev.disabled = S.currentIdx <= 0;
       D.dNext.disabled = S.currentIdx >= S.N - 1;
 
       D.edgeL.classList.toggle("off", S.currentIdx <= 0);
       D.edgeR.classList.toggle("off", S.currentIdx >= S.N - 1);
-
-      return;
-    }
-
-    var desktopPages = S.N + 1;
-
-    if (S.viewMode === "front") {
-      D.dPages.textContent = "Cover";
-      D.dFill.style.width = Math.round((1 / Math.max(desktopPages, 1)) * 100) + "%";
-
-      D.dPrev.disabled = true;
-      D.dNext.disabled = S.N <= 0;
-
-      D.edgeL.classList.add("off");
-      D.edgeR.classList.toggle("off", S.N <= 0);
 
       return;
     }
@@ -68,47 +72,29 @@
       return;
     }
 
-    var atEnd = S.isPortrait
-      ? (S.currentIdx >= S.N - 1)
-      : (S.currentIdx >= S.lastSpreadIdx);
+    var origs = EPSF.layout.originalPagesForCurrentSpread();
+    var minOrig = origs.length ? Math.min.apply(null, origs) : 1;
+    var maxOrig = origs.length ? Math.max.apply(null, origs) : 1;
 
-    if (atEnd) {
+    if (S.currentIdx === 0 || (origs.length === 1 && origs[0] === 1)) {
+      D.dPages.textContent = "Cover";
+    } else if (origs.indexOf(totalLogical) >= 0) {
       D.dPages.textContent = "Back Cover";
-      D.dFill.style.width = "100%";
-
-      D.dPrev.disabled = false;
-      D.dNext.disabled = true;
-
-      D.edgeL.classList.remove("off");
-      D.edgeR.classList.add("off");
-
-      return;
-    }
-
-    if (S.isPortrait) {
-      var logical = Math.min(desktopPages, S.currentIdx + 2);
-      D.dPages.textContent = "Page " + logical + " / " + desktopPages;
-      D.dFill.style.width = Math.round((logical / desktopPages) * 100) + "%";
+    } else if (origs.length <= 1) {
+      D.dPages.textContent = "Page " + minOrig + " / " + totalLogical;
     } else {
-      var leftLogical = S.currentIdx + 2;
-      var rightLogical = leftLogical + 1;
-
-      if (leftLogical > desktopPages) leftLogical = desktopPages;
-      if (rightLogical > desktopPages) rightLogical = 0;
-
-      D.dPages.textContent =
-        (rightLogical ? leftLogical + "–" + rightLogical : leftLogical) +
-        " / " + desktopPages;
-
-      var lastVisible = rightLogical || leftLogical;
-      D.dFill.style.width = Math.round(Math.min(100, (lastVisible / desktopPages) * 100)) + "%";
+      D.dPages.textContent = "Pages " + minOrig + "–" + maxOrig + " / " + totalLogical;
     }
 
-    D.dPrev.disabled = false;
-    D.dNext.disabled = false;
+    D.dFill.style.width = Math.round(Math.min(100, (maxOrig / Math.max(totalLogical, 1)) * 100)) + "%";
 
-    D.edgeL.classList.remove("off");
-    D.edgeR.classList.remove("off");
+    var atEnd = S.currentIdx >= S.lastSpreadIdx;
+
+    D.dPrev.disabled = S.currentIdx <= 0;
+    D.dNext.disabled = atEnd;
+
+    D.edgeL.classList.toggle("off", S.currentIdx <= 0);
+    D.edgeR.classList.toggle("off", atEnd);
   };
 
   EPSF.ui.updateHint = function () {
@@ -117,27 +103,20 @@
       return;
     }
 
-    if (S.isMobile) {
+    if (S.N <= 0) {
       EPSF.ui.hideHint();
       return;
     }
 
-    if (S.viewMode === "front") {
-      EPSF.ui.showHint("Click the cover to open");
-    } else if (S.viewMode === "book" && S.currentIdx === 0) {
-      EPSF.ui.showHint("Click left edge to return to cover");
+    if (S.currentIdx === 0) {
+      EPSF.ui.showHint("Flip the cover to open");
     } else {
       EPSF.ui.hideHint();
     }
   };
 
   EPSF.ui.updateEnd = function () {
-    if (S.isMobile) {
-      EPSF.ui.hideEnd();
-      return;
-    }
-
-    if (S.viewMode !== "book" || S.N <= 0) {
+    if (S.N <= 0) {
       EPSF.ui.hideEnd();
       return;
     }
