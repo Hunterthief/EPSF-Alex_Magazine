@@ -1,14 +1,14 @@
 /* ============ SOFT MAGAZINE COVER BRIDGE ============ */
 
 .turn-cover {
-  --cover-duration: 980ms;
+  --cover-duration: 880ms;
   --cover-ease: cubic-bezier(0.18, 0.72, 0.22, 1);
 
   position: absolute;
   top: 0;
   z-index: 28;
   transform-style: preserve-3d;
-  perspective: 2100px;
+  perspective: 2000px;
   perspective-origin: 0% 50%;
   cursor: pointer;
   touch-action: none;
@@ -43,30 +43,20 @@
   animation: coverClose var(--cover-duration) var(--cover-ease) forwards;
 }
 
+/*
+  CRITICAL ANTI-MIRROR RULE:
+  Both faces must hinge from the left/spine edge.
+  Do NOT use scaleX(-1) on the back image.
+*/
 .cover-face {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  transform-origin: left center;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.cover-face img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-}
-
-/*
-  Front cover:
-  When closed, this sits in the right-page position.
-  Spine is on the left edge.
-  Outer corners are rounded on the right.
-*/
 .cover-front {
   border-radius: 0 6px 6px 0;
   background: #0A192F;
@@ -75,20 +65,15 @@
     0 18px 38px -10px rgba(0, 0, 0, 0.42);
 }
 
-.cover-front::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+.cover-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
   pointer-events: none;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.24) 0%,
-      rgba(0, 0, 0, 0.08) 10%,
-      rgba(0, 0, 0, 0.02) 22%,
-      transparent 42%
-    );
-  opacity: 0.75;
+  transform: none;
 }
 
 .cover-front::after {
@@ -101,29 +86,38 @@
       115deg,
       transparent 0%,
       rgba(255, 255, 255, 0.035) 34%,
-      rgba(255, 255, 255, 0.11) 48%,
+      rgba(255, 255, 255, 0.10) 48%,
       rgba(255, 255, 255, 0.035) 58%,
       transparent 100%
     );
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 /*
-  Inside/back cover:
-  This is now the first inside magazine page, usually page 2.
-  When the cover opens, this face becomes the left page.
-  Spine is on the right edge.
-  Outer corners are rounded on the left.
+  Back / inside of cover.
+  This shows the first inside magazine page, normally page 2.jpg.
+  rotateY(180deg) + left transform-origin prevents mirroring.
 */
 .cover-back {
   transform: rotateY(180deg);
   border-radius: 6px 0 0 6px;
   background: #FFFFFF;
   box-shadow:
-    inset 0 0 0 1px rgba(10, 25, 47, 0.06),
-    inset -18px 0 34px -20px rgba(10, 25, 47, 0.30),
+    inset 0 0 0 1px rgba(2, 65, 196, 0.06),
+    inset 18px 0 32px -18px rgba(10, 25, 47, 0.22),
     0 2px 4px rgba(0, 0, 0, 0.16),
     0 16px 34px -12px rgba(0, 0, 0, 0.34);
+}
+
+.cover-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transform: none;
 }
 
 .cover-back::before {
@@ -134,10 +128,10 @@
   background:
     linear-gradient(
       90deg,
-      transparent 54%,
-      rgba(10, 25, 47, 0.02) 70%,
-      rgba(10, 25, 47, 0.09) 87%,
-      rgba(10, 25, 47, 0.22) 100%
+      rgba(10, 25, 47, 0.22) 0%,
+      rgba(10, 25, 47, 0.08) 12%,
+      rgba(10, 25, 47, 0.02) 26%,
+      transparent 46%
     );
 }
 
@@ -158,14 +152,24 @@
 }
 
 /*
-  While the cover is animating, reveal the St.PageFlip layer underneath.
-  The delay lets the inside cover page carry the motion first,
-  then the real magazine spread fades in underneath.
+  Interior reveal timing.
+
+  Opening:
+  Keep the St.PageFlip interior hidden until the cover is almost open.
+  Then fade it in underneath the inside-cover page.
+
+  Closing:
+  Keep the interior visible while the cover closes.
 */
 .book-wrap.cover-mode.turning-cover #flipbook-mount {
-  opacity: 1;
+  opacity: 0;
   pointer-events: none;
-  transition: opacity 430ms var(--ease-out) 260ms;
+  transition: opacity 260ms var(--ease-out);
+}
+
+.book-wrap.cover-mode.turning-cover.cover-reveal #flipbook-mount,
+.book-wrap.cover-mode.turning-cover.cover-closing #flipbook-mount {
+  opacity: 1;
 }
 
 @keyframes coverOpen {
@@ -175,39 +179,33 @@
     filter: brightness(1) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
   }
 
-  7% {
+  10% {
     opacity: 1;
-    transform: rotateY(-6deg) translateZ(7px) skewY(-0.20deg);
-    filter: brightness(0.997) drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.10));
+    transform: rotateY(-8deg) translateZ(7px) skewY(-0.22deg);
+    filter: brightness(0.996) drop-shadow(2px 4px 7px rgba(0, 0, 0, 0.13));
   }
 
-  22% {
+  30% {
     opacity: 1;
-    transform: rotateY(-30deg) translateZ(17px) skewY(-0.75deg);
-    filter: brightness(0.985) drop-shadow(8px 13px 15px rgba(0, 0, 0, 0.17));
+    transform: rotateY(-40deg) translateZ(18px) skewY(-0.9deg);
+    filter: brightness(0.982) drop-shadow(9px 14px 17px rgba(0, 0, 0, 0.20));
   }
 
-  44% {
+  60% {
     opacity: 1;
-    transform: rotateY(-74deg) translateZ(25px) skewY(-1.25deg);
-    filter: brightness(0.965) drop-shadow(15px 22px 26px rgba(0, 0, 0, 0.26));
+    transform: rotateY(-102deg) translateZ(24px) skewY(-1.35deg);
+    filter: brightness(0.955) drop-shadow(17px 25px 29px rgba(0, 0, 0, 0.29));
   }
 
-  66% {
+  82% {
     opacity: 1;
-    transform: rotateY(-118deg) translateZ(23px) skewY(-1.05deg);
-    filter: brightness(0.965) drop-shadow(17px 25px 29px rgba(0, 0, 0, 0.28));
-  }
-
-  84% {
-    opacity: 1;
-    transform: rotateY(-155deg) translateZ(12px) skewY(-0.50deg);
+    transform: rotateY(-154deg) translateZ(12px) skewY(-0.6deg);
     filter: brightness(0.985) drop-shadow(10px 14px 18px rgba(0, 0, 0, 0.20));
   }
 
   95% {
     opacity: 1;
-    transform: rotateY(-176deg) translateZ(3px) skewY(-0.08deg);
+    transform: rotateY(-176deg) translateZ(3px) skewY(-0.1deg);
     filter: brightness(1) drop-shadow(3px 4px 8px rgba(0, 0, 0, 0.10));
   }
 
@@ -220,39 +218,33 @@
 
 @keyframes coverClose {
   0% {
-    opacity: 0;
+    opacity: 1;
     transform: rotateY(-180deg) translateZ(0px) skewY(0deg);
     filter: brightness(1) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
   }
 
-  7% {
+  10% {
     opacity: 1;
-    transform: rotateY(-172deg) translateZ(7px) skewY(0.20deg);
-    filter: brightness(0.997) drop-shadow(3px 5px 8px rgba(0, 0, 0, 0.10));
+    transform: rotateY(-165deg) translateZ(7px) skewY(0.22deg);
+    filter: brightness(0.996) drop-shadow(3px 5px 8px rgba(0, 0, 0, 0.13));
   }
 
-  22% {
+  30% {
     opacity: 1;
-    transform: rotateY(-142deg) translateZ(17px) skewY(0.70deg);
-    filter: brightness(0.985) drop-shadow(9px 14px 17px rgba(0, 0, 0, 0.18));
+    transform: rotateY(-130deg) translateZ(18px) skewY(0.85deg);
+    filter: brightness(0.982) drop-shadow(10px 16px 20px rgba(0, 0, 0, 0.21));
   }
 
-  44% {
+  60% {
     opacity: 1;
-    transform: rotateY(-98deg) translateZ(25px) skewY(1.18deg);
-    filter: brightness(0.965) drop-shadow(16px 24px 28px rgba(0, 0, 0, 0.27));
+    transform: rotateY(-70deg) translateZ(24px) skewY(1.3deg);
+    filter: brightness(0.955) drop-shadow(18px 26px 30px rgba(0, 0, 0, 0.29));
   }
 
-  66% {
+  82% {
     opacity: 1;
-    transform: rotateY(-54deg) translateZ(23px) skewY(1.00deg);
-    filter: brightness(0.965) drop-shadow(17px 25px 29px rgba(0, 0, 0, 0.28));
-  }
-
-  84% {
-    opacity: 1;
-    transform: rotateY(-22deg) translateZ(12px) skewY(0.45deg);
-    filter: brightness(0.985) drop-shadow(10px 14px 18px rgba(0, 0, 0, 0.20));
+    transform: rotateY(-25deg) translateZ(10px) skewY(0.48deg);
+    filter: brightness(0.987) drop-shadow(9px 12px 16px rgba(0, 0, 0, 0.18));
   }
 
   100% {
@@ -263,12 +255,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .turn-cover {
-    --cover-duration: 1ms;
-  }
-
   .turn-cover.cover-opening .cover-leaf,
   .turn-cover.cover-closing .cover-leaf {
     animation-duration: 1ms !important;
+  }
+
+  .book-wrap.cover-mode.turning-cover #flipbook-mount {
+    transition-duration: 1ms !important;
   }
 }
