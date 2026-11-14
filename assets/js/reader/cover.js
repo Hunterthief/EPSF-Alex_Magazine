@@ -4,48 +4,48 @@
   var S = EPSF.state;
   var D = EPSF.dom;
   var U = EPSF.util;
-  var L = EPSF.loaders;
-  var Lay = EPSF.layout;
   var UI = EPSF.ui;
   var Med = EPSF.media;
+  var Lay = EPSF.layout;
 
-  var TURN_COVER_TEMPLATE =
-    '<div class="turn-page page turn-cover-front hard">' +
-      '<img id="turn-cover-front-img" alt="Magazine cover" draggable="false">' +
-    '</div>' +
-    '<div class="turn-page page turn-cover-inside"></div>';
+  var DURATION = S.RM ? 1 : 760;
 
-  function clearCoverWatchdog() {
+  var TEMPLATE =
+    '<div class="cover-leaf">' +
+      '<div class="cover-face cover-front">' +
+        '<img id="turn-cover-front-img" alt="Magazine cover" draggable="false">' +
+      '</div>' +
+      '<div class="cover-face cover-back"></div>' +
+    '</div>';
+
+  function clearWatchdog() {
     if (S.coverWatchdogTimer) {
       clearTimeout(S.coverWatchdogTimer);
       S.coverWatchdogTimer = null;
     }
   }
 
-  function startCoverWatchdog(mode) {
-    clearCoverWatchdog();
-
-    var ms = S.RM ? 300 : 2500;
-
-    S.coverWatchdogTimer = setTimeout(function () {
-      S.coverWatchdogTimer = null;
-
-      if (D.reader.hidden) return;
-
-      if (mode === "open" && S.viewMode === "front" && S.coverAnimating) {
-        EPSF.cover.finishOpen();
-      } else if (
-        mode === "close" &&
-        S.viewMode === "book" &&
-        S.coverAnimating &&
-        S.currentIdx === 0
-      ) {
-        EPSF.cover.finishClose();
-      }
-    }, ms);
+  function getLeaf() {
+    return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
   }
 
-  function positionTurnCover() {
+  function ensureDom() {
+    if (!D.turnCover) return null;
+
+    if (!D.turnCover.querySelector(".cover-leaf")) {
+      D.turnCover.classList.add("custom-cover");
+      D.turnCover.innerHTML = TEMPLATE;
+    }
+
+    var img = D.turnCover.querySelector("#turn-cover-front-img");
+    if (img && S.pagesUrl) {
+      img.src = U.pageUrl(1);
+    }
+
+    return getLeaf();
+  }
+
+  function setSize() {
     if (!D.turnCover) return;
 
     D.turnCover.style.width = S.pageW + "px";
@@ -54,122 +54,86 @@
     D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW / 2) + "px";
   }
 
-  function destroyCoverTurn(hide) {
-    if (S.turnCoverJQ) {
-      try {
-        S.turnCoverJQ.turn("destroy");
-      } catch (e) {}
+  function setInstantTransform(deg) {
+    var leaf = ensureDom();
+    if (!leaf) return;
 
-      S.turnCoverJQ = null;
-    }
+    leaf.style.transition = "none";
+    leaf.style.transform = "rotateY(" + deg + "deg)";
 
-    S.turnCoverReady = false;
+    // Force reflow so the next transform change animates.
+    void leaf.offsetWidth;
 
-    if (D.turnCover) {
-      D.turnCover.classList.remove("turn-ready");
-
-      if (hide !== false) {
-        D.turnCover.hidden = true;
-      }
-    }
+    leaf.style.transition = "";
+    leaf.style.transitionDuration = DURATION + "ms";
   }
 
-  function showStaticCover() {
-    if (!D.turnCover) return;
+  function showClosed() {
+    if (S.isMobile || !D.turnCover) return;
+
+    ensureDom();
+    setSize();
 
     D.turnCover.hidden = false;
-    D.turnCover.innerHTML = TURN_COVER_TEMPLATE;
+    D.turnCover.classList.remove("cover-opening", "cover-closing", "animating");
+    D.turnCover.classList.add("cover-closed");
+    D.turnCover.style.pointerEvents = "auto";
 
-    positionTurnCover();
-
-    var img = D.turnCover.querySelector("#turn-cover-front-img");
-    if (img) img.src = U.pageUrl(1);
+    setInstantTransform(0);
   }
 
-  function buildCoverTurn() {
-    if (!D.turnCover || S.isMobile) return false;
-    if (!L.TQ || !L.TQ.fn || !L.TQ.fn.turn) return false;
+  function hideCover() {
+    if (!D.turnCover) return;
 
-    destroyCoverTurn(false);
-
-    D.turnCover.innerHTML = TURN_COVER_TEMPLATE;
-    positionTurnCover();
-
-    var img = D.turnCover.querySelector("#turn-cover-front-img");
-    if (img) img.src = U.pageUrl(1);
-
-    D.turnCover.hidden = !(S.viewMode === "front" || S.coverAnimating);
-
-    try {
-      S.turnCoverJQ = L.TQ(D.turnCover);
-
-      S.turnCoverJQ.turn({
-        width: S.pageW,
-        height: S.pageH,
-        display: "single",
-        autoCenter: false,
-        direction: "ltr",
-        duration: S.RM ? 0 : 620,
-        acceleration: true,
-        gradients: true,
-        when: {
-          turning: onCoverTurning,
-          turned: onCoverTurned
-        }
-      });
-
-      D.turnCover.classList.add("turn-ready");
-      S.turnCoverReady = true;
-
-      return true;
-    } catch (e) {
-      S.turnCoverJQ = null;
-      S.turnCoverReady = false;
-      return false;
-    }
+    D.turnCover.hidden = true;
+    D.turnCover.classList.remove("cover-closed", "cover-opening", "cover-closing", "animating");
+    D.turnCover.style.pointerEvents = "";
   }
 
-  function setTurnPageInstant(jq, page) {
-    if (!jq) return;
+  function animateCover(target, done) {
+    var leaf = ensureDom();
 
-    try {
-      jq.turn("options", "duration", 0);
-      jq.turn("turn", page, true);
-      jq.turn("options", "duration", S.RM ? 0 : 620);
+    if (!leaf || !D.turnCover) {
+      done();
       return;
-    } catch (e) {}
-
-    try {
-      jq.turn("page", page);
-    } catch (e2) {}
-  }
-
-  function onCoverTurning(e, page, obj) {
-    var p = parseInt(page, 10);
-
-    D.bookWrap.classList.add("turning-cover");
-
-    UI.ensureAudio();
-    UI.playSparkSound();
-
-    if (p === 2) UI.showSparks(-1);
-    else if (p === 1) UI.showSparks(1);
-  }
-
-  function onCoverTurned(e, page, obj) {
-    var p = parseInt(page, 10);
-
-    UI.hideSparks();
-
-    if (p === 2) {
-      EPSF.cover.finishOpen();
-    } else {
-      EPSF.cover.finishClose();
     }
+
+    D.turnCover.classList.add("animating");
+    D.turnCover.style.pointerEvents = "none";
+
+    var finalDeg = target === "open" ? -180 : 0;
+    var finished = false;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+
+      clearWatchdog();
+      leaf.removeEventListener("transitionend", onEnd);
+      done();
+    }
+
+    function onEnd(e) {
+      if (e.target === leaf) {
+        finish();
+      }
+    }
+
+    leaf.addEventListener("transitionend", onEnd);
+    leaf.style.transitionDuration = DURATION + "ms";
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        leaf.style.transform = "rotateY(" + finalDeg + "deg)";
+      });
+    });
+
+    // Safety fallback if transitionend never fires.
+    S.coverWatchdogTimer = setTimeout(finish, DURATION + 450);
   }
 
   EPSF.cover.finishOpen = function () {
-    clearCoverWatchdog();
+    clearWatchdog();
 
     if (S.viewMode === "book" && !S.coverAnimating) return;
 
@@ -179,12 +143,7 @@
 
     D.bookWrap.classList.remove("cover-mode", "turning-cover", "back-mode");
 
-    destroyCoverTurn(false);
-
-    if (D.turnCover) {
-      D.turnCover.hidden = true;
-      D.turnCover.style.pointerEvents = "";
-    }
+    hideCover();
 
     if (S.pageFlip && S.N > 0) {
       try {
@@ -198,7 +157,7 @@
   };
 
   EPSF.cover.finishClose = function () {
-    clearCoverWatchdog();
+    clearWatchdog();
 
     if (S.viewMode === "front" && !S.coverAnimating) return;
 
@@ -209,8 +168,7 @@
     D.bookWrap.classList.add("cover-mode");
     D.bookWrap.classList.remove("turning-cover", "back-mode");
 
-    destroyCoverTurn(false);
-    showStaticCover();
+    showClosed();
 
     if (S.pageFlip && S.N > 0) {
       try {
@@ -235,35 +193,16 @@
 
     D.bookWrap.classList.add("turning-cover");
 
-    L.ensureTurnJS().then(function () {
-      if (S.viewMode !== "front" || !S.coverAnimating) return;
+    ensureDom();
+    setSize();
 
-      if (!S.turnCoverReady) buildCoverTurn();
+    D.turnCover.hidden = false;
+    D.turnCover.classList.remove("cover-closed", "cover-closing");
+    D.turnCover.classList.add("cover-opening");
 
-      if (!S.turnCoverReady) {
-        EPSF.cover.finishOpen();
-        return;
-      }
+    setInstantTransform(0);
 
-      D.turnCover.hidden = false;
-      setTurnPageInstant(S.turnCoverJQ, 1);
-
-      requestAnimationFrame(function () {
-        startCoverWatchdog("open");
-
-        try {
-          if (S.turnCoverJQ) {
-            S.turnCoverJQ.turn("turn", 2, true);
-          } else {
-            EPSF.cover.finishOpen();
-          }
-        } catch (e) {
-          EPSF.cover.finishOpen();
-        }
-      });
-    }).catch(function () {
-      EPSF.cover.finishOpen();
-    });
+    animateCover("open", EPSF.cover.finishOpen);
   };
 
   EPSF.cover.closeToCover = function () {
@@ -285,44 +224,23 @@
 
     D.bookWrap.classList.add("cover-mode", "turning-cover");
 
-    L.ensureTurnJS().then(function () {
-      if (S.viewMode !== "book" || !S.coverAnimating) return;
+    ensureDom();
+    setSize();
 
-      if (!S.turnCoverReady) buildCoverTurn();
+    D.turnCover.hidden = false;
+    D.turnCover.classList.remove("cover-closed", "cover-opening");
+    D.turnCover.classList.add("cover-closing");
 
-      if (!S.turnCoverReady) {
-        EPSF.cover.finishClose();
-        return;
-      }
+    setInstantTransform(-180);
 
-      D.turnCover.hidden = false;
-      setTurnPageInstant(S.turnCoverJQ, 2);
-
-      requestAnimationFrame(function () {
-        startCoverWatchdog("close");
-
-        try {
-          if (S.turnCoverJQ) {
-            S.turnCoverJQ.turn("turn", 1, true);
-          } else {
-            EPSF.cover.finishClose();
-          }
-        } catch (e) {
-          EPSF.cover.finishClose();
-        }
-      });
-    }).catch(function () {
-      EPSF.cover.finishClose();
-    });
+    animateCover("close", EPSF.cover.finishClose);
   };
 
   EPSF.cover.forceFront = function () {
-    clearCoverWatchdog();
+    clearWatchdog();
 
     S.coverAnimToken++;
     S.coverAnimating = false;
-
-    destroyCoverTurn(false);
 
     S.viewMode = "front";
     S.currentIdx = 0;
@@ -330,7 +248,7 @@
     D.bookWrap.classList.add("cover-mode");
     D.bookWrap.classList.remove("turning-cover", "back-mode");
 
-    showStaticCover();
+    showClosed();
 
     if (S.pageFlip && S.N > 0) {
       try {
@@ -343,12 +261,12 @@
   };
 
   EPSF.cover.forceBook = function (idx) {
-    clearCoverWatchdog();
+    clearWatchdog();
 
     S.coverAnimToken++;
     S.coverAnimating = false;
 
-    destroyCoverTurn(true);
+    hideCover();
 
     S.viewMode = "book";
 
@@ -368,6 +286,54 @@
     Med.syncForCurrentPage();
   };
 
+  EPSF.cover.destroy = function (hide) {
+    clearWatchdog();
+    S.coverAnimating = false;
+
+    if (hide !== false) {
+      hideCover();
+    } else {
+      if (S.viewMode === "front") {
+        showClosed();
+      } else {
+        hideCover();
+      }
+    }
+  };
+
+  EPSF.cover.build = function () {
+    if (S.isMobile) {
+      hideCover();
+      return false;
+    }
+
+    ensureDom();
+    setSize();
+
+    if (S.viewMode === "front" || S.coverAnimating) {
+      D.turnCover.hidden = false;
+
+      if (!S.coverAnimating) {
+        showClosed();
+      }
+    } else {
+      hideCover();
+    }
+
+    return true;
+  };
+
+  EPSF.cover.showStatic = function () {
+    if (S.isMobile) return;
+    showClosed();
+  };
+
+  EPSF.cover.position = function () {
+    setSize();
+  };
+
+  EPSF.cover.clearWatchdog = clearWatchdog;
+
   EPSF.cover.bindClick = function () {
     if (!D.turnCover) return;
 
@@ -377,10 +343,4 @@
       }
     });
   };
-
-  EPSF.cover.position = positionTurnCover;
-  EPSF.cover.destroy = destroyCoverTurn;
-  EPSF.cover.build = buildCoverTurn;
-  EPSF.cover.showStatic = showStaticCover;
-  EPSF.cover.clearWatchdog = clearCoverWatchdog;
 })();
