@@ -11,13 +11,13 @@
   var DURATION = S.RM ? 1 : 880;
 
   /*
-    Your cover is page 1.
-    The inside/back of the cover should be page 2.
+    Page numbering:
+      1.jpg = front cover
+      2.jpg = inside cover / first real magazine page
 
-    If your issue numbering is different, change this number.
-    Example:
-      INSIDE_PAGE = 1;
+    If your issue uses a different inside-cover page, change INSIDE_PAGE here.
   */
+  var FRONT_PAGE = 1;
   var INSIDE_PAGE = 2;
 
   var TEMPLATE =
@@ -74,6 +74,10 @@
     );
   }
 
+  function getLeaf() {
+    return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
+  }
+
   function detachLeafListener() {
     var leaf = getLeaf();
 
@@ -83,19 +87,23 @@
     }
   }
 
-  function getLeaf() {
-    return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
-  }
-
   function frontSrc() {
     if (!S.pagesUrl) return "";
-    return U.pageUrl(1);
+    return U.pageUrl(FRONT_PAGE);
   }
 
   function insideSrc() {
     if (!S.pagesUrl) return "";
     if (S.total < INSIDE_PAGE) return "";
     return U.pageUrl(INSIDE_PAGE);
+  }
+
+  function preloadSrc(src) {
+    if (!src) return;
+
+    U.loadImage(src).catch(function () {
+      // Ignore preload failures. The image tag will still attempt to load.
+    });
   }
 
   function ensureDom() {
@@ -110,9 +118,18 @@
 
     if (frontImg) {
       var fSrc = frontSrc();
+
       if (fSrc) {
         frontImg.src = fSrc;
+        frontImg.alt = "Magazine cover";
         frontImg.style.display = "block";
+        frontImg.loading = "eager";
+        frontImg.decoding = "async";
+        preloadSrc(fSrc);
+      } else {
+        frontImg.removeAttribute("src");
+        frontImg.alt = "";
+        frontImg.style.display = "none";
       }
     }
 
@@ -121,9 +138,14 @@
 
       if (bSrc) {
         backImg.src = bSrc;
+        backImg.alt = "Inside cover";
         backImg.style.display = "block";
+        backImg.loading = "eager";
+        backImg.decoding = "async";
+        preloadSrc(bSrc);
       } else {
         backImg.removeAttribute("src");
+        backImg.alt = "";
         backImg.style.display = "none";
       }
     }
@@ -140,14 +162,12 @@
 
     /*
       Desktop:
-      The closed cover must sit in the RIGHT page position.
+        bookWrap width = pageW * 2
+        left page      = 0 to pageW
+        right page     = pageW to pageW * 2
 
-      bookWrap width = pageW * 2
-      left page  = 0 to pageW
-      right page = pageW to pageW * 2
-
-      Mobile:
-      Cover is just a normal St.PageFlip page, so this is hidden anyway.
+      The closed cover must sit in the right-page position,
+      hinged at the spine, like a real magazine page.
     */
     D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW) + "px";
   }
@@ -271,8 +291,8 @@
 
     /*
       Opening:
-      Reveal the interior underneath near the end, so the inside-cover page
-      blends seamlessly into the real St.PageFlip page.
+      Reveal the real St.PageFlip page 2 underneath near the end.
+      Because the back of the cover is also page 2, it blends seamlessly.
     */
     if (mode === "open") {
       if (S.RM) {
@@ -280,7 +300,7 @@
       } else {
         revealTimer = setTimeout(function () {
           D.bookWrap.classList.add("cover-reveal");
-        }, Math.round(DURATION * 0.64));
+        }, Math.round(DURATION * 0.54));
       }
     }
   }
@@ -365,7 +385,7 @@
 
     /*
       Start closed:
-      rotateY(0deg), fully visible.
+      front cover page 1 visible.
     */
     setInstant(0, 1);
 
@@ -395,8 +415,8 @@
     setSize();
 
     /*
-      Start from the opened position:
-      rotateY(-180deg), visible, showing the inside cover page.
+      Start from opened position:
+      back cover page 2 visible, then close to front cover page 1.
     */
     setInstant(-180, 1);
 
