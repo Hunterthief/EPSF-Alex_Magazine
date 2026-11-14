@@ -28,7 +28,7 @@
       return null;
     }
 
-    if (S.viewMode !== "book") return null;
+    if (S.viewMode && S.viewMode !== "book") return null;
 
     var left = S.pageMeta[S.currentIdx];
 
@@ -123,6 +123,24 @@
     video.style.height = "100%";
   }
 
+  function hasOtherPlaying(exceptPlayer) {
+    for (var i = 0; i < S.activeMedia.length; i++) {
+      var item = S.activeMedia[i];
+
+      if (
+        item &&
+        item.player &&
+        item.player !== exceptPlayer &&
+        typeof item.player.paused === "boolean" &&
+        !item.player.paused
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function pauseOtherMedia(currentPlayer) {
     S.activeMedia.forEach(function (item) {
       if (item.player && item.player !== currentPlayer && item.player.pause) {
@@ -131,6 +149,103 @@
         } catch (e) {}
       }
     });
+  }
+
+  function capturePoster(video) {
+    if (!video) return;
+    if (video.dataset.posterCaptured === "1") return;
+
+    video.dataset.posterCaptured = "1";
+
+    /*
+      If the manifest already supplied a poster, respect it.
+    */
+    if (video.poster) return;
+
+    if (!video.videoWidth || !video.videoHeight) return;
+
+    try {
+      var canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      var ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+
+      if (dataUrl && dataUrl.length > 100) {
+        video.poster = dataUrl;
+      }
+    } catch (e) {
+      /*
+        Canvas capture can fail for cross-origin media.
+        The fallback below still tries to display the first frame.
+      */
+    }
+  }
+
+  function primeVideoFrame(video) {
+    if (!video) return;
+    if (video.dataset.framePrimed === "1") return;
+
+    video.dataset.framePrimed = "1";
+
+    /*
+      Seek a tiny amount forward. Many browsers will then paint the first frame
+      even while paused.
+    */
+    try {
+      if (video.duration && isFinite(video.duration) && video.duration > 0) {
+        video.currentTime = Math.min(0.05, video.duration / 2);
+      }
+    } catch (e) {}
+
+    /*
+      Some browsers still refuse to paint a paused video until it has played once.
+      We temporarily mute, play for an instant, then pause again.
+      This is only to make the video visibly part of the page.
+    */
+    var wasMuted = video.muted;
+
+    try {
+      video.muted = true;
+
+      var p = video.play();
+
+      if (p && typeof p.then === "function") {
+        p.then(function () {
+          try {
+            video.pause();
+          } catch (e) {}
+
+          video.muted = wasMuted;
+        }).catch(function () {
+          video.muted = wasMuted;
+        });
+      } else {
+        try {
+          video.pause();
+        } catch (e) {}
+
+        video.muted = wasMuted;
+      }
+    } catch (e) {
+      video.muted = wasMuted;
+    }
+  }
+
+  function prepareVisibleVideoFrame(video, autoplay) {
+    if (autoplay) return;
+
+    /*
+      Do not interrupt another video that is already playing.
+    */
+    if (hasOtherPlaying(video)) return;
+
+    primeVideoFrame(video);
   }
 
   EPSF.media.clearOverlays = function () {
@@ -182,11 +297,17 @@
     box.className = "media-box media-video";
     box.setAttribute("role", "button");
     box.setAttribute("tabindex", "0");
-    box.setAttribute("aria-label", m.title || "Play video");
+    box.setAttribute(
+      "aria-label",
+      (m.title || "Video") + " — click to play or pause"
+    );
 
     var video = document.createElement("video");
 
-    // Always invisible native controls.
+    /*
+      Always invisible native controls.
+      Click/tap the video itself to play/pause.
+    */
     video.controls = false;
     video.setAttribute("controls", "false");
     video.setAttribute("controlslist", "nodownload nofullscreen noremoteplayback");
@@ -196,31 +317,55 @@
 
     video.loop = !!m.loop;
     video.muted = !!m.muted;
-    video.preload = m.preload || "metadata";
+    video.preload = "auto";
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
+
+    /*
+      Visible immediately. No fade-in-on-click behavior.
+    */
+    video.style.opacity = "1";
 
     if (m.title) {
       video.setAttribute("aria-label", m.title);
     }
 
-    // Start hidden until metadata gives us the real aspect ratio.
-    video.style.opacity = "0";
+    if (m.poster) {
+      video.poster = U.resolveMediaSrc(m.poster);
+    }
+
+    video.src = U.resolveMediaSrc(m.src);
+
+    var item = {
+      el: box,
+      player: video,
+      media: m,
+      page: m.page,
+      type: "video",
+      rect: rect,
+      slot: slot,
+      key: entryKey(m, slot)
+    };
+
+    function fit() {
+      fitVideoItem(item);
+    }
 
     function onMeta() {
-      fitVideoItem({
-        el: box,
-        player: video,
-        rect: rect,
-        slot: slot,
-        type: "video"
-      });
+      fit();
+      capturePoster(video);
+      prepareVisibleVideoFrame(video, !!m.autoplay);
+    }
 
-      video.style.opacity = "1";
+    function onData() {
+      fit();
+      capturePoster(video);
+      prepareVisibleVideoFrame(video, !!m.autoplay);
     }
 
     video.addEventListener("loadedmetadata", onMeta);
+    video.addEventListener("loadeddata", onData);
     video.addEventListener("canplay", onMeta);
 
     video.addEventListener("play", function () {
@@ -235,7 +380,6 @@
 
     video.addEventListener("error", function () {
       box.classList.add("media-error");
-      video.style.opacity = "1";
     });
 
     function togglePlay(e) {
@@ -260,35 +404,23 @@
       }
     });
 
-    if (m.poster) {
-      video.poster = U.resolveMediaSrc(m.poster);
-    }
-
-    video.src = U.resolveMediaSrc(m.src);
-
     box.appendChild(video);
     D.mediaLayer.appendChild(box);
 
-    // Initial placement before metadata arrives.
+    /*
+      Place it immediately using the manifest rectangle.
+      After metadata loads, it is refit to the true video aspect ratio.
+    */
     applyBasePosition(box, rect, slot);
 
-    // If the browser already knows dimensions synchronously.
+    S.activeMedia.push(item);
+
+    /*
+      If dimensions are already known synchronously, fit/prime now.
+    */
     if (video.videoWidth && video.videoHeight) {
       onMeta();
     }
-
-    var item = {
-      el: box,
-      player: video,
-      media: m,
-      page: m.page,
-      type: "video",
-      rect: rect,
-      slot: slot,
-      key: entryKey(m, slot)
-    };
-
-    S.activeMedia.push(item);
 
     if (m.autoplay) {
       video.play().catch(function () {});
@@ -413,7 +545,11 @@
       return;
     }
 
-    if (D.reader.hidden || S.coverAnimating || S.isJumping) {
+    if (D.reader.hidden) {
+      return;
+    }
+
+    if (S.coverAnimating || S.isJumping) {
       return;
     }
 
@@ -421,7 +557,7 @@
       return;
     }
 
-    if (S.viewMode !== "book") {
+    if (S.viewMode && S.viewMode !== "book") {
       return;
     }
 
@@ -433,8 +569,10 @@
         return S.activeMedia[i] && S.activeMedia[i].key === d.key;
       });
 
-    // If the same media is already active, do not restart it.
-    // This prevents hover/state changes from killing playback.
+    /*
+      If the same media is already active, do not restart it.
+      This prevents harmless state changes from killing playback.
+    */
     if (same) {
       EPSF.media.reposition();
       return;
