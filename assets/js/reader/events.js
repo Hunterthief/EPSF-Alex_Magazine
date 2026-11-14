@@ -61,13 +61,6 @@
     marker.style.opacity = "1";
   }
 
-  /*
-    Block stack interaction cleanly:
-
-      - mobile: stacks are hidden anyway
-      - cover: both stacks disabled
-      - first interior spread after cover: left stack disabled only
-  */
   function stackInteractionBlocked(container) {
     if (S.isPortrait) return true;
 
@@ -392,6 +385,8 @@
       var oldW = S.pageW;
       var oldH = S.pageH;
       var oldPortrait = S.isPortrait;
+      var oldRenderW = S.renderW;
+      var oldRenderH = S.renderH;
       var currentOrig = Lay.currentOriginalPage();
 
       Lay.computeLayout();
@@ -410,7 +405,9 @@
       if (
         oldPortrait !== S.isPortrait ||
         Math.abs(oldW - S.pageW) >= 2 ||
-        Math.abs(oldH - S.pageH) >= 2
+        Math.abs(oldH - S.pageH) >= 2 ||
+        Math.abs(oldRenderW - S.renderW) >= 2 ||
+        Math.abs(oldRenderH - S.renderH) >= 2
       ) {
         Med.clearOverlays();
 
