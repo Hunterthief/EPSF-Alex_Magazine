@@ -533,11 +533,7 @@
             Cover.forceBook(desktopTargetIdx);
           }
 
-          EPSF.loaders.ensureTurnJS().then(function () {
-            if (!D.reader.hidden && S.viewMode === "front") {
-              Cover.build();
-            }
-          }).catch(function () {});
+          Cover.build();
         }
 
         return;
@@ -552,12 +548,7 @@
 
         if (!S.isMobile && S.viewMode === "front") {
           Cover.destroy(false);
-
-          EPSF.loaders.ensureTurnJS().then(function () {
-            if (!D.reader.hidden && S.viewMode === "front") {
-              Cover.build();
-            }
-          }).catch(function () {});
+          Cover.build();
         }
 
         var start = UI.getCurrentIndex();
