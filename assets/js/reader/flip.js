@@ -4,33 +4,10 @@
   var S = EPSF.state;
   var Lay = EPSF.layout;
   var UI = EPSF.ui;
-  var Cover = EPSF.cover;
   var Med = EPSF.media;
 
   EPSF.flip.requestFlip = function (dir) {
     if (S.coverAnimating || S.isJumping) return;
-
-    if (S.isMobile) {
-      if (!S.pageFlip || S.N <= 0) return;
-
-      UI.hideHint();
-
-      if (dir > 0) {
-        if (S.currentIdx >= S.N - 1) return;
-        S.pageFlip.flipNext("bottom");
-      } else {
-        if (S.currentIdx <= 0) return;
-        S.pageFlip.flipPrev("bottom");
-      }
-
-      return;
-    }
-
-    if (S.viewMode === "front") {
-      if (dir > 0) Cover.open();
-      return;
-    }
-
     if (!S.pageFlip || S.N <= 0) return;
 
     UI.hideHint();
@@ -43,8 +20,8 @@
       if (atEnd) return;
       S.pageFlip.flipNext("bottom");
     } else {
-      if (S.currentIdx <= 0) Cover.closeToCover();
-      else S.pageFlip.flipPrev("bottom");
+      if (S.currentIdx <= 0) return;
+      S.pageFlip.flipPrev("bottom");
     }
   };
 
@@ -63,15 +40,10 @@
   EPSF.flip.jumpToInner = function (target, sparks) {
     if (S.N <= 0) return;
 
-    if (S.isMobile) {
+    if (S.isPortrait) {
       target = Math.max(0, Math.min(S.N - 1, target));
     } else {
       target = Lay.clampInner(target);
-
-      if (S.viewMode === "front") {
-        Cover.forceBook(target);
-        return;
-      }
     }
 
     if (!S.pageFlip) return;
@@ -127,7 +99,7 @@
 
   EPSF.flip.startHeld = function (dir) {
     if (S.isJumping || S.coverAnimating) return;
-    if (S.viewMode !== "book" && !S.pageFlip) return;
+    if (!S.pageFlip) return;
     if (S.heldDir === dir && S.heldLoopRunning) return;
 
     S.heldDir = dir;
@@ -153,43 +125,6 @@
       return;
     }
 
-    if (S.isMobile) {
-      if (!S.pageFlip || S.sfState !== "read") {
-        setTimeout(EPSF.flip.heldLoop, 60);
-        return;
-      }
-
-      if (S.heldDir > 0) {
-        if (S.currentIdx >= S.N - 1) {
-          EPSF.flip.stopHeld();
-          return;
-        }
-
-        EPSF.flip.requestFlip(1);
-      } else {
-        if (S.currentIdx <= 0) {
-          EPSF.flip.stopHeld();
-          return;
-        }
-
-        EPSF.flip.requestFlip(-1);
-      }
-
-      setTimeout(EPSF.flip.heldLoop, 90);
-      return;
-    }
-
-    if (S.viewMode === "front") {
-      if (S.heldDir > 0) {
-        Cover.open();
-        setTimeout(EPSF.flip.heldLoop, 80);
-      } else {
-        EPSF.flip.stopHeld();
-      }
-
-      return;
-    }
-
     if (!S.pageFlip || S.sfState !== "read") {
       setTimeout(EPSF.flip.heldLoop, 60);
       return;
@@ -208,7 +143,6 @@
       EPSF.flip.requestFlip(1);
     } else {
       if (S.currentIdx <= 0) {
-        Cover.closeToCover();
         EPSF.flip.stopHeld();
         return;
       }
