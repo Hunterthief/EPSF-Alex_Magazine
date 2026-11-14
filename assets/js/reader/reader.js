@@ -11,6 +11,46 @@
   var Flip = EPSF.flip;
   var Zoom = EPSF.zoom;
 
+  function applyRenderTransform() {
+    var flipEl = D.mount ? D.mount.querySelector("#flipbook") : null;
+    if (!flipEl) return;
+
+    var scale = S.renderScale || 1;
+
+    flipEl.style.position = "absolute";
+    flipEl.style.left = "0px";
+    flipEl.style.top = "0px";
+    flipEl.style.transformOrigin = "0 0";
+    flipEl.style.transform = "scale(" + scale + ")";
+    flipEl.style.willChange = "transform";
+  }
+
+  function enhanceCanvasQuality() {
+    if (!D.mount) return;
+
+    var canvases = D.mount.querySelectorAll("#flipbook canvas");
+
+    Array.prototype.forEach.call(canvases, function (canvas) {
+      try {
+        var ctx = canvas.getContext("2d");
+
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+        }
+      } catch (e) {}
+
+      canvas.style.imageRendering = "auto";
+    });
+
+    var imgs = D.mount.querySelectorAll("#flipbook img");
+
+    Array.prototype.forEach.call(imgs, function (img) {
+      img.style.imageRendering = "auto";
+      img.decoding = "async";
+    });
+  }
+
   EPSF.reader.destroyFlipbook = function () {
     Med.clearOverlays();
 
@@ -48,14 +88,27 @@
     S.suppressLoader = !!hideLoader;
     S.sfState = "read";
 
+    var renderW = S.renderW || S.pageW;
+    var renderH = S.renderH || S.pageH;
+
+    if (renderW <= 0) renderW = 1;
+    if (renderH <= 0) renderH = 1;
+
     var flipEl = document.createElement("div");
     flipEl.id = "flipbook";
+
+    flipEl.style.position = "absolute";
+    flipEl.style.left = "0px";
+    flipEl.style.top = "0px";
+    flipEl.style.transformOrigin = "0 0";
+    flipEl.style.willChange = "transform";
+
     D.mount.appendChild(flipEl);
 
     try {
       S.pageFlip = new St.PageFlip(flipEl, {
-        width: S.pageW,
-        height: S.pageH,
+        width: renderW,
+        height: renderH,
         size: "fixed",
         showCover: false,
         usePortrait: S.isPortrait,
@@ -78,6 +131,9 @@
       S.isInitializing = false;
       S.currentIdx = Lay.clampInner(startIndex);
 
+      applyRenderTransform();
+      enhanceCanvasQuality();
+
       if (!S.suppressLoader) D.loader.classList.add("gone");
 
       D.bookWrap.classList.add("visible");
@@ -92,11 +148,9 @@
 
       S.currentIdx = Lay.clampInner(idx);
 
-      /*
-        Pause old media immediately, then sync the destination page media
-        right away. This prevents the video from waiting until the flip
-        animation fully finishes.
-      */
+      applyRenderTransform();
+      enhanceCanvasQuality();
+
       Med.pauseAll();
       UI.updateUIAll();
       Med.syncForCurrentPage(true);
@@ -104,6 +158,9 @@
 
     S.pageFlip.on("changeState", function (e) {
       S.sfState = (e && e.data) ? e.data : "read";
+
+      applyRenderTransform();
+      enhanceCanvasQuality();
 
       if (S.sfState === "read") {
         UI.updateUIAll();
@@ -128,6 +185,12 @@
     S.issueManifest = null;
     S.pageMeta = [];
     S.mediaUserGesture = true;
+
+    S.sourceW = 0;
+    S.sourceH = 0;
+    S.renderW = 0;
+    S.renderH = 0;
+    S.renderScale = 1;
 
     if (Zoom.isOpen()) {
       Zoom.close();
@@ -188,6 +251,8 @@
         throw new Error("bad first page");
       }
 
+      S.sourceW = im.naturalWidth;
+      S.sourceH = im.naturalHeight;
       S.aspect = im.naturalWidth / im.naturalHeight;
 
       var mUrl = S.pagesUrl + "/manifest.json";
@@ -217,10 +282,6 @@
       Med.clearOverlays();
       S.mediaUserGesture = true;
 
-      /*
-        Start warming video/audio/poster caches as soon as the manifest is known.
-        This is the main reason the video now appears faster.
-      */
       if (Med.preloadIssue) {
         Med.preloadIssue(S.issueManifest);
       }
@@ -236,13 +297,6 @@
           D.statPages.textContent = String(S.total).padStart(2, "0");
         }
 
-        /*
-          Desktop starts at index 0:
-            Cover-saver.png + 1.jpg cover
-
-          Mobile starts at index 0:
-            1.jpg cover
-        */
         EPSF.reader.createFlipbook(0, false);
       });
     }).catch(function (e) {
