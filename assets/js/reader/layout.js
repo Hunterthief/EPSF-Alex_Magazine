@@ -15,6 +15,65 @@
       });
   }
 
+  /*
+    Detect whether the desktop reader is using the Cover-saver filler page.
+
+    If yes:
+      index 0 = Cover-saver.png
+      index 1 = 1.jpg cover
+      index 2 = 2.jpg first inside page
+
+    If no, we are likely using the hybrid Turn.js cover bridge:
+      viewMode "front" = cover
+      viewMode "book" + currentIdx 0 = first inside page
+  */
+  function hasBackgroundFiller() {
+    return (
+      !S.isMobile &&
+      Array.isArray(S.pageMeta) &&
+      S.pageMeta.length > 0 &&
+      S.pageMeta[0] &&
+      S.pageMeta[0].kind === "background"
+    );
+  }
+
+  EPSF.layout.isCoverView = function () {
+    if (S.isMobile) return false;
+
+    /*
+      Hybrid Turn.js cover mode.
+    */
+    if (S.viewMode === "front") return true;
+
+    /*
+      St.PageFlip owns everything, with Cover-saver.png as desktop filler.
+      The cover is the first spread: index 0 + index 1.
+    */
+    if (hasBackgroundFiller() && S.currentIdx === 0) return true;
+
+    return false;
+  };
+
+  EPSF.layout.isFirstInteriorView = function () {
+    if (S.isMobile) return false;
+
+    if (S.viewMode !== "book") return false;
+
+    /*
+      St.PageFlip owns everything, with Cover-saver.png as desktop filler.
+      First real magazine spread after the cover is index 2 + index 3.
+    */
+    if (hasBackgroundFiller()) {
+      return S.currentIdx === 2;
+    }
+
+    /*
+      Hybrid Turn.js cover bridge.
+      St.PageFlip interior starts at index 0, which is page 2.jpg.
+    */
+    return S.currentIdx === 0;
+  };
+
   EPSF.layout.clampInner = function (idx) {
     if (S.N <= 0) return 0;
 
@@ -322,15 +381,36 @@
   };
 
   EPSF.layout.updateStacks = function () {
+    var coverView = EPSF.layout.isCoverView();
+    var firstInteriorView = EPSF.layout.isFirstInteriorView();
+
+    /*
+      Normal stack behavior:
+        - show right stack for unread spreads
+        - show left stack for read spreads
+
+      Requested clean behavior:
+        - on cover: disable both stacks
+        - on first interior spread after cover: disable left stack only
+    */
     var open =
       !S.isPortrait &&
       S.N > 0 &&
       S.currentIdx >= 0 &&
-      S.currentIdx <= S.lastSpreadIdx;
+      S.currentIdx <= S.lastSpreadIdx &&
+      !coverView;
 
     var currentSpread = open ? EPSF.layout.spreadFromIndex(S.currentIdx) : 0;
+
     var unread = open ? Math.max(0, S.maxSpread - currentSpread) : 0;
     var read = open ? Math.max(0, currentSpread - 1) : 0;
+
+    /*
+      Hide the left stack on the first real magazine spread after the cover.
+    */
+    if (firstInteriorView) {
+      read = 0;
+    }
 
     var wR = (open && unread > 0) ? Math.min(S.STACK_MAX, Math.max(14, unread * 2)) : 0;
     var wL = (open && read > 0) ? Math.min(S.STACK_MAX, Math.max(14, read * 2)) : 0;
@@ -361,7 +441,7 @@
     S.stackLSheets.forEach(function (sheet) {
       var s = parseInt(sheet.dataset.spread, 10);
 
-      if (open && s < currentSpread) {
+      if (open && s < currentSpread && !firstInteriorView) {
         sheet.style.display = "";
         S.stackLVisible.push(sheet);
       } else {
