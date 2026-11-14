@@ -8,7 +8,7 @@
   top: 0;
   z-index: 28;
   transform-style: preserve-3d;
-  perspective: 2000px;
+  perspective: 2200px;
   perspective-origin: 0% 50%;
   cursor: pointer;
   touch-action: none;
@@ -27,10 +27,14 @@
   pointer-events: none;
 }
 
+/*
+  The leaf is the physical magazine sheet.
+  It hinges from the spine, which is the left edge of the right-hand page.
+*/
 .cover-leaf {
   position: absolute;
   inset: 0;
-  transform-origin: left center;
+  transform-origin: 0% 50%;
   transform-style: preserve-3d;
   will-change: transform, opacity;
 }
@@ -44,22 +48,27 @@
 }
 
 /*
-  CRITICAL ANTI-MIRROR RULE:
-  Both faces hinge from the left/spine edge.
-  The back face uses rotateY(180deg), NOT scaleX(-1).
-  This keeps page 2 readable and not mirrored.
+  FRONT AND BACK FACE RULES.
+
+  Important:
+  The faces themselves must rotate around their own center,
+  not around the spine.
+
+  The spine hinge belongs only to .cover-leaf.
+
+  This prevents the back page from being displaced or mirrored.
 */
 .cover-face {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  transform-origin: left center;
+  transform-origin: 50% 50%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
 .cover-front {
-  transform: translateZ(0.1px);
+  transform: translateZ(1px);
   background: #0A192F;
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.24),
@@ -91,18 +100,24 @@
       rgba(255, 255, 255, 0.035) 58%,
       transparent 100%
     );
-  opacity: 0.45;
+  opacity: 0.42;
 }
 
 /*
-  Back / inside of cover.
+  Back of the cover.
+
   This is page 2.jpg.
-  It must match the first St.PageFlip interior page exactly.
+
+  rotateY(180deg) around the face center makes it the reverse side of the same sheet.
+  translateZ(1px) after rotation puts it slightly behind the front face.
+  This avoids z-fighting and keeps the page readable, not mirrored.
 */
 .cover-back {
-  transform: rotateY(180deg) translateZ(0.1px);
+  transform: rotateY(180deg) translateZ(1px);
   background: #FFFFFF;
-  box-shadow: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(2, 65, 196, 0.05),
+    inset 18px 0 30px -18px rgba(10, 25, 47, 0.18);
 }
 
 .cover-back img {
@@ -116,26 +131,88 @@
   transform: none;
 }
 
+.cover-back::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10, 25, 47, 0.18) 0%,
+      rgba(10, 25, 47, 0.07) 12%,
+      rgba(10, 25, 47, 0.02) 26%,
+      transparent 48%
+    );
+}
+
+.cover-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(10, 25, 47, 0.012) 0px,
+      rgba(10, 25, 47, 0.012) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  opacity: 0.18;
+}
+
 /*
-  Interior reveal timing.
+  MAGAZINE HIDING RULE.
 
-  Opening:
-  Keep St.PageFlip hidden until the cover is almost open.
-  Then reveal page 2 underneath the back-cover page 2.
-
-  Closing:
-  Keep interior visible while the cover closes.
+  When the cover animation starts, the real magazine interior disappears immediately.
+  It only comes back when .cover-reveal is added near the end of the opening animation.
 */
-.book-wrap.cover-mode.turning-cover #flipbook-mount {
+.book-wrap.cover-mode #flipbook-mount,
+.book-wrap.turning-cover #flipbook-mount {
   opacity: 0;
   pointer-events: none;
   transition: opacity 220ms var(--ease-out);
 }
 
-.book-wrap.cover-mode.turning-cover.cover-reveal #flipbook-mount {
+.book-wrap.turning-cover.cover-reveal #flipbook-mount {
   opacity: 1;
+  pointer-events: none;
 }
 
+/*
+  Hide page stacks and media while the cover is animating.
+*/
+.book-wrap.cover-mode .page-stack,
+.book-wrap.turning-cover .page-stack {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.book-wrap.cover-mode .media-layer,
+.book-wrap.turning-cover .media-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.book-wrap.cover-mode .spine-shadow,
+.book-wrap.turning-cover:not(.cover-reveal) .spine-shadow {
+  opacity: 0 !important;
+}
+
+/*
+  Opening animation.
+
+  0% to 50%:
+    front cover page 1 is visible.
+
+  Around 50%:
+    the leaf passes vertical and the back face becomes visible.
+    That back face is page 2.jpg.
+
+  After reveal:
+    the real St.PageFlip magazine fades in underneath.
+*/
 @keyframes coverOpen {
   0% {
     opacity: 1;
@@ -144,27 +221,42 @@
 
   12% {
     opacity: 1;
-    transform: rotateY(-10deg) translateZ(6px);
+    transform: rotateY(-10deg) translateZ(5px);
   }
 
-  35% {
+  28% {
     opacity: 1;
-    transform: rotateY(-45deg) translateZ(16px);
+    transform: rotateY(-34deg) translateZ(13px);
   }
 
-  60% {
+  42% {
     opacity: 1;
-    transform: rotateY(-100deg) translateZ(22px);
+    transform: rotateY(-62deg) translateZ(19px);
   }
 
-  82% {
+  50% {
     opacity: 1;
-    transform: rotateY(-155deg) translateZ(12px);
+    transform: rotateY(-82deg) translateZ(21px);
   }
 
-  95% {
+  62% {
     opacity: 1;
-    transform: rotateY(-176deg) translateZ(3px);
+    transform: rotateY(-112deg) translateZ(19px);
+  }
+
+  76% {
+    opacity: 1;
+    transform: rotateY(-142deg) translateZ(13px);
+  }
+
+  88% {
+    opacity: 1;
+    transform: rotateY(-166deg) translateZ(6px);
+  }
+
+  96% {
+    opacity: 1;
+    transform: rotateY(-177deg) translateZ(2px);
   }
 
   100% {
@@ -173,6 +265,13 @@
   }
 }
 
+/*
+  Closing animation.
+
+  Starts from the opened position.
+  The back of the cover, page 2, is visible first.
+  As it crosses halfway, the front cover page 1 becomes visible again.
+*/
 @keyframes coverClose {
   0% {
     opacity: 1;
@@ -181,27 +280,42 @@
 
   12% {
     opacity: 1;
-    transform: rotateY(-168deg) translateZ(6px);
+    transform: rotateY(-168deg) translateZ(5px);
   }
 
-  35% {
+  28% {
     opacity: 1;
-    transform: rotateY(-132deg) translateZ(16px);
+    transform: rotateY(-142deg) translateZ(13px);
   }
 
-  60% {
+  42% {
     opacity: 1;
-    transform: rotateY(-78deg) translateZ(22px);
+    transform: rotateY(-112deg) translateZ(19px);
   }
 
-  82% {
+  50% {
     opacity: 1;
-    transform: rotateY(-28deg) translateZ(12px);
+    transform: rotateY(-92deg) translateZ(21px);
   }
 
-  95% {
+  62% {
     opacity: 1;
-    transform: rotateY(-8deg) translateZ(3px);
+    transform: rotateY(-62deg) translateZ(19px);
+  }
+
+  76% {
+    opacity: 1;
+    transform: rotateY(-34deg) translateZ(13px);
+  }
+
+  88% {
+    opacity: 1;
+    transform: rotateY(-12deg) translateZ(6px);
+  }
+
+  96% {
+    opacity: 1;
+    transform: rotateY(-4deg) translateZ(2px);
   }
 
   100% {
@@ -216,7 +330,9 @@
     animation-duration: 1ms !important;
   }
 
-  .book-wrap.cover-mode.turning-cover #flipbook-mount {
+  .book-wrap.cover-mode #flipbook-mount,
+  .book-wrap.turning-cover #flipbook-mount,
+  .book-wrap.turning-cover.cover-reveal #flipbook-mount {
     transition-duration: 1ms !important;
   }
 }
