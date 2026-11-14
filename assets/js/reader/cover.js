@@ -8,7 +8,7 @@
   var Med = EPSF.media;
   var Lay = EPSF.layout;
 
-  var DURATION = S.RM ? 1 : 760;
+  var DURATION = S.RM ? 1 : 900;
 
   var TEMPLATE =
     '<div class="cover-leaf">' +
@@ -17,6 +17,8 @@
       '</div>' +
       '<div class="cover-face cover-back"></div>' +
     '</div>';
+
+  var activeLeafHandler = null;
 
   function clearWatchdog() {
     if (S.coverWatchdogTimer) {
@@ -29,15 +31,24 @@
     return D.turnCover ? D.turnCover.querySelector(".cover-leaf") : null;
   }
 
+  function detachLeafListener() {
+    var leaf = getLeaf();
+
+    if (leaf && activeLeafHandler) {
+      leaf.removeEventListener("animationend", activeLeafHandler);
+      activeLeafHandler = null;
+    }
+  }
+
   function ensureDom() {
     if (!D.turnCover) return null;
 
     if (!D.turnCover.querySelector(".cover-leaf")) {
-      D.turnCover.classList.add("custom-cover");
       D.turnCover.innerHTML = TEMPLATE;
     }
 
     var img = D.turnCover.querySelector("#turn-cover-front-img");
+
     if (img && S.pagesUrl) {
       img.src = U.pageUrl(1);
     }
@@ -51,21 +62,33 @@
     D.turnCover.style.width = S.pageW + "px";
     D.turnCover.style.height = S.pageH + "px";
     D.turnCover.style.top = "0px";
-    D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW / 2) + "px";
+
+    /*
+      IMPORTANT:
+      On desktop, the cover must sit in the RIGHT page position.
+
+      bookWrap width = pageW * 2
+      left page  = 0 to pageW
+      right page = pageW to pageW * 2
+
+      So the cover leaf starts at pageW.
+    */
+    D.turnCover.style.left = (S.isPortrait ? 0 : S.pageW) + "px";
   }
 
-  function setInstantTransform(deg) {
-    var leaf = ensureDom();
+  function setInstant(deg, opacity) {
+    var leaf = getLeaf();
     if (!leaf) return;
 
-    leaf.style.transition = "none";
-    leaf.style.transform = "rotateY(" + deg + "deg)";
+    detachLeafListener();
 
-    // Force reflow so the next transform change animates.
+    leaf.style.animation = "none";
+    leaf.style.transform = "rotateY(" + deg + "deg)";
+    leaf.style.opacity = String(opacity);
+
     void leaf.offsetWidth;
 
-    leaf.style.transition = "";
-    leaf.style.transitionDuration = DURATION + "ms";
+    leaf.style.animation = "";
   }
 
   function showClosed() {
@@ -79,18 +102,20 @@
     D.turnCover.classList.add("cover-closed");
     D.turnCover.style.pointerEvents = "auto";
 
-    setInstantTransform(0);
+    setInstant(0, 1);
   }
 
   function hideCover() {
     if (!D.turnCover) return;
+
+    detachLeafListener();
 
     D.turnCover.hidden = true;
     D.turnCover.classList.remove("cover-closed", "cover-opening", "cover-closing", "animating");
     D.turnCover.style.pointerEvents = "";
   }
 
-  function animateCover(target, done) {
+  function runAnimation(mode, done) {
     var leaf = ensureDom();
 
     if (!leaf || !D.turnCover) {
@@ -98,42 +123,54 @@
       return;
     }
 
-    D.turnCover.classList.add("animating");
-    D.turnCover.style.pointerEvents = "none";
+    setSize();
+    detachLeafListener();
+    clearWatchdog();
 
-    var finalDeg = target === "open" ? -180 : 0;
+    D.turnCover.hidden = false;
+    D.turnCover.style.setProperty("--cover-duration", DURATION + "ms");
+
+    D.turnCover.classList.remove("cover-closed", "cover-opening", "cover-closing", "animating");
+
+    void D.turnCover.offsetWidth;
+
+    D.turnCover.classList.add(
+      "animating",
+      mode === "open" ? "cover-opening" : "cover-closing"
+    );
+
+    var animName = mode === "open" ? "coverOpen" : "coverClose";
     var finished = false;
 
     function finish() {
       if (finished) return;
+
       finished = true;
 
       clearWatchdog();
-      leaf.removeEventListener("transitionend", onEnd);
+      detachLeafListener();
       done();
     }
 
     function onEnd(e) {
-      if (e.target === leaf) {
+      if (e.target === leaf && e.animationName === animName) {
         finish();
       }
     }
 
-    leaf.addEventListener("transitionend", onEnd);
-    leaf.style.transitionDuration = DURATION + "ms";
+    activeLeafHandler = onEnd;
+    leaf.addEventListener("animationend", onEnd);
 
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        leaf.style.transform = "rotateY(" + finalDeg + "deg)";
-      });
-    });
-
-    // Safety fallback if transitionend never fires.
-    S.coverWatchdogTimer = setTimeout(finish, DURATION + 450);
+    /*
+      Safety watchdog.
+      If animationend never fires for any browser reason, the cover still resolves.
+    */
+    S.coverWatchdogTimer = setTimeout(finish, DURATION + 700);
   }
 
   EPSF.cover.finishOpen = function () {
     clearWatchdog();
+    detachLeafListener();
 
     if (S.viewMode === "book" && !S.coverAnimating) return;
 
@@ -158,6 +195,7 @@
 
   EPSF.cover.finishClose = function () {
     clearWatchdog();
+    detachLeafListener();
 
     if (S.viewMode === "front" && !S.coverAnimating) return;
 
@@ -196,13 +234,13 @@
     ensureDom();
     setSize();
 
-    D.turnCover.hidden = false;
-    D.turnCover.classList.remove("cover-closed", "cover-closing");
-    D.turnCover.classList.add("cover-opening");
+    /*
+      Start closed:
+      rotateY(0deg), fully visible.
+    */
+    setInstant(0, 1);
 
-    setInstantTransform(0);
-
-    animateCover("open", EPSF.cover.finishOpen);
+    runAnimation("open", EPSF.cover.finishOpen);
   };
 
   EPSF.cover.closeToCover = function () {
@@ -227,17 +265,18 @@
     ensureDom();
     setSize();
 
-    D.turnCover.hidden = false;
-    D.turnCover.classList.remove("cover-closed", "cover-opening");
-    D.turnCover.classList.add("cover-closing");
+    /*
+      Start from the opened position:
+      rotateY(-180deg), invisible, then animate back to closed.
+    */
+    setInstant(-180, 0);
 
-    setInstantTransform(-180);
-
-    animateCover("close", EPSF.cover.finishClose);
+    runAnimation("close", EPSF.cover.finishClose);
   };
 
   EPSF.cover.forceFront = function () {
     clearWatchdog();
+    detachLeafListener();
 
     S.coverAnimToken++;
     S.coverAnimating = false;
@@ -262,6 +301,7 @@
 
   EPSF.cover.forceBook = function (idx) {
     clearWatchdog();
+    detachLeafListener();
 
     S.coverAnimToken++;
     S.coverAnimating = false;
@@ -288,6 +328,8 @@
 
   EPSF.cover.destroy = function (hide) {
     clearWatchdog();
+    detachLeafListener();
+
     S.coverAnimating = false;
 
     if (hide !== false) {
