@@ -61,13 +61,32 @@
     marker.style.opacity = "1";
   }
 
+  /*
+    Block stack interaction cleanly:
+
+      - mobile: stacks are hidden anyway
+      - cover: both stacks disabled
+      - first interior spread after cover: left stack disabled only
+  */
+  function stackInteractionBlocked(container) {
+    if (S.isPortrait) return true;
+
+    if (Lay.isCoverView()) return true;
+
+    if (container === D.stackL && Lay.isFirstInteriorView()) {
+      return true;
+    }
+
+    return false;
+  }
+
   function bindStack(container) {
     container.addEventListener("pointermove", function (e) {
-      if (S.isPortrait) {
+      if (stackInteractionBlocked(container)) {
         UI.hideTip();
 
-        var m0 = hoverMarkerFor(container);
-        if (m0) m0.style.opacity = "0";
+        var m = hoverMarkerFor(container);
+        if (m) m.style.opacity = "0";
 
         return;
       }
@@ -99,7 +118,9 @@
     });
 
     container.addEventListener("click", function (e) {
-      if (S.isPortrait || S.isJumping || S.coverAnimating) return;
+      if (stackInteractionBlocked(container)) return;
+
+      if (S.isJumping || S.coverAnimating) return;
 
       var idx = stackIndexFromEvent(container, e);
       if (idx < 0) return;
