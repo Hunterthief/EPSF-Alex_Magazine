@@ -201,6 +201,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  overflow: hidden;
   transform-origin: 50% 50%;
   will-change: opacity, transform;
   transition: opacity 0.45s ease;
@@ -212,14 +213,34 @@
 }
 
 #flipbook {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
   touch-action: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 #flipbook canvas {
   display: block;
+  max-width: none;
+  max-height: none;
+  image-rendering: auto;
+  image-rendering: smooth;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+#flipbook img {
+  display: block;
+  max-width: none;
+  max-height: none;
+  image-rendering: auto;
+  image-rendering: smooth;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .book-wrap.cover-mode #flipbook-mount,
