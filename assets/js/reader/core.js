@@ -41,6 +41,12 @@
     pageH: 0,
     backCoverSrc: "",
 
+    sourceW: 0,
+    sourceH: 0,
+    renderW: 0,
+    renderH: 0,
+    renderScale: 1,
+
     pageFlip: null,
     currentIdx: 0,
     sfState: "read",
@@ -76,6 +82,7 @@
     issueManifest: null,
     activeMedia: [],
     mediaUserGesture: false,
+    mediaPreload: {},
 
     turnCoverJQ: null,
     turnCoverReady: false,
