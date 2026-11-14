@@ -84,7 +84,7 @@
       D.reader.classList.add("is-open");
 
       UI.updateUIAll();
-      Med.syncForCurrentPage();
+      Med.syncForCurrentPage(true);
     });
 
     S.pageFlip.on("flip", function (e) {
@@ -93,11 +93,13 @@
       S.currentIdx = Lay.clampInner(idx);
 
       /*
-        Only remove media when an actual flip starts.
-        Hovering/dragging state changes should not kill playback.
+        Pause old media immediately, then sync the destination page media
+        right away. This prevents the video from waiting until the flip
+        animation fully finishes.
       */
-      Med.clearOverlays();
+      Med.pauseAll();
       UI.updateUIAll();
+      Med.syncForCurrentPage(true);
     });
 
     S.pageFlip.on("changeState", function (e) {
@@ -105,7 +107,7 @@
 
       if (S.sfState === "read") {
         UI.updateUIAll();
-        Med.syncForCurrentPage();
+        Med.syncForCurrentPage(false);
 
         if (S.heldLoopRunning) {
           setTimeout(Flip.heldLoop, 30);
@@ -214,6 +216,14 @@
       S.pageMeta = [];
       Med.clearOverlays();
       S.mediaUserGesture = true;
+
+      /*
+        Start warming video/audio/poster caches as soon as the manifest is known.
+        This is the main reason the video now appears faster.
+      */
+      if (Med.preloadIssue) {
+        Med.preloadIssue(S.issueManifest);
+      }
 
       return U.prepareBackground();
     }).then(function () {
